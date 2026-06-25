@@ -10,7 +10,12 @@ const config = defineConfig({
   resolve: { tsconfigPaths: true },
   plugins: [
     devtools(),
-    nitro(),
+    nitro({
+      vercel: {
+        // Avoid Vercel web handler 508 infinite-loop with TanStack Start SSR.
+        entryFormat: 'node',
+      },
+    }),
     tailwindcss(),
     tanstackStart(),
     // MDX must transform `.mdx` before the React plugin runs.
