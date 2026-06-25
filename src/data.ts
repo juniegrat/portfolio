@@ -121,6 +121,26 @@ export const PROJECTS: Project[] = [
     accent: 'from-violet-500/25 to-fuchsia-500/25',
     id: 'adobe-mcp',
   },
+  {
+    name: 'Aketi & Wilfried — Wedding',
+    description:
+      'A modern wedding-invitation site (FR) for a May 2026 wedding at Château Fengari — animated hero, photo carousel, interactive map, and RSVP forms backed by Google Sheets with React Hook Form + Zod validation.',
+    link: 'https://github.com/juniegrat/aketi-will-wedding',
+    tech: ['Next.js 16', 'React 19', 'Tailwind CSS 4', 'Motion', 'shadcn/ui', 'Google Sheets'],
+    year: '2026',
+    accent: 'from-rose-400/25 to-pink-300/25',
+    id: 'wedding',
+  },
+  {
+    name: 'COVID Testing MVP',
+    description:
+      'An MVP web app from the 2021 pandemic for COVID-19 testing — a React monorepo (landing front end), containerized with Nginx. Shipped fast under real-world constraints.',
+    link: 'https://github.com/juniegrat/test-covid',
+    tech: ['React', 'JavaScript', 'Yarn Workspaces', 'Nginx'],
+    year: '2021',
+    accent: 'from-teal-500/25 to-sky-500/25',
+    id: 'covid',
+  },
 ]
 
 // PLACEHOLDER work history.
