@@ -6,7 +6,8 @@
 export type Project = {
   name: string
   description: string
-  link: string
+  /** Optional — omit for private/commercial work; the card renders the name unlinked. */
+  link?: string
   tech: string[]
   year: string
   /** Optional media shown in the card (and zoomable). Falls back to an accent placeholder. */
@@ -50,6 +51,16 @@ export const EMAIL = 'juniegrat@gmail.com'
 // Real projects pulled from github.com/juniegrat. Reorder/trim to taste; drop in
 // an `image` (path under /public) or `video` URL to replace the accent placeholder.
 export const PROJECTS: Project[] = [
+  {
+    name: 'Hadesor ERP',
+    description:
+      'The most complex system I’ve built — a Turborepo ERP monorepo (staff app, customer portal, mobile, docs) over a 300+ table PostgreSQL/Drizzle schema, with end-to-end tRPC, type-safe drizzle-zod validation, auth, i18n, and Playwright E2E coverage.',
+    // Private/commercial repo — link intentionally omitted (set a live/case-study URL to enable).
+    tech: ['Next.js', 'Turborepo', 'tRPC', 'Drizzle ORM', 'PostgreSQL', 'Playwright'],
+    year: '2026',
+    accent: 'from-[#cea600]/30 to-amber-700/20',
+    id: 'hadesor',
+  },
   {
     name: 'ASM — Attack Surface Monitor',
     description:

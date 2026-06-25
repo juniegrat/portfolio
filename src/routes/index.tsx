@@ -163,15 +163,21 @@ function Home() {
               </div>
               <div className="px-1">
                 <div className="flex items-baseline justify-between gap-3">
-                  <a
-                    className="font-base group relative inline-block font-[450] text-zinc-900 dark:text-zinc-50"
-                    href={project.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {project.name}
-                    <span className="absolute bottom-0.5 left-0 block h-[1px] w-full max-w-0 bg-zinc-900 transition-all duration-200 group-hover:max-w-full dark:bg-zinc-50"></span>
-                  </a>
+                  {project.link ? (
+                    <a
+                      className="font-base group relative inline-block font-[450] text-zinc-900 dark:text-zinc-50"
+                      href={project.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {project.name}
+                      <span className="absolute bottom-0.5 left-0 block h-[1px] w-full max-w-0 bg-zinc-900 transition-all duration-200 group-hover:max-w-full dark:bg-zinc-50"></span>
+                    </a>
+                  ) : (
+                    <span className="font-base inline-block font-[450] text-zinc-900 dark:text-zinc-50">
+                      {project.name}
+                    </span>
+                  )}
                   <span className="shrink-0 font-mono text-xs text-zinc-400 dark:text-zinc-500">
                     {project.year}
                   </span>
