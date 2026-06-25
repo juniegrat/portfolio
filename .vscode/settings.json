@@ -1,0 +1,13 @@
+{
+  "files.watcherExclude": {
+    "**/routeTree.gen.ts": true
+  },
+  "search.exclude": {
+    "**/routeTree.gen.ts": true
+  },
+  "files.readonlyInclude": {
+    "**/routeTree.gen.ts": true
+  },
+  "snyk.advanced.organization": "891b4fda-bbfb-4ce2-aced-5a08e09d0e2a",
+  "snyk.advanced.autoSelectOrganization": true
+}
