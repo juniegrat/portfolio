@@ -1,0 +1,57 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/geist';
+@import '@fontsource-variable/geist-mono';
+@plugin '@tailwindcss/typography';
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --font-sans: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, SFMono-Regular, monospace;
+}
+
+:root {
+  --font-geist: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-geist-mono: 'Geist Mono Variable', ui-monospace, monospace;
+
+  /* sugar-high syntax highlighting (Tokyo Night-ish) */
+  --sh-class: #7aa2f7;
+  --sh-sign: #89ddff;
+  --sh-string: #9ece6a;
+  --sh-keyword: #bb9af7;
+  --sh-comment: #565f89;
+  --sh-jsxliterals: #7aa2f7;
+  --sh-property: #73daca;
+  --sh-entity: #e0af68;
+}
+
+/*
+  The default border color changed to `currentColor` in Tailwind CSS v4,
+  so we keep these compatibility styles to preserve the original look.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-geist);
+}
+
+code {
+  font-family: var(--font-geist-mono);
+}

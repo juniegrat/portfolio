@@ -1,0 +1,41 @@
+export const metadata = {
+  title: 'How to Export Metadata from MDX',
+  description:
+    'A guide on exporting metadata from MDX files to drive page titles, descriptions, and social previews.',
+  alternates: {
+    canonical: '/blog/example-mdx-metadata',
+  },
+}
+
+# How to Export Metadata from MDX
+
+You can export a `metadata` object from an MDX file and read it from your route to set the page title, description, and Open Graph tags. This is especially useful for blog posts and documentation pages.
+
+## Example: Exporting Metadata
+
+You can export a `metadata` object at the top of your MDX file like this:
+
+```javascript
+export const metadata = {
+  title: 'How to Export Metadata from MDX',
+  description: 'A guide on exporting metadata from MDX files.',
+  authors: [{ name: 'Jane Doe', url: 'https://janedoe.com' }],
+}
+```
+
+In this template, the dynamic blog route imports every post with `import.meta.glob` and reads that exported `metadata` to populate the `<head>` for each page.
+
+## Why Use Metadata in MDX?
+
+- **SEO**: Improve your page's search engine ranking with relevant titles and descriptions.
+- **Social Sharing**: Enhance how your content appears when shared on social media platforms.
+- **Consistency**: Keep your metadata close to your content for easier management.
+
+## Further Reading
+
+- [MDX Documentation](https://mdxjs.com/)
+- [TanStack Router head/meta](https://tanstack.com/router/latest/docs/framework/react/guide/document-head-management)
+
+---
+
+_This post demonstrates how to export metadata from MDX files, inspired by [leerob's site](https://github.com/leerob/site)._
