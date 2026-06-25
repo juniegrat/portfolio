@@ -7,7 +7,13 @@ export type Project = {
   name: string
   description: string
   link: string
-  video: string
+  tech: string[]
+  year: string
+  /** Optional media shown in the card (and zoomable). Falls back to an accent placeholder. */
+  video?: string
+  image?: string
+  /** Tailwind gradient classes for the placeholder when there's no image/video. */
+  accent?: string
   id: string
 }
 
@@ -41,24 +47,68 @@ export const SITE_DESCRIPTION =
 
 export const EMAIL = 'juniegrat@gmail.com'
 
-// PLACEHOLDER projects — the videos are demo clips so the morphing dialog has
-// something to show. Swap names/descriptions/links/videos for your own work.
+// Real projects pulled from github.com/juniegrat. Reorder/trim to taste; drop in
+// an `image` (path under /public) or `video` URL to replace the accent placeholder.
 export const PROJECTS: Project[] = [
   {
-    name: 'Project One',
-    description: 'A short description of what this project is and does.',
-    link: 'https://github.com/juniegrat',
-    video:
-      'https://res.cloudinary.com/read-cv/video/upload/t_v_b/v1/1/profileItems/W2azTw5BVbMXfj7F53G92hMVIn32/newProfileItem/d898be8a-7037-4c71-af0c-8997239b050d.mp4?_a=DATAdtAAZAA0',
-    id: 'project1',
+    name: 'ASM — Attack Surface Monitor',
+    description:
+      'Self-hosted attack-surface monitor: continuous asset discovery and nuclei vulnerability scanning with a dashboard — an own-your-data alternative to ProjectDiscovery Cloud.',
+    link: 'https://github.com/juniegrat/asm',
+    tech: ['Python', 'FastAPI', 'TanStack Start', 'SQLite', 'nuclei'],
+    year: '2026',
+    accent: 'from-emerald-500/25 to-cyan-500/25',
+    id: 'asm',
   },
   {
-    name: 'Project Two',
-    description: 'Another project worth highlighting on your portfolio.',
-    link: 'https://github.com/juniegrat',
-    video:
-      'https://res.cloudinary.com/read-cv/video/upload/t_v_b/v1/1/profileItems/W2azTw5BVbMXfj7F53G92hMVIn32/XSfIvT7BUWbPRXhrbLed/ee6871c9-8400-49d2-8be9-e32675eabf7e.mp4?_a=DATAdtAAZAA0',
-    id: 'project2',
+    name: 'Coin Detector',
+    description:
+      'AI-powered numismatic analysis — identify and grade coins from photos with vision models and forensic OCR passes. Cross-platform Expo app.',
+    link: 'https://github.com/juniegrat/coin-detect',
+    tech: ['React Native', 'Expo', 'TypeScript', 'OpenAI Vision'],
+    year: '2026',
+    accent: 'from-amber-500/25 to-yellow-500/25',
+    id: 'coin-detect',
+  },
+  {
+    name: 'AURUM',
+    description:
+      'Scroll-driven 3D showcase where precious-metal coins melt and reform into one another, with a technical HUD and hover inspection.',
+    link: 'https://github.com/juniegrat/threejs-nebula',
+    tech: ['Three.js', 'GLSL', 'Vite'],
+    year: '2026',
+    accent: 'from-yellow-500/25 to-zinc-400/25',
+    id: 'aurum',
+  },
+  {
+    name: 'Voodoo',
+    description:
+      'Interactive WebGL voodoo doll — a spring-bone skinned figure you can grab, needle, burn and tear, with webcam pinch-to-throw darts.',
+    link: 'https://github.com/juniegrat/threejs-voodoo',
+    tech: ['Three.js', 'WebGL', 'MediaPipe', 'Vite'],
+    year: '2026',
+    accent: 'from-rose-500/25 to-purple-500/25',
+    id: 'voodoo',
+  },
+  {
+    name: 'Three Balisong',
+    description:
+      'Real-time balisong (butterfly knife) playground in Three.js, with opt-in MediaPipe webcam hand control.',
+    link: 'https://github.com/juniegrat/three-balisong',
+    tech: ['Three.js', 'MediaPipe', 'Vite'],
+    year: '2026',
+    accent: 'from-sky-500/25 to-slate-500/25',
+    id: 'balisong',
+  },
+  {
+    name: 'Adobe MCP Bridges',
+    description:
+      'MCP servers that drive Adobe After Effects & Illustrator via ExtendScript — generate and render compositions end-to-end from a config or an AI agent.',
+    link: 'https://github.com/juniegrat/ae-mcp',
+    tech: ['TypeScript', 'MCP', 'ExtendScript', 'AppleScript'],
+    year: '2026',
+    accent: 'from-violet-500/25 to-fuchsia-500/25',
+    id: 'adobe-mcp',
   },
 ]
 

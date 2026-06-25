@@ -15,10 +15,12 @@ import {
   BLOG_POSTS,
   EMAIL,
   PROJECTS,
+  type Project,
   SITE_DESCRIPTION,
   SOCIAL_LINKS,
   WORK_EXPERIENCE,
 } from '@/data'
+import { cn } from '@/lib/utils'
 
 export const Route = createFileRoute('/')({
   head: () => ({
@@ -46,11 +48,31 @@ const TRANSITION_SECTION = {
   duration: 0.3,
 }
 
-type ProjectVideoProps = {
-  src: string
-}
+function ProjectMedia({ project }: { project: Project }) {
+  const { video, image, accent, name } = project
 
-function ProjectVideo({ src }: ProjectVideoProps) {
+  if (!video && !image) {
+    return (
+      <div
+        className={cn(
+          'flex aspect-video w-full items-center justify-center rounded-xl bg-gradient-to-br',
+          accent ?? 'from-zinc-200/50 to-zinc-100/40 dark:from-zinc-800/50 dark:to-zinc-900/40',
+        )}
+      >
+        <span className="px-4 text-center font-mono text-xs tracking-widest text-zinc-500 uppercase dark:text-zinc-400">
+          {name}
+        </span>
+      </div>
+    )
+  }
+
+  const renderMedia = (className: string) =>
+    video ? (
+      <video src={video} autoPlay loop muted className={className} />
+    ) : (
+      <img src={image} alt={name} className={className} />
+    )
+
   return (
     <MorphingDialog
       transition={{
@@ -60,23 +82,11 @@ function ProjectVideo({ src }: ProjectVideoProps) {
       }}
     >
       <MorphingDialogTrigger>
-        <video
-          src={src}
-          autoPlay
-          loop
-          muted
-          className="aspect-video w-full cursor-zoom-in rounded-xl"
-        />
+        {renderMedia('aspect-video w-full cursor-zoom-in rounded-xl object-cover')}
       </MorphingDialogTrigger>
       <MorphingDialogContainer>
         <MorphingDialogContent className="relative aspect-video rounded-2xl bg-zinc-50 p-1 ring-1 ring-zinc-200/50 ring-inset dark:bg-zinc-950 dark:ring-zinc-800/50">
-          <video
-            src={src}
-            autoPlay
-            loop
-            muted
-            className="aspect-video h-[50vh] w-full rounded-xl md:h-[70vh]"
-          />
+          {renderMedia('aspect-video h-[50vh] w-full rounded-xl object-cover md:h-[70vh]')}
         </MorphingDialogContent>
         <MorphingDialogClose
           className="fixed top-6 right-6 h-fit w-fit rounded-full bg-white p-1"
@@ -147,21 +157,38 @@ function Home() {
         <h3 className="mb-5 text-lg font-medium">Selected Projects</h3>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           {PROJECTS.map((project) => (
-            <div key={project.name} className="space-y-2">
+            <div key={project.id} className="space-y-2">
               <div className="relative rounded-2xl bg-zinc-50/40 p-1 ring-1 ring-zinc-200/50 ring-inset dark:bg-zinc-950/40 dark:ring-zinc-800/50">
-                <ProjectVideo src={project.video} />
+                <ProjectMedia project={project} />
               </div>
               <div className="px-1">
-                <a
-                  className="font-base group relative inline-block font-[450] text-zinc-900 dark:text-zinc-50"
-                  href={project.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {project.name}
-                  <span className="absolute bottom-0.5 left-0 block h-[1px] w-full max-w-0 bg-zinc-900 transition-all duration-200 group-hover:max-w-full dark:bg-zinc-50"></span>
-                </a>
-                <p className="text-base text-zinc-600 dark:text-zinc-400">{project.description}</p>
+                <div className="flex items-baseline justify-between gap-3">
+                  <a
+                    className="font-base group relative inline-block font-[450] text-zinc-900 dark:text-zinc-50"
+                    href={project.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {project.name}
+                    <span className="absolute bottom-0.5 left-0 block h-[1px] w-full max-w-0 bg-zinc-900 transition-all duration-200 group-hover:max-w-full dark:bg-zinc-50"></span>
+                  </a>
+                  <span className="shrink-0 font-mono text-xs text-zinc-400 dark:text-zinc-500">
+                    {project.year}
+                  </span>
+                </div>
+                <p className="mt-0.5 text-base text-zinc-600 dark:text-zinc-400">
+                  {project.description}
+                </p>
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {project.tech.map((t) => (
+                    <span
+                      key={t}
+                      className="rounded-md bg-zinc-100 px-1.5 py-0.5 font-mono text-[11px] text-zinc-500 dark:bg-zinc-800/80 dark:text-zinc-400"
+                    >
+                      {t}
+                    </span>
+                  ))}
+                </div>
               </div>
             </div>
           ))}
