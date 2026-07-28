@@ -20,11 +20,12 @@ import {
   SOCIAL_LINKS,
   WORK_EXPERIENCE,
 } from '@/data'
+import { WEBSITE_URL } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 
 export const Route = createFileRoute('/')({
   head: () => ({
-    links: [{ rel: 'canonical', href: 'https://juniegrat.vercel.app/' }],
+    links: [{ rel: 'canonical', href: `${WEBSITE_URL}/` }],
   }),
   component: Home,
 })

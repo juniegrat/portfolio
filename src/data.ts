@@ -39,8 +39,7 @@ export type SocialLink = {
   link: string
 }
 
-// TODO: your display name + role (shown in the header).
-export const NAME = 'Your Name'
+export const NAME = 'Junie Grat'
 export const ROLE = 'Design Engineer'
 
 export const SITE_DESCRIPTION =
@@ -48,8 +47,8 @@ export const SITE_DESCRIPTION =
 
 export const EMAIL = 'juniegrat@gmail.com'
 
-// Real projects pulled from github.com/juniegrat. Reorder/trim to taste; drop in
-// an `image` (path under /public) or `video` URL to replace the accent placeholder.
+// Selected projects — drop in an `image` (path under /public) or `video` URL
+// to replace the accent placeholder.
 export const PROJECTS: Project[] = [
   {
     name: 'Hadesor ERP',
@@ -92,26 +91,6 @@ export const PROJECTS: Project[] = [
     id: 'aurum',
   },
   {
-    name: 'Voodoo',
-    description:
-      'Interactive WebGL voodoo doll — a spring-bone skinned figure you can grab, needle, burn and tear, with webcam pinch-to-throw darts.',
-    link: 'https://github.com/juniegrat/threejs-voodoo',
-    tech: ['Three.js', 'WebGL', 'MediaPipe', 'Vite'],
-    year: '2026',
-    accent: 'from-rose-500/25 to-purple-500/25',
-    id: 'voodoo',
-  },
-  {
-    name: 'Three Balisong',
-    description:
-      'Real-time balisong (butterfly knife) playground in Three.js, with opt-in MediaPipe webcam hand control.',
-    link: 'https://github.com/juniegrat/three-balisong',
-    tech: ['Three.js', 'MediaPipe', 'Vite'],
-    year: '2026',
-    accent: 'from-sky-500/25 to-slate-500/25',
-    id: 'balisong',
-  },
-  {
     name: 'Adobe MCP Bridges',
     description:
       'MCP servers that drive Adobe After Effects & Illustrator via ExtendScript — generate and render compositions end-to-end from a config or an AI agent.',
@@ -120,26 +99,6 @@ export const PROJECTS: Project[] = [
     year: '2026',
     accent: 'from-violet-500/25 to-fuchsia-500/25',
     id: 'adobe-mcp',
-  },
-  {
-    name: 'Aketi & Wilfried — Wedding',
-    description:
-      'A modern wedding-invitation site (FR) for a May 2026 wedding at Château Fengari — animated hero, photo carousel, interactive map, and RSVP forms backed by Google Sheets with React Hook Form + Zod validation.',
-    link: 'https://github.com/juniegrat/aketi-will-wedding',
-    tech: ['Next.js 16', 'React 19', 'Tailwind CSS 4', 'Motion', 'shadcn/ui', 'Google Sheets'],
-    year: '2026',
-    accent: 'from-rose-400/25 to-pink-300/25',
-    id: 'wedding',
-  },
-  {
-    name: 'COVID Testing MVP',
-    description:
-      'An MVP web app from the 2021 pandemic for COVID-19 testing — a React monorepo (landing front end), containerized with Nginx. Shipped fast under real-world constraints.',
-    link: 'https://github.com/juniegrat/test-covid',
-    tech: ['React', 'JavaScript', 'Yarn Workspaces', 'Nginx'],
-    year: '2021',
-    accent: 'from-teal-500/25 to-sky-500/25',
-    id: 'covid',
   },
 ]
 
