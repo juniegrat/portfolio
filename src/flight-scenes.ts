@@ -101,6 +101,19 @@ export const FLIGHT_SCENES: FlightScene[] = [
   },
 ]
 
+/**
+ * Poster for each connector, taken from that connector's OWN first frame.
+ * Without these the engine falls back to the next scene's establishing still,
+ * which is the wrong scene entirely until the clip finishes downloading.
+ */
+export const FLIGHT_CONNECTOR_STILLS: string[] = [
+  '/flight/conn-1-poster.webp',
+  '/flight/conn-2-poster.webp',
+  '/flight/conn-3-poster.webp',
+  '/flight/conn-4-poster.webp',
+  '/flight/conn-5-poster.webp',
+]
+
 /** length = FLIGHT_SCENES.length - 1. `null` is allowed; the engine crossfades that seam. */
 export const FLIGHT_CONNECTORS: (string | null)[] = [
   '/flight/conn-1.mp4',

@@ -75,6 +75,10 @@ function mountScrollWorld(container, config) {
   const SECTIONS = config.sections || [];
   const CONNECTORS = config.connectors || [];
   const CONNECTORS_M = config.connectorsMobile || [];
+  // ADAPTED: upstream posters a connector with SECTIONS[i+1].still, but a
+  // connector OPENS on dive_i's last frame (an interior), so that poster shows
+  // the wrong scene until the clip downloads. Allow a real per-connector poster.
+  const CONNECTOR_STILLS = config.connectorStills || [];
   const DIVE_W = config.diveScroll || 1.3;
   const CONN_W = config.connScroll || 0.9;
   const CROSSFADE = (config.crossfade != null) ? config.crossfade : 0.12;  // seam dissolve width (vh)
@@ -96,7 +100,7 @@ function mountScrollWorld(container, config) {
     // connector can't be generated (e.g. a content-filter false-positive).
     if (i < N - 1 && CONNECTORS[i]) {
       SEGMENTS.push({ kind: 'conn', si: i, clip: CONNECTORS[i], clipM: CONNECTORS_M[i],
-                      still: SECTIONS[i + 1].still, stillM: SECTIONS[i + 1].stillMobile,
+                      still: CONNECTOR_STILLS[i] || SECTIONS[i + 1].still, stillM: SECTIONS[i + 1].stillMobile,
                       accent: SECTIONS[i + 1].accent, w: CONN_W });
     }
   });

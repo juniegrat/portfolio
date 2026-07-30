@@ -2,6 +2,12 @@ import { Link } from '@tanstack/react-router'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { NAME, ROLE } from '@/data'
 
+/** Two work surfaces: the GSAP horizontal pan and the video camera flight. */
+const NAV = [
+  { to: '/world', label: 'Work' },
+  { to: '/scroll-world', label: 'Flight' },
+] as const
+
 export function Header() {
   // flex-wrap moves the control group to its own row on very narrow screens
   // rather than letting the role line break in half.
@@ -22,13 +28,18 @@ export function Header() {
         <p className="enter whitespace-nowrap text-muted">{ROLE}</p>
       </div>
       <div className="flex items-center gap-3">
-        <Link
-          to="/world"
-          className="text-sm text-muted transition-colors duration-150 ease-snap hover:text-ink"
-          activeProps={{ className: 'text-ink' }}
-        >
-          Work
-        </Link>
+        <nav className="flex items-center gap-3">
+          {NAV.map((item) => (
+            <Link
+              key={item.to}
+              to={item.to}
+              className="text-sm text-muted transition-colors duration-150 ease-snap hover:text-ink"
+              activeProps={{ className: 'text-ink' }}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </nav>
         <ThemeSwitch />
       </div>
     </header>

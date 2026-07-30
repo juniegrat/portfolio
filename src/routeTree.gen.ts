@@ -10,7 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as FlightRouteImport } from './routes/flight'
+import { Route as ScrollWorldRouteImport } from './routes/scroll-world'
 import { Route as WorldRouteImport } from './routes/world'
 import { Route as BlogSlugRouteImport } from './routes/blog/$slug'
 
@@ -19,9 +19,9 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const FlightRoute = FlightRouteImport.update({
-  id: '/flight',
-  path: '/flight',
+const ScrollWorldRoute = ScrollWorldRouteImport.update({
+  id: '/scroll-world',
+  path: '/scroll-world',
   getParentRoute: () => rootRouteImport,
 } as any)
 const WorldRoute = WorldRouteImport.update({
@@ -37,34 +37,34 @@ const BlogSlugRoute = BlogSlugRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/flight': typeof FlightRoute
+  '/scroll-world': typeof ScrollWorldRoute
   '/world': typeof WorldRoute
   '/blog/$slug': typeof BlogSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/flight': typeof FlightRoute
+  '/scroll-world': typeof ScrollWorldRoute
   '/world': typeof WorldRoute
   '/blog/$slug': typeof BlogSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/flight': typeof FlightRoute
+  '/scroll-world': typeof ScrollWorldRoute
   '/world': typeof WorldRoute
   '/blog/$slug': typeof BlogSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/flight' | '/world' | '/blog/$slug'
+  fullPaths: '/' | '/scroll-world' | '/world' | '/blog/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/flight' | '/world' | '/blog/$slug'
-  id: '__root__' | '/' | '/flight' | '/world' | '/blog/$slug'
+  to: '/' | '/scroll-world' | '/world' | '/blog/$slug'
+  id: '__root__' | '/' | '/scroll-world' | '/world' | '/blog/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  FlightRoute: typeof FlightRoute
+  ScrollWorldRoute: typeof ScrollWorldRoute
   WorldRoute: typeof WorldRoute
   BlogSlugRoute: typeof BlogSlugRoute
 }
@@ -78,11 +78,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/flight': {
-      id: '/flight'
-      path: '/flight'
-      fullPath: '/flight'
-      preLoaderRoute: typeof FlightRouteImport
+    '/scroll-world': {
+      id: '/scroll-world'
+      path: '/scroll-world'
+      fullPath: '/scroll-world'
+      preLoaderRoute: typeof ScrollWorldRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/world': {
@@ -104,7 +104,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  FlightRoute: FlightRoute,
+  ScrollWorldRoute: ScrollWorldRoute,
   WorldRoute: WorldRoute,
   BlogSlugRoute: BlogSlugRoute,
 }

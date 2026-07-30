@@ -36,6 +36,8 @@ export type ScrollWorldConfig = {
   /** Length must be sections.length - 1. `null` lets the engine crossfade that seam. */
   connectors?: (string | null)[]
   connectorsMobile?: (string | null)[]
+  /** Locally added: poster per connector, from that connector's own first frame. */
+  connectorStills?: string[]
 }
 
 /** Locally added teardown (see the ADAPTED notes in scrub-engine.js). */

@@ -1,12 +1,17 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useRef } from 'react'
 import { NAME } from '@/data'
-import { FLIGHT_ACCENT, FLIGHT_CONNECTORS, FLIGHT_SCENES } from '@/flight-scenes'
+import {
+  FLIGHT_ACCENT,
+  FLIGHT_CONNECTOR_STILLS,
+  FLIGHT_CONNECTORS,
+  FLIGHT_SCENES,
+} from '@/flight-scenes'
 import { WEBSITE_URL } from '@/lib/constants'
 
-const TITLE = `Flight, ${NAME}`
+const TITLE = `Scroll World, ${NAME}`
 
-export const Route = createFileRoute('/flight')({
+export const Route = createFileRoute('/scroll-world')({
   head: () => ({
     meta: [
       { title: TITLE },
@@ -16,7 +21,7 @@ export const Route = createFileRoute('/flight')({
       },
       { property: 'og:title', content: TITLE },
     ],
-    links: [{ rel: 'canonical', href: `${WEBSITE_URL}/flight` }],
+    links: [{ rel: 'canonical', href: `${WEBSITE_URL}/scroll-world` }],
   }),
   component: Flight,
 })
@@ -46,6 +51,7 @@ function Flight() {
           connScroll: 0.9,
           sections: FLIGHT_SCENES.map((scene) => ({ ...scene, accent: FLIGHT_ACCENT })),
           connectors: FLIGHT_CONNECTORS,
+          connectorStills: FLIGHT_CONNECTOR_STILLS,
         })
       })
       .catch(() => {
