@@ -8,7 +8,7 @@ import { NAME, ROLE, SITE_DESCRIPTION } from '@/data'
 import { WEBSITE_URL } from '@/lib/constants'
 import appCss from '../styles.css?url'
 
-const SITE_TITLE = `${NAME} — ${ROLE}`
+const SITE_TITLE = `${NAME}, ${ROLE}`
 
 export const Route = createRootRoute({
   head: () => ({
@@ -44,9 +44,13 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         {/* biome-ignore lint/security/noDangerouslySetInnerHtml: static first-paint theme bootstrap, not user input */}
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
-      <body className="bg-white tracking-tight antialiased dark:bg-zinc-950">
+      <body className="bg-surface tracking-tight text-ink antialiased">
         <ThemeProvider>
-          <div className="flex min-h-screen w-full flex-col">
+          {/* Theme-gated decoration, both inert in the other themes (see styles.css):
+              the instrument measurement grid and the kinetic scroll rail. */}
+          <div className="theme-grid" aria-hidden="true" />
+          <div className="rail" aria-hidden="true" />
+          <div className="relative flex min-h-[100dvh] w-full flex-col">
             <div className="relative mx-auto w-full max-w-[640px] flex-1 px-4 pt-20">
               <Header />
               {children}

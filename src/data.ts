@@ -1,29 +1,24 @@
 // ---------------------------------------------------------------------------
-// Edit this file to make the site yours. The values wired with your GitHub /
-// email are real; everything marked PLACEHOLDER is demo content to replace.
+// Site content. Everything in here is real; there is no placeholder copy left.
 // ---------------------------------------------------------------------------
 
 export type Project = {
   name: string
   description: string
-  /** Optional — omit for private/commercial work; the card renders the name unlinked. */
+  /** Optional. Omit for private/commercial work; the card renders the name unlinked. */
   link?: string
   tech: string[]
   year: string
-  /** Optional media shown in the card (and zoomable). Falls back to an accent placeholder. */
+  /** Optional media shown in the card (and zoomable). Falls back to a typographic plate. */
   video?: string
   image?: string
-  /** Tailwind gradient classes for the placeholder when there's no image/video. */
-  accent?: string
   id: string
 }
 
-export type WorkExperience = {
-  company: string
-  title: string
-  start: string
-  end: string
-  link: string
+export type Capability = {
+  label: string
+  summary: string
+  stack: string[]
   id: string
 }
 
@@ -43,41 +38,48 @@ export const NAME = 'Junie Grat'
 export const ROLE = 'Design Engineer'
 
 export const SITE_DESCRIPTION =
-  'Focused on creating intuitive and performant web experiences. Bridging the gap between design and development.'
+  'I build production systems end to end: a 300-table ERP monorepo, self-hosted security tooling, WebGL showcases, and MCP servers that drive Adobe apps.'
 
 export const EMAIL = 'juniegrat@gmail.com'
 
-// Selected projects — drop in an `image` (path under /public) or `video` URL
-// to replace the accent placeholder.
+// Selected projects. Drop in an `image` (path under /public) or `video` URL to
+// replace the typographic plate.
 export const PROJECTS: Project[] = [
+  {
+    name: 'Design Library',
+    description:
+      'A registry of AI-generated interface designs, stored as files and served as a shadcn registry so any of them installs into another project with one command. Each design carries the brief that produced it, and the whole set exports to standalone HTML.',
+    link: 'https://design.juniegrat.com',
+    tech: ['TanStack Start', 'Tailwind v4', 'shadcn registry', 'Vite SSR'],
+    year: '2026',
+    id: 'design-library',
+  },
   {
     name: 'Hadesor ERP',
     description:
-      'The most complex system I’ve built — a Turborepo ERP monorepo (staff app, customer portal, mobile, docs) over a 300+ table PostgreSQL/Drizzle schema, with end-to-end tRPC, type-safe drizzle-zod validation, auth, i18n, and Playwright E2E coverage.',
-    // Private/commercial repo — link intentionally omitted (set a live/case-study URL to enable).
+      'The most complex system I have built. A Turborepo ERP monorepo (staff app, customer portal, mobile, docs) over a 300+ table PostgreSQL/Drizzle schema, with end-to-end tRPC, type-safe drizzle-zod validation, auth, i18n, and Playwright E2E coverage.',
+    // Private/commercial repo, link intentionally omitted (set a live or
+    // case-study URL to enable it).
     tech: ['Next.js', 'Turborepo', 'tRPC', 'Drizzle ORM', 'PostgreSQL', 'Playwright'],
     year: '2026',
-    accent: 'from-[#cea600]/30 to-amber-700/20',
     id: 'hadesor',
   },
   {
-    name: 'ASM — Attack Surface Monitor',
+    name: 'ASM: Attack Surface Monitor',
     description:
-      'Self-hosted attack-surface monitor: continuous asset discovery and nuclei vulnerability scanning with a dashboard — an own-your-data alternative to ProjectDiscovery Cloud.',
+      'Self-hosted attack-surface monitor. Continuous asset discovery and nuclei vulnerability scanning behind a dashboard, as an own-your-data alternative to ProjectDiscovery Cloud.',
     link: 'https://github.com/juniegrat/asm',
     tech: ['Python', 'FastAPI', 'TanStack Start', 'SQLite', 'nuclei'],
     year: '2026',
-    accent: 'from-emerald-500/25 to-cyan-500/25',
     id: 'asm',
   },
   {
     name: 'Coin Detector',
     description:
-      'AI-powered numismatic analysis — identify and grade coins from photos with vision models and forensic OCR passes. Cross-platform Expo app.',
+      'AI-powered numismatic analysis. Identify and grade coins from photos using vision models and forensic OCR passes, in a cross-platform Expo app.',
     link: 'https://github.com/juniegrat/coin-detect',
     tech: ['React Native', 'Expo', 'TypeScript', 'OpenAI Vision'],
     year: '2026',
-    accent: 'from-amber-500/25 to-yellow-500/25',
     id: 'coin-detect',
   },
   {
@@ -87,38 +89,44 @@ export const PROJECTS: Project[] = [
     link: 'https://github.com/juniegrat/threejs-nebula',
     tech: ['Three.js', 'GLSL', 'Vite'],
     year: '2026',
-    accent: 'from-yellow-500/25 to-zinc-400/25',
     id: 'aurum',
   },
   {
     name: 'Adobe MCP Bridges',
     description:
-      'MCP servers that drive Adobe After Effects & Illustrator via ExtendScript — generate and render compositions end-to-end from a config or an AI agent.',
+      'MCP servers that drive After Effects and Illustrator through ExtendScript, generating and rendering compositions end to end from a config file or an AI agent.',
     link: 'https://github.com/juniegrat/ae-mcp',
     tech: ['TypeScript', 'MCP', 'ExtendScript', 'AppleScript'],
     year: '2026',
-    accent: 'from-violet-500/25 to-fuchsia-500/25',
     id: 'adobe-mcp',
   },
 ]
 
-// PLACEHOLDER work history.
-export const WORK_EXPERIENCE: WorkExperience[] = [
+// What I actually work on, grouped by the stacks above rather than by employer.
+export const CAPABILITIES: Capability[] = [
   {
-    company: 'Company',
-    title: 'Your Role',
-    start: '2024',
-    end: 'Present',
-    link: 'https://github.com/juniegrat',
-    id: 'work1',
+    label: 'Product engineering',
+    summary: 'Monorepo applications with one unbroken type chain from schema to UI.',
+    stack: ['Next.js', 'TanStack Start', 'Turborepo', 'tRPC'],
+    id: 'product',
   },
   {
-    company: 'Previous Company',
-    title: 'Previous Role',
-    start: '2021',
-    end: '2024',
-    link: 'https://github.com/juniegrat',
-    id: 'work2',
+    label: 'Data and backend',
+    summary: 'Relational schemas at scale, validated at the edge of every call.',
+    stack: ['PostgreSQL', 'Drizzle ORM', 'FastAPI', 'SQLite'],
+    id: 'backend',
+  },
+  {
+    label: 'Interface and motion',
+    summary: 'Interfaces designed in code, where type, color, and motion are one system.',
+    stack: ['Tailwind', 'Motion', 'Three.js', 'GLSL'],
+    id: 'interface',
+  },
+  {
+    label: 'Automation and AI',
+    summary: 'Agents and MCP servers wired into real tools rather than demos.',
+    stack: ['MCP', 'OpenAI Vision', 'ExtendScript', 'Playwright'],
+    id: 'automation',
   },
 ]
 
@@ -142,15 +150,5 @@ export const SOCIAL_LINKS: SocialLink[] = [
   {
     label: 'Github',
     link: 'https://github.com/juniegrat',
-  },
-  {
-    // TODO: replace with your handle (or delete).
-    label: 'Twitter',
-    link: 'https://twitter.com/',
-  },
-  {
-    // TODO: replace with your profile (or delete).
-    label: 'LinkedIn',
-    link: 'https://www.linkedin.com/',
   },
 ]

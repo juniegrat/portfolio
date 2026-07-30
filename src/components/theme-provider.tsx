@@ -8,10 +8,28 @@ import {
   useState,
 } from 'react'
 
-export type Theme = 'light' | 'dark' | 'system'
-export type ResolvedTheme = 'light' | 'dark'
+/** Single source of truth. Adding a theme means editing this file only. */
+const THEMES = ['light', 'dark', 'instrument', 'kinetic'] as const
+
+export type ResolvedTheme = (typeof THEMES)[number]
+export type Theme = ResolvedTheme | 'system'
 
 const STORAGE_KEY = 'theme'
+
+/** Themes that sit on a dark ground, so `dark:` variants still apply to them. */
+const DARK_GROUND: ResolvedTheme[] = ['dark', 'instrument']
+
+/** Mobile browser chrome color. Must match each theme's --surface. */
+const SURFACE: Record<ResolvedTheme, string> = {
+  light: '#ffffff',
+  dark: '#09090b',
+  instrument: '#0c0c0e',
+  kinetic: '#eef1f7',
+}
+
+function isTheme(value: unknown): value is Theme {
+  return value === 'system' || THEMES.includes(value as ResolvedTheme)
+}
 
 type ThemeContextValue = {
   theme: Theme
@@ -28,8 +46,13 @@ function getSystemTheme(): ResolvedTheme {
 
 function applyTheme(resolved: ResolvedTheme) {
   const root = document.documentElement
-  root.classList.toggle('dark', resolved === 'dark')
-  root.style.colorScheme = resolved
+  const onDarkGround = DARK_GROUND.includes(resolved)
+  // Tokens key off data-theme; the class keeps `dark:` variants (prose-invert)
+  // working for every dark-ground theme.
+  root.dataset.theme = resolved
+  root.classList.toggle('dark', onDarkGround)
+  root.style.colorScheme = onDarkGround ? 'dark' : 'light'
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', SURFACE[resolved])
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
@@ -38,8 +61,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   // Hydrate the stored preference once mounted (server can't read localStorage).
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY) as Theme | null
-    if (stored === 'light' || stored === 'dark' || stored === 'system') {
+    const stored = localStorage.getItem(STORAGE_KEY)
+    if (isTheme(stored)) {
       setThemeState(stored)
     }
   }, [])
@@ -87,6 +110,15 @@ export function useTheme() {
   return ctx
 }
 
-// Render-blocking inline script for <head>. Sets the theme class before first
-// paint so there's no flash of the wrong theme on load (replaces next-themes).
-export const themeInitScript = `(function(){try{var t=localStorage.getItem('${STORAGE_KEY}')||'system';var d=t==='dark'||(t==='system'&&window.matchMedia('(prefers-color-scheme: dark)').matches);var r=document.documentElement;r.classList.toggle('dark',d);r.style.colorScheme=d?'dark':'light';}catch(e){}})();`
+// Render-blocking inline script for <head>. Sets the theme before first paint so
+// there's no flash of the wrong theme on load (replaces next-themes). The theme
+// tables are serialized from the constants above so this can't drift from them.
+export const themeInitScript = `(function(){try{
+var S=${JSON.stringify(SURFACE)},D=${JSON.stringify(DARK_GROUND)};
+var t=localStorage.getItem('${STORAGE_KEY}');
+if(!t||!S[t])t='system';
+if(t==='system')t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+var d=D.indexOf(t)>-1,r=document.documentElement;
+r.dataset.theme=t;r.classList.toggle('dark',d);r.style.colorScheme=d?'dark':'light';
+var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute('content',S[t]);
+}catch(e){}})();`

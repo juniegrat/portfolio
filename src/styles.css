@@ -2,14 +2,60 @@
 @import '@fontsource-variable/geist';
 @import '@fontsource-variable/geist-mono';
 @plugin '@tailwindcss/typography';
-@custom-variant dark (&:is(.dark *));
 
-@theme {
+@custom-variant dark (&:is(.dark *));
+@custom-variant instrument (&:is([data-theme='instrument'] *));
+@custom-variant kinetic (&:is([data-theme='kinetic'] *));
+
+/*
+  Semantic tokens. `inline` makes utilities compile to `var(--surface)` rather
+  than `var(--color-surface)`, so redeclaring the raw token under a theme
+  selector below retargets every `bg-surface` / `text-ink` at once. That is what
+  lets a third theme exist without a third variant on every utility.
+*/
+@theme inline {
   --font-sans: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'Geist Mono Variable', ui-monospace, SFMono-Regular, monospace;
+
+  --color-surface: var(--surface);
+  --color-raised: var(--raised);
+  --color-sunken: var(--sunken);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-muted: var(--ink-muted);
+  --color-faint: var(--ink-faint);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-ink: var(--accent-ink);
+
+  /* Corner radius is part of a theme's character, so it is a token too. */
+  --radius-frame: var(--r-frame);
+  --radius-plate: var(--r-plate);
+
+  /* Built-in CSS easings are too weak to read as intentional. */
+  --ease-snap: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-shift: cubic-bezier(0.77, 0, 0.175, 1);
 }
 
+/* Light: the incumbent look, retokenized. */
 :root {
+  --surface: #ffffff;
+  --raised: #ffffff;
+  --sunken: #f4f4f5;
+  --line: #e4e4e7;
+  --ink: #09090b;
+  --ink-muted: #52525b;
+  --ink-faint: #6f6f78;
+  --accent: #8f6212;
+  --accent-soft: #8f62121f;
+  --accent-ink: #ffffff;
+
+  --r-frame: 1rem;
+  --r-plate: 0.75rem;
+
+  --grain: 0;
+  --rule: transparent;
+
   --font-geist: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
   --font-geist-mono: 'Geist Mono Variable', ui-monospace, monospace;
 
@@ -24,17 +70,80 @@
   --sh-entity: #e0af68;
 }
 
+/* Dark: the incumbent dark, retokenized. */
+[data-theme='dark'] {
+  --surface: #09090b;
+  --raised: #18181b;
+  --sunken: #27272a;
+  --line: #27272a;
+  --ink: #fafafa;
+  --ink-muted: #a1a1aa;
+  /* Light enough to clear AA on --sunken, where the tech tags sit. */
+  --ink-faint: #909099;
+  --accent: #e0af68;
+  --accent-soft: #e0af6824;
+  --accent-ink: #09090b;
+}
+
 /*
-  The default border color changed to `currentColor` in Tailwind CSS v4,
-  so we keep these compatibility styles to preserve the original look.
+  Instrument: the designed theme. Graphite ground, warm paper ink, hairline
+  measurement grid, one gold accent taken from the Hadesor and AURUM work so it
+  reads as this portfolio's own color rather than a generic dark mode.
 */
+[data-theme='instrument'] {
+  --surface: #0c0c0e;
+  --raised: #131316;
+  --sunken: #1a1a1e;
+  --line: #24242a;
+  --ink: #f4f2ec;
+  --ink-muted: #a8a49a;
+  --ink-faint: #8a8679;
+  --accent: #cea600;
+  --accent-soft: #cea60021;
+  --accent-ink: #0c0c0e;
+
+  /* Squarer than the other themes. Instrument panels are milled, not rounded. */
+  --r-frame: 0.375rem;
+  --r-plate: 0.25rem;
+
+  --grain: 1;
+  --rule: #ffffff12;
+}
+
+/*
+  Kinetic: the motion theme. Cool paper ground with white cards that actually
+  lift off it (light theme is white-on-white and has no such separation), one
+  cobalt accent, softer radii. Scroll choreography is gated on this theme at the
+  bottom of this file.
+*/
+[data-theme='kinetic'] {
+  --surface: #eef1f7;
+  --raised: #ffffff;
+  --sunken: #e3e8f1;
+  --line: #d2dae8;
+  --ink: #0b1220;
+  --ink-muted: #47536b;
+  /* Dark enough to clear AA on --sunken, where the tech tags sit. */
+  --ink-faint: #5a6579;
+  --accent: #1f4bd8;
+  --accent-soft: #1f4bd81f;
+  --accent-ink: #ffffff;
+
+  /* Softer than the rest. Motion reads better on fluid shapes. */
+  --r-frame: 1.25rem;
+  --r-plate: 1rem;
+
+  --grain: 0;
+  --rule: transparent;
+}
+
 @layer base {
   *,
   ::after,
   ::before,
   ::backdrop,
   ::file-selector-button {
-    border-color: var(--color-gray-200, currentColor);
+    border-color: var(--line);
   }
 }
 
@@ -54,4 +163,253 @@ body {
 
 code {
   font-family: var(--font-geist-mono);
+}
+
+/*
+  Point the typography plugin at the same tokens, so prose follows every theme
+  from one place instead of needing `prose-gray dark:prose-invert`.
+*/
+.prose {
+  --tw-prose-body: var(--ink-muted);
+  --tw-prose-headings: var(--ink);
+  --tw-prose-lead: var(--ink-muted);
+  --tw-prose-links: var(--ink);
+  --tw-prose-bold: var(--ink);
+  --tw-prose-counters: var(--ink-faint);
+  --tw-prose-bullets: var(--line);
+  --tw-prose-hr: var(--line);
+  --tw-prose-quotes: var(--ink);
+  --tw-prose-quote-borders: var(--accent);
+  --tw-prose-captions: var(--ink-faint);
+  --tw-prose-kbd: var(--ink);
+  --tw-prose-code: var(--ink);
+  --tw-prose-pre-code: var(--ink);
+  --tw-prose-pre-bg: var(--sunken);
+  --tw-prose-th-borders: var(--line);
+  --tw-prose-td-borders: var(--line);
+}
+
+/*
+  Section entry. Deliberately CSS rather than a JS variant chain: this animation
+  is predetermined, it runs off the main thread, and it cannot leave content
+  stranded at opacity 0 the way a rAF-driven loop does in an unfocused tab.
+  `backwards` fill holds the from-state during the stagger delay only, so no
+  filter or transform is retained after it finishes.
+*/
+@keyframes enter-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+    filter: blur(6px);
+  }
+}
+
+@keyframes enter-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+.enter {
+  animation: enter-up 320ms var(--ease-snap) backwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Keep the fade, drop the movement. */
+  .enter {
+    animation-name: enter-fade;
+  }
+}
+
+/*
+  Escape the 640px reading column without refactoring the root shell. Used by
+  the /world surface, which needs full width to pan horizontally.
+*/
+.full-bleed {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+}
+
+/*
+  100vw includes the scrollbar, so .full-bleed overhangs by its width. `clip`
+  rather than `hidden` on purpose: `hidden` would make the body a scroll
+  container and break ScrollTrigger's pinning.
+*/
+body {
+  overflow-x: clip;
+}
+
+/*
+  /world horizontal pan.
+
+  The pinned GSAP scrub is only built for `(prefers-reduced-motion: no-preference)
+  and (min-width: 768px)`. This query is the exact complement, so wherever the pin
+  is NOT built the track scrolls natively instead. Without it the oversized track
+  sits inside an overflow-hidden box and the later panels are unreachable.
+*/
+@media (max-width: 767px), (prefers-reduced-motion: reduce) {
+  .pan-wrap {
+    height: auto;
+    overflow: visible;
+  }
+
+  .pan-track {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-block: 2rem;
+  }
+}
+
+/* Years, counts, and other figures should not reflow as digits change. */
+.tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+/*
+  Measurement grid. Fixed and non-interactive so it never repaints on scroll,
+  and gated on --grain so only the instrument theme pays for it.
+*/
+.theme-grid {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: var(--grain);
+  background-image:
+    repeating-linear-gradient(to right, var(--rule) 0 1px, transparent 1px 96px),
+    repeating-linear-gradient(to bottom, var(--rule) 0 1px, transparent 1px 96px);
+  mask-image: linear-gradient(to bottom, black 0%, black 62%, transparent 100%);
+  transition: opacity 320ms var(--ease-snap);
+}
+
+/*
+  Invisible in light and dark (--rule is transparent there), a hairline in
+  instrument. One token drives the whole structural layer.
+*/
+.rule-b {
+  border-bottom: 1px solid var(--rule);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-grid {
+    transition: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Kinetic scroll choreography.
+
+   Native CSS scroll-driven animation, so there is no scroll listener, no rAF
+   loop, and nothing to unmount when the theme changes. Every rule that can
+   HIDE content lives inside @supports: a browser without scroll-driven
+   animations must fall through to the static page, never to a blank one.
+   --------------------------------------------------------------------------- */
+
+/* Scroll progress rail. Parked at scaleX(0) so it is invisible without support. */
+.rail {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 30;
+  height: 2px;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  background: var(--accent);
+  opacity: 0;
+  pointer-events: none;
+}
+
+[data-theme='kinetic'] .rail {
+  opacity: 1;
+}
+
+@keyframes rail-grow {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes reveal-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+}
+
+/*
+  Depth cue: shifts a plate's inner grid, clipped by the plate's overflow.
+
+  The timeline cannot live on the inner layer. The plate sets `overflow: hidden`,
+  which makes it a scroll container, so `view()` on a child resolves against the
+  PLATE rather than the page; a child at `inset: 0` exactly fills that scrollport
+  and its progress pins at 0.5 forever. So the animation runs on the unclipped
+  frame (whose scrollport is the document) and hands the value inward through an
+  inherited custom property.
+*/
+@property --drift {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 0px;
+}
+
+@keyframes plate-drift {
+  from {
+    --drift: -10px;
+  }
+  to {
+    --drift: 10px;
+  }
+}
+
+/*
+  Longhands, not the `animation` shorthand. The shorthand defaults duration to
+  0s, and a scroll-driven animation with a 0s duration has no progress to map
+  scroll onto: it snaps to an endpoint and looks inert. Scroll timelines need
+  `animation-duration: auto`, which the shorthand cannot express.
+*/
+@supports (animation-timeline: view()) {
+  [data-theme='kinetic'] .rail {
+    animation-name: rail-grow;
+    animation-duration: auto;
+    animation-timing-function: linear;
+    animation-fill-mode: both;
+    animation-timeline: scroll(root block);
+  }
+
+  [data-theme='kinetic'] .reveal {
+    animation-name: reveal-in;
+    animation-duration: auto;
+    animation-timing-function: linear;
+    animation-fill-mode: both;
+    animation-timeline: view();
+    animation-range: entry 8% cover 26%;
+  }
+
+  [data-theme='kinetic'] .drift-host {
+    animation-name: plate-drift;
+    animation-duration: auto;
+    animation-timing-function: linear;
+    animation-fill-mode: both;
+    animation-timeline: view();
+  }
+
+  [data-theme='kinetic'] .drift {
+    transform: translateY(var(--drift, 0px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-theme='kinetic'] .rail,
+  [data-theme='kinetic'] .reveal,
+  [data-theme='kinetic'] .drift-host {
+    animation: none;
+  }
+
+  [data-theme='kinetic'] .drift {
+    transform: none;
+  }
+
+  [data-theme='kinetic'] .rail {
+    opacity: 0;
+  }
 }

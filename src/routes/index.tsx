@@ -1,6 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { XIcon } from 'lucide-react'
-import { motion } from 'motion/react'
 import { AnimatedBackground } from '@/components/ui/animated-background'
 import { Magnetic } from '@/components/ui/magnetic'
 import {
@@ -10,18 +9,16 @@ import {
   MorphingDialogContent,
   MorphingDialogTrigger,
 } from '@/components/ui/morphing-dialog'
-import { Spotlight } from '@/components/ui/spotlight'
 import {
   BLOG_POSTS,
+  CAPABILITIES,
   EMAIL,
   PROJECTS,
   type Project,
   SITE_DESCRIPTION,
   SOCIAL_LINKS,
-  WORK_EXPERIENCE,
 } from '@/data'
 import { WEBSITE_URL } from '@/lib/constants'
-import { cn } from '@/lib/utils'
 
 export const Route = createFileRoute('/')({
   head: () => ({
@@ -30,41 +27,60 @@ export const Route = createFileRoute('/')({
   component: Home,
 })
 
-const VARIANTS_CONTAINER = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.15,
-    },
-  },
+// Section entry is a CSS animation (see `.enter` in styles.css). 60ms between
+// sections; long staggers read as the page loading slowly.
+const STAGGER_MS = 60
+
+function enter(index: number) {
+  return { className: 'enter', style: { animationDelay: `${index * STAGGER_MS}ms` } }
 }
 
-const VARIANTS_SECTION = {
-  hidden: { opacity: 0, y: 20, filter: 'blur(8px)' },
-  visible: { opacity: 1, y: 0, filter: 'blur(0px)' },
+/**
+ * Media plate. With no screenshot to show, this renders a measured plate built
+ * from theme tokens rather than a colored blur, so all three themes stay on a
+ * single hue.
+ */
+function ProjectPlate({ name, index }: { name: string; index: number }) {
+  return (
+    <div className="relative flex aspect-video w-full items-end overflow-hidden rounded-plate bg-sunken">
+      <div
+        aria-hidden="true"
+        className="drift absolute inset-0 opacity-70"
+        style={{
+          backgroundImage:
+            'repeating-linear-gradient(to right, var(--line) 0 1px, transparent 1px 24px), repeating-linear-gradient(to bottom, var(--line) 0 1px, transparent 1px 24px)',
+          maskImage: 'radial-gradient(120% 120% at 0% 100%, black 10%, transparent 75%)',
+        }}
+      />
+      <div
+        aria-hidden="true"
+        className="absolute inset-0"
+        style={{
+          background: 'radial-gradient(90% 90% at 12% 115%, var(--accent-soft), transparent 68%)',
+        }}
+      />
+      {/* Registration marks. They give the empty plate a measured composition. */}
+      <span
+        aria-hidden="true"
+        className="absolute top-3 left-3 h-2 w-2 border-t border-l border-accent/45"
+      />
+      <span
+        aria-hidden="true"
+        className="absolute right-3 bottom-3 h-2 w-2 border-r border-b border-accent/45"
+      />
+      <span className="relative m-4 font-mono text-xs text-muted">{name}</span>
+      <span className="tabular absolute top-4 right-4 font-mono text-xs text-accent">
+        {String(index + 1).padStart(2, '0')}
+      </span>
+    </div>
+  )
 }
 
-const TRANSITION_SECTION = {
-  duration: 0.3,
-}
-
-function ProjectMedia({ project }: { project: Project }) {
-  const { video, image, accent, name } = project
+function ProjectMedia({ project, index }: { project: Project; index: number }) {
+  const { video, image, name } = project
 
   if (!video && !image) {
-    return (
-      <div
-        className={cn(
-          'flex aspect-video w-full items-center justify-center rounded-xl bg-gradient-to-br',
-          accent ?? 'from-zinc-200/50 to-zinc-100/40 dark:from-zinc-800/50 dark:to-zinc-900/40',
-        )}
-      >
-        <span className="px-4 text-center font-mono text-xs tracking-widest text-zinc-500 uppercase dark:text-zinc-400">
-          {name}
-        </span>
-      </div>
-    )
+    return <ProjectPlate name={name} index={index} />
   }
 
   const renderMedia = (className: string) =>
@@ -75,32 +91,23 @@ function ProjectMedia({ project }: { project: Project }) {
     )
 
   return (
-    <MorphingDialog
-      transition={{
-        type: 'spring',
-        bounce: 0,
-        duration: 0.3,
-      }}
-    >
+    <MorphingDialog transition={{ type: 'spring', bounce: 0, duration: 0.3 }}>
       <MorphingDialogTrigger>
-        {renderMedia('aspect-video w-full cursor-zoom-in rounded-xl object-cover')}
+        {renderMedia('aspect-video w-full cursor-zoom-in rounded-plate object-cover')}
       </MorphingDialogTrigger>
       <MorphingDialogContainer>
-        <MorphingDialogContent className="relative aspect-video rounded-2xl bg-zinc-50 p-1 ring-1 ring-zinc-200/50 ring-inset dark:bg-zinc-950 dark:ring-zinc-800/50">
-          {renderMedia('aspect-video h-[50vh] w-full rounded-xl object-cover md:h-[70vh]')}
+        <MorphingDialogContent className="relative aspect-video rounded-frame bg-raised p-1 ring-1 ring-line ring-inset">
+          {renderMedia('aspect-video h-[50vh] w-full rounded-plate object-cover md:h-[70vh]')}
         </MorphingDialogContent>
         <MorphingDialogClose
-          className="fixed top-6 right-6 h-fit w-fit rounded-full bg-white p-1"
+          className="fixed top-6 right-6 h-fit w-fit rounded-full bg-raised p-1"
           variants={{
             initial: { opacity: 0 },
-            animate: {
-              opacity: 1,
-              transition: { delay: 0.3, duration: 0.1 },
-            },
+            animate: { opacity: 1, transition: { delay: 0.3, duration: 0.1 } },
             exit: { opacity: 0, transition: { duration: 0 } },
           }}
         >
-          <XIcon className="h-5 w-5 text-zinc-500" />
+          <XIcon className="h-5 w-5 text-muted" />
         </MorphingDialogClose>
       </MorphingDialogContainer>
     </MorphingDialog>
@@ -114,7 +121,7 @@ function MagneticSocialLink({ children, link }: { children: React.ReactNode; lin
         href={link}
         target="_blank"
         rel="noopener noreferrer"
-        className="group relative inline-flex shrink-0 items-center gap-[1px] rounded-full bg-zinc-100 px-2.5 py-1 text-sm text-black transition-colors duration-200 hover:bg-zinc-950 hover:text-zinc-50 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-700"
+        className="group relative inline-flex shrink-0 items-center gap-[1px] rounded-full bg-sunken px-2.5 py-1 text-sm text-ink transition-[background-color,color,transform] duration-200 ease-snap hover:bg-accent hover:text-accent-ink active:scale-[0.97]"
       >
         {children}
         <svg
@@ -142,55 +149,44 @@ function MagneticSocialLink({ children, link }: { children: React.ReactNode; lin
 
 function Home() {
   return (
-    <motion.main
-      className="space-y-24"
-      variants={VARIANTS_CONTAINER}
-      initial="hidden"
-      animate="visible"
-    >
-      <motion.section variants={VARIANTS_SECTION} transition={TRANSITION_SECTION}>
-        <div className="flex-1">
-          <p className="text-zinc-600 dark:text-zinc-400">{SITE_DESCRIPTION}</p>
-        </div>
-      </motion.section>
+    <main className="relative space-y-24">
+      <section {...enter(0)}>
+        <p className="text-balance text-lg leading-relaxed text-muted">{SITE_DESCRIPTION}</p>
+      </section>
 
-      <motion.section variants={VARIANTS_SECTION} transition={TRANSITION_SECTION}>
-        <h3 className="mb-5 text-lg font-medium">Selected Projects</h3>
+      <section {...enter(1)}>
+        <h2 className="mb-5 text-lg font-medium text-ink">Selected Projects</h2>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          {PROJECTS.map((project) => (
-            <div key={project.id} className="space-y-2">
-              <div className="relative rounded-2xl bg-zinc-50/40 p-1 ring-1 ring-zinc-200/50 ring-inset dark:bg-zinc-950/40 dark:ring-zinc-800/50">
-                <ProjectMedia project={project} />
+          {PROJECTS.map((project, index) => (
+            <div key={project.id} className="reveal space-y-2">
+              <div className="drift-host relative rounded-frame bg-raised p-1 ring-1 ring-line ring-inset">
+                <ProjectMedia project={project} index={index} />
               </div>
               <div className="px-1">
                 <div className="flex items-baseline justify-between gap-3">
                   {project.link ? (
                     <a
-                      className="font-base group relative inline-block font-[450] text-zinc-900 dark:text-zinc-50"
+                      className="group relative inline-block font-[450] text-ink"
                       href={project.link}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
                       {project.name}
-                      <span className="absolute bottom-0.5 left-0 block h-[1px] w-full max-w-0 bg-zinc-900 transition-all duration-200 group-hover:max-w-full dark:bg-zinc-50"></span>
+                      <span className="absolute bottom-0.5 left-0 block h-[1px] w-full max-w-0 bg-accent transition-[max-width] duration-200 ease-snap group-hover:max-w-full"></span>
                     </a>
                   ) : (
-                    <span className="font-base inline-block font-[450] text-zinc-900 dark:text-zinc-50">
-                      {project.name}
-                    </span>
+                    <span className="inline-block font-[450] text-ink">{project.name}</span>
                   )}
-                  <span className="shrink-0 font-mono text-xs text-zinc-400 dark:text-zinc-500">
+                  <span className="tabular shrink-0 font-mono text-xs text-faint">
                     {project.year}
                   </span>
                 </div>
-                <p className="mt-0.5 text-base text-zinc-600 dark:text-zinc-400">
-                  {project.description}
-                </p>
+                <p className="mt-0.5 text-base text-muted">{project.description}</p>
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {project.tech.map((t) => (
                     <span
                       key={t}
-                      className="rounded-md bg-zinc-100 px-1.5 py-0.5 font-mono text-[11px] text-zinc-500 dark:bg-zinc-800/80 dark:text-zinc-400"
+                      className="rounded-md bg-sunken px-1.5 py-0.5 font-mono text-[11px] text-faint"
                     >
                       {t}
                     </span>
@@ -200,50 +196,42 @@ function Home() {
             </div>
           ))}
         </div>
-      </motion.section>
+      </section>
 
-      <motion.section variants={VARIANTS_SECTION} transition={TRANSITION_SECTION}>
-        <h3 className="mb-5 text-lg font-medium">Work Experience</h3>
-        <div className="flex flex-col space-y-2">
-          {WORK_EXPERIENCE.map((job) => (
-            <a
-              className="relative overflow-hidden rounded-2xl bg-zinc-300/30 p-[1px] dark:bg-zinc-600/30"
-              href={job.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              key={job.id}
+      <section {...enter(2)}>
+        <h2 className="mb-5 text-lg font-medium text-ink">What I Work On</h2>
+        <div className="divide-y divide-line border-t border-line">
+          {CAPABILITIES.map((capability) => (
+            <div
+              key={capability.id}
+              className="reveal grid gap-1 py-4 sm:grid-cols-[9rem_1fr] sm:gap-6"
             >
-              <Spotlight
-                className="from-zinc-900 via-zinc-800 to-zinc-700 blur-2xl dark:from-zinc-100 dark:via-zinc-200 dark:to-zinc-50"
-                size={64}
-              />
-              <div className="relative h-full w-full rounded-[15px] bg-white p-4 dark:bg-zinc-950">
-                <div className="relative flex w-full flex-row justify-between">
-                  <div>
-                    <h4 className="font-normal dark:text-zinc-100">{job.title}</h4>
-                    <p className="text-zinc-500 dark:text-zinc-400">{job.company}</p>
-                  </div>
-                  <p className="text-zinc-600 dark:text-zinc-400">
-                    {job.start} - {job.end}
-                  </p>
+              <h3 className="font-mono text-xs text-accent sm:pt-1">{capability.label}</h3>
+              <div>
+                <p className="text-base text-muted">{capability.summary}</p>
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {capability.stack.map((item) => (
+                    <span
+                      key={item}
+                      className="rounded-md bg-sunken px-1.5 py-0.5 font-mono text-[11px] text-faint"
+                    >
+                      {item}
+                    </span>
+                  ))}
                 </div>
               </div>
-            </a>
+            </div>
           ))}
         </div>
-      </motion.section>
+      </section>
 
-      <motion.section variants={VARIANTS_SECTION} transition={TRANSITION_SECTION}>
-        <h3 className="mb-3 text-lg font-medium">Blog</h3>
+      <section {...enter(3)}>
+        <h2 className="mb-3 text-lg font-medium text-ink">Blog</h2>
         <div className="flex flex-col space-y-0">
           <AnimatedBackground
             enableHover
-            className="h-full w-full rounded-lg bg-zinc-100 dark:bg-zinc-900/80"
-            transition={{
-              type: 'spring',
-              bounce: 0,
-              duration: 0.2,
-            }}
+            className="h-full w-full rounded-lg bg-sunken"
+            transition={{ type: 'spring', bounce: 0, duration: 0.2 }}
           >
             {BLOG_POSTS.map((post) => (
               <Link
@@ -254,20 +242,23 @@ function Home() {
                 data-id={post.uid}
               >
                 <div className="flex flex-col space-y-1">
-                  <h4 className="font-normal dark:text-zinc-100">{post.title}</h4>
-                  <p className="text-zinc-500 dark:text-zinc-400">{post.description}</p>
+                  <h3 className="font-normal text-ink">{post.title}</h3>
+                  <p className="text-muted">{post.description}</p>
                 </div>
               </Link>
             ))}
           </AnimatedBackground>
         </div>
-      </motion.section>
+      </section>
 
-      <motion.section variants={VARIANTS_SECTION} transition={TRANSITION_SECTION}>
-        <h3 className="mb-5 text-lg font-medium">Connect</h3>
-        <p className="mb-5 text-zinc-600 dark:text-zinc-400">
-          Feel free to contact me at{' '}
-          <a className="underline dark:text-zinc-300" href={`mailto:${EMAIL}`}>
+      <section {...enter(4)}>
+        <h2 className="mb-5 text-lg font-medium text-ink">Connect</h2>
+        <p className="mb-5 text-muted">
+          Reach me at{' '}
+          <a
+            className="text-ink underline decoration-accent decoration-1 underline-offset-2"
+            href={`mailto:${EMAIL}`}
+          >
             {EMAIL}
           </a>
         </p>
@@ -278,7 +269,7 @@ function Home() {
             </MagneticSocialLink>
           ))}
         </div>
-      </motion.section>
-    </motion.main>
+      </section>
+    </main>
   )
 }
