@@ -222,6 +222,26 @@ code {
 }
 
 /*
+  Drive the vendored scroll-world engine from this site's tokens. Its own
+  defaults are a cream ground with a lavender accent; unlayered rules here beat
+  its `@layer sw` defaults, so /scroll-world follows whichever theme is active.
+*/
+.sw-root {
+  /*
+    Deliberately NOT var(--surface). Every clip is grounded in the diorama's own
+    graphite, so the page must match it or the posters read as dark rectangles
+    floating on a pale page. This surface is a cinema: dark in all four themes,
+    with the gold taken from the footage itself.
+  */
+  --sw-bg: #0c0c0e;
+  --sw-ink: #f4f2ec;
+  --sw-ink-soft: #a8a49a;
+  --sw-accent: #cea600;
+  --sw-font-display: var(--font-geist);
+  --sw-font-body: var(--font-geist);
+}
+
+/*
   Escape the 640px reading column without refactoring the root shell. Used by
   the /world surface, which needs full width to pan horizontally.
 */

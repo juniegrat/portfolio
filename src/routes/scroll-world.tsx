@@ -54,9 +54,11 @@ function Flight() {
           connectorStills: FLIGHT_CONNECTOR_STILLS,
         })
       })
-      .catch(() => {
-        // Assets or engine missing: the markup below is already a readable
-        // fallback, so there is nothing to recover.
+      .catch((err) => {
+        // The <noscript> markup below is the fallback, so there is nothing to
+        // recover — but never swallow this. Silently ignoring it once turned a
+        // syntax error in the engine into a blank surface with a clean console.
+        console.error('[scroll-world] engine failed to load', err)
       })
 
     return () => {
@@ -66,7 +68,8 @@ function Flight() {
   }, [])
 
   return (
-    <main className="full-bleed">
+    // bg matches --sw-bg so the surface is uniform before the engine paints.
+    <main className="full-bleed bg-[#0c0c0e]">
       <div ref={host} />
       {/* Server-rendered fallback. The engine replaces this container's contents
           on mount, so this is what crawlers and no-JS visitors read. */}
