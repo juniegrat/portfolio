@@ -1,4 +1,10 @@
-import { motion, type SpringOptions, useMotionValue, useSpring } from 'motion/react'
+import {
+  motion,
+  type SpringOptions,
+  useMotionValue,
+  useReducedMotion,
+  useSpring,
+} from 'motion/react'
 import type React from 'react'
 import { useEffect, useRef, useState } from 'react'
 
@@ -21,6 +27,7 @@ export function Magnetic({
 }: MagneticProps) {
   const [isHovered, setIsHovered] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+  const reduceMotion = useReducedMotion()
 
   const x = useMotionValue(0)
   const y = useMotionValue(0)
@@ -29,6 +36,9 @@ export function Magnetic({
   const springY = useSpring(y, springOptions)
 
   useEffect(() => {
+    // Pointer-tracked movement is exactly what reduced motion asks us to drop.
+    if (reduceMotion) return
+
     const calculateDistance = (e: MouseEvent) => {
       if (ref.current) {
         const rect = ref.current.getBoundingClientRect()
@@ -55,7 +65,7 @@ export function Magnetic({
     return () => {
       document.removeEventListener('mousemove', calculateDistance)
     }
-  }, [isHovered, intensity, range, x, y])
+  }, [isHovered, intensity, range, x, y, reduceMotion])
 
   useEffect(() => {
     if (actionArea === 'parent' && ref.current?.parentElement) {
