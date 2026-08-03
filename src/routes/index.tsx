@@ -77,7 +77,7 @@ function ProjectPlate({ name, index }: { name: string; index: number }) {
 }
 
 function ProjectMedia({ project, index }: { project: Project; index: number }) {
-  const { video, image, name } = project
+  const { video, image, poster, name } = project
 
   if (!video && !image) {
     return <ProjectPlate name={name} index={index} />
@@ -85,7 +85,22 @@ function ProjectMedia({ project, index }: { project: Project; index: number }) {
 
   const renderMedia = (className: string) =>
     video ? (
-      <video src={video} autoPlay loop muted className={className} />
+      // `playsInline` is not cosmetic: iOS Safari refuses to autoplay without
+      // it and the card renders as a black rectangle. `muted` is the other half
+      // of that policy. A `poster` gives the grid something to paint while the
+      // clip loads; with one set we can hold the payload back to metadata.
+      // ponytail: still six eager clips on the home grid — if that shows up in
+      // the waterfall, gate play on IntersectionObserver rather than preload.
+      <video
+        src={video}
+        poster={poster}
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="metadata"
+        className={className}
+      />
     ) : (
       <img src={image} alt={name} className={className} />
     )

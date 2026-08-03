@@ -12,6 +12,8 @@ export type Project = {
   /** Optional media shown in the card (and zoomable). Falls back to a typographic plate. */
   video?: string
   image?: string
+  /** First frame for `video`, painted while the clip loads. Ignored without a video. */
+  poster?: string
   id: string
 }
 
