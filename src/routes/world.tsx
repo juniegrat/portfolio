@@ -4,6 +4,7 @@ import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useRef } from 'react'
 import { EMAIL, NAME, PROJECTS } from '@/data'
+import { useLocale } from '@/i18n/use-locale'
 import { WEBSITE_URL } from '@/lib/constants'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -31,6 +32,8 @@ function panelLabel(progress: number) {
 }
 
 function World() {
+  const locale = useLocale()
+
   const wrap = useRef<HTMLDivElement>(null)
   const track = useRef<HTMLDivElement>(null)
   const counter = useRef<HTMLSpanElement>(null)
@@ -125,7 +128,7 @@ function World() {
                   {String(index + 1).padStart(2, '0')}
                 </span>
                 <h2 className="mt-3 text-xl font-medium text-ink">{project.name}</h2>
-                <p className="mt-2 text-muted">{project.description}</p>
+                <p className="mt-2 text-muted">{project.description[locale]}</p>
               </div>
               <div className="mt-6">
                 <div className="flex flex-wrap gap-1.5">

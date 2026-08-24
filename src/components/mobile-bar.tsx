@@ -2,8 +2,11 @@ import { Link } from '@tanstack/react-router'
 import { PaletteIcon } from 'lucide-react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
+import { useIntl } from 'react-intl'
+import { LanguageSwitch } from '@/components/language-switch'
 import { ThemeSwitch } from '@/components/theme-switch'
 import useClickOutside from '@/hooks/useClickOutside'
+import { LocaleLink } from '@/i18n/use-locale'
 
 /**
  * Bottom navigation, phones only.
@@ -14,9 +17,9 @@ import useClickOutside from '@/hooks/useClickOutside'
  * labels do not fit one 375px row, and navigation earns the space.
  */
 const NAV = [
-  { label: 'Work', to: '/world' },
-  { label: 'Blog', to: '/blog' },
-  { label: 'Contact', to: '/', hash: 'connect' },
+  { key: 'nav.work', to: '/world', localised: false },
+  { key: 'nav.blog', to: '/blog', localised: true },
+  { key: 'nav.contact', to: '/', hash: 'connect', localised: true },
 ] as const
 
 const ITEM =
@@ -26,6 +29,7 @@ export function MobileBar() {
   const [open, setOpen] = useState(false)
   const shell = useRef<HTMLDivElement>(null)
   const reduceMotion = useReducedMotion()
+  const intl = useIntl()
 
   useClickOutside(shell, () => setOpen(false))
 
@@ -56,7 +60,14 @@ export function MobileBar() {
               reduceMotion ? { duration: 0 } : { duration: 0.18, ease: [0.23, 1, 0.32, 1] }
             }
           >
-            <ThemeSwitch />
+            {/* The header is hidden on phones, so the language toggle rides
+                along with the theme disclosure rather than costing a slot in
+                the 375px navigation row. */}
+            <div className="flex items-center gap-3 rounded-frame border border-line bg-raised px-3 py-2">
+              <LanguageSwitch />
+              <span aria-hidden="true" className="h-4 w-px shrink-0 bg-line" />
+              <ThemeSwitch />
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -67,9 +78,10 @@ export function MobileBar() {
       >
         {NAV.map((item) => {
           const hash = 'hash' in item ? item.hash : undefined
+          const Component = item.localised ? LocaleLink : Link
           return (
-            <Link
-              key={item.label}
+            <Component
+              key={item.key}
               to={item.to}
               hash={hash}
               className={ITEM}
@@ -93,8 +105,8 @@ export function MobileBar() {
                 window.history.replaceState(null, '', `#${hash}`)
               }}
             >
-              {item.label}
-            </Link>
+              {intl.formatMessage({ id: item.key })}
+            </Component>
           )
         })}
 

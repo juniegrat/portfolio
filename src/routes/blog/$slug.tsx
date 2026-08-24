@@ -1,49 +1,25 @@
-import { createFileRoute, Link, notFound } from '@tanstack/react-router'
-import { ArrowLeftIcon } from 'lucide-react'
-import type { MDXComponents } from 'mdx/types'
-import { useEffect, useState } from 'react'
-import { mdxComponents } from '@/components/mdx-components'
-import { formatPostDate, PostHero } from '@/components/post-hero'
-import { ScrollProgress } from '@/components/ui/scroll-progress'
-import { TextMorph } from '@/components/ui/text-morph'
+import { createFileRoute, notFound } from '@tanstack/react-router'
 import { BLOG_POSTS } from '@/data'
+import { alternateLinks, localePath, OG_LOCALE } from '@/i18n/locale'
+import { MESSAGES } from '@/i18n/messages'
 import { WEBSITE_URL } from '@/lib/constants'
+import { BlogPostPage, resolvePost } from '@/pages/blog-post'
 
-type PostModule = {
-  default: React.ComponentType<{ components?: MDXComponents }>
-  metadata?: {
-    title?: string
-    description?: string
-  }
-}
-
-// Eagerly load every post so we can resolve slug -> component + metadata on the
-// server during SSR. (Vite inlines these at build time.)
-const modules = import.meta.glob<PostModule>('../../content/blog/*.mdx', {
-  eager: true,
-})
-
-const posts: Record<string, PostModule> = {}
-for (const [path, mod] of Object.entries(modules)) {
-  const file = path.split('/').pop() ?? ''
-  const slug = file.replace(/\.mdx$/, '')
-  if (slug) posts[slug] = mod
-}
+const LOCALE = 'en' as const
 
 export const Route = createFileRoute('/blog/$slug')({
   loader: ({ params }) => {
-    const post = posts[params.slug]
-    if (!post) throw notFound()
+    if (!resolvePost(params.slug, LOCALE)) throw notFound()
     const entry = BLOG_POSTS.find((item) => item.slug === params.slug)
     return {
-      title: post.metadata?.title ?? params.slug,
-      description: post.metadata?.description ?? '',
+      title: entry?.title[LOCALE] ?? params.slug,
+      description: entry?.description[LOCALE] ?? '',
       hero: entry?.hero,
     }
   },
   head: ({ loaderData, params }) => {
     if (!loaderData) return {}
-    const url = `${WEBSITE_URL}/blog/${params.slug}`
+    const path = `/blog/${params.slug}`
     return {
       meta: [
         { title: loaderData.title },
@@ -51,98 +27,32 @@ export const Route = createFileRoute('/blog/$slug')({
         { property: 'og:type', content: 'article' },
         { property: 'og:title', content: loaderData.title },
         { property: 'og:description', content: loaderData.description },
-        { property: 'og:url', content: url },
-        // Falls through to the site card declared on the root route when a
-        // post ships without a hero.
+        { property: 'og:url', content: `${WEBSITE_URL}${localePath(path, LOCALE)}` },
+        { property: 'og:locale', content: OG_LOCALE[LOCALE] },
+        // Falls through to the site card on the root route when a post ships
+        // without a hero.
         ...(loaderData.hero
           ? [{ property: 'og:image', content: `${WEBSITE_URL}${loaderData.hero}` }]
           : []),
         { name: 'twitter:title', content: loaderData.title },
         { name: 'twitter:description', content: loaderData.description },
       ],
-      links: [{ rel: 'canonical', href: url }],
+      links: [
+        { rel: 'canonical', href: `${WEBSITE_URL}${localePath(path, LOCALE)}` },
+        ...alternateLinks(path, WEBSITE_URL),
+      ],
     }
   },
-  component: BlogPost,
+  component: BlogPostRoute,
   notFoundComponent: () => (
     <div className="prose mt-24 pb-20">
-      <h1>Post not found</h1>
-      <p>This article doesn’t exist (yet).</p>
+      <h1>{MESSAGES[LOCALE]['blog.notFound']}</h1>
+      <p>{MESSAGES[LOCALE]['blog.notFoundBody']}</p>
     </div>
   ),
 })
 
-function CopyButton() {
-  const [text, setText] = useState('Copy')
-  const currentUrl = typeof window !== 'undefined' ? window.location.href : ''
-
-  useEffect(() => {
-    if (text !== 'Copied') return
-    const timeout = setTimeout(() => {
-      setText('Copy')
-    }, 2000)
-    return () => clearTimeout(timeout)
-  }, [text])
-
-  return (
-    <button
-      onClick={() => {
-        setText('Copied')
-        navigator.clipboard.writeText(currentUrl)
-      }}
-      className="flex items-center gap-1 text-center text-sm text-muted transition-colors duration-150 ease-snap hover:text-ink active:scale-[0.97]"
-      type="button"
-    >
-      <TextMorph>{text}</TextMorph>
-      <span>URL</span>
-    </button>
-  )
-}
-
-function BlogPost() {
+function BlogPostRoute() {
   const { slug } = Route.useParams()
-  const post = posts[slug]
-
-  if (!post) return null
-
-  const Content = post.default
-  const entry = BLOG_POSTS.find((item) => item.slug === slug)
-
-  return (
-    <>
-      <div className="pointer-events-none fixed top-0 left-0 z-10 h-12 w-full bg-surface backdrop-blur-xl [-webkit-mask-image:linear-gradient(to_bottom,black,transparent)]" />
-      <ScrollProgress
-        className="fixed top-0 z-20 h-0.5 bg-accent"
-        springOptions={{
-          bounce: 0,
-        }}
-      />
-
-      <div className="mt-24 flex items-center justify-between gap-4">
-        <Link
-          to="/blog"
-          className="group inline-flex min-h-11 items-center gap-1.5 text-sm text-muted transition-colors duration-150 ease-snap hover:text-ink sm:min-h-0"
-        >
-          <ArrowLeftIcon className="h-3.5 w-3.5 transition-transform duration-200 ease-snap group-hover:-translate-x-0.5" />
-          <span>Writing</span>
-        </Link>
-        <CopyButton />
-      </div>
-
-      {entry ? (
-        <div className="mt-4">
-          <PostHero title={entry.title} src={entry.hero} eager />
-          <div className="tabular mt-3 flex items-center gap-2 px-1 font-mono text-xs text-faint">
-            <time dateTime={entry.date}>{formatPostDate(entry.date)}</time>
-            <span aria-hidden="true">/</span>
-            <span>{entry.minutes} min</span>
-          </div>
-        </div>
-      ) : null}
-
-      <main className="prose mt-6 pb-20 prose-h1:text-xl prose-h1:font-medium prose-h2:mt-12 prose-h2:scroll-m-20 prose-h2:text-lg prose-h2:font-medium prose-h3:text-base prose-h3:font-medium prose-h4:text-base prose-h4:font-medium prose-h5:text-base prose-h5:font-medium prose-h6:text-base prose-h6:font-medium prose-strong:font-medium">
-        <Content components={mdxComponents} />
-      </main>
-    </>
-  )
+  return <BlogPostPage slug={slug} locale={LOCALE} />
 }

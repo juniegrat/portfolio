@@ -71,27 +71,22 @@ function PostPlate({ title }: { title: string }) {
 }
 
 /**
- * `2026-08-24` -> `24 August 2026`. Written out rather than `toLocaleDateString`
- * so server and client agree regardless of the runtime's locale.
+ * `2026-08-24` as a local `Date`.
+ *
+ * `new Date('2026-08-24')` parses as UTC midnight, which renders as the 23rd
+ * anywhere west of Greenwich. Building from parts keeps the calendar date the
+ * one that was written. Formatting is then left to `intl.formatDate`, which
+ * uses the locale the provider was given rather than the runtime's own, so the
+ * server and the client produce the same string.
  */
-const MONTHS = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-]
-
-export function formatPostDate(iso: string) {
-  const [year, month, day] = iso.split('-')
-  const name = MONTHS[Number(month) - 1]
-  if (!name) return iso
-  return `${Number(day)} ${name} ${year}`
+export function parsePostDate(iso: string): Date {
+  const [year, month, day] = iso.split('-').map(Number)
+  return new Date(year ?? 1970, (month ?? 1) - 1, day ?? 1)
 }
+
+/** Day, month name, year. Shared by the index cards and the article dateline. */
+export const POST_DATE_FORMAT = {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+} as const

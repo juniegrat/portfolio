@@ -1,0 +1,78 @@
+export const metadata = {
+  title: 'I built a tool to check whether I was imagining it',
+  description:
+    'Twenty-one months of my own messages, two detectors, and a hand-labelled sample to measure them. The tool found what I expected. Then measuring the tool took part of it back.',
+  alternates: {
+    canonical: '/blog/checking-my-own-memory',
+  },
+}
+
+# I built a tool to check whether I was imagining it
+
+The situation was not hostility. Hostility would have been easier, because it leaves marks you can point at.
+
+What I had was agreement that did not survive the next meeting. Scope confirmed in writing and then redefined after delivery. Direct questions about acceptance criteria answered with a change of subject. Decisions attributed to whoever was not in the room. Any one of those is a bad afternoon. Twenty months of them produces something worse than conflict, which is the steady suspicion that you are misremembering your own working life.
+
+That is the state I want to describe accurately, because it is the reason for everything that follows. You are not angry. You are unsure. You reread a thread at eleven at night to check whether the thing you remember agreeing to is actually there, and it is, and that does not help, because tomorrow it will be characterised differently and you will be the only person in the room who went back and read it.
+
+So I did what an engineer does when the instrumentation is missing. I built some.
+
+## What it did
+
+I exported my own one-to-one message archive, twenty-one months of it, 29,918 messages, and wrote a pipeline that ingested them into a local database.
+
+Two detectors. The first looked for contradictions: a statement that conflicted with an earlier statement by the same person. The second looked for avoidance, which I defined as a topic I raised that never received an answer.
+
+Both are harder than they sound, and the second is much harder than the first. A contradiction has a shape you can almost pattern-match. Avoidance requires deciding what counts as a topic, what counts as an answer, and how long a gap has to be before silence becomes refusal. Every one of those is a judgement call I encoded as a threshold, which should have been my first warning.
+
+It found 203 contradictions and 422 topics raised without being addressed.
+
+I want to be honest about the twenty-four hours after that. It felt like vindication. There is a specific relief in a number confirming something you have been carrying alone, and I sat with 422 for an evening as though it were a verdict.
+
+## Measuring the measurement
+
+The relief is also the reason I did the next part, because I have been wrong before in exactly that mood.
+
+I took 109 of the findings and labelled them by hand, one at a time, deciding for each whether it really was what the tool said it was. Not a spot check. A full read of the surrounding thread for every one, scored before looking at what the tool had decided.
+
+Contradiction detection came out at 94 percent precision. Of every hundred contradictions it listed, about six were not contradictions. That is usable, and I would cite it.
+
+Avoidance detection came out at 77 percent precision and 71 percent recall. Roughly a quarter of what it flagged did not survive a careful reread, and it was also missing about three in ten of the real cases. So the number that had felt like a verdict was, at best, three hundred-something, and not the set I thought it was.
+
+The third detector was the one that mattered most to me and it was the one that failed. It tried to separate "never answered" from "answered only after I chased it," which is the distinction between forgetting and avoiding. It agreed with my own judgement 37 percent of the time. Worse than a coin flip on a binary question, which means it was not weak, it was anti-correlated with something. I deleted it from the report rather than keep it with a caveat, because a number with a caveat still ends up quoted without one.
+
+Two more findings from the labelling that I did not enjoy.
+
+Seventeen percent of the avoidance results were miscategorised upstream, at ingestion, before any detection logic ran. Bad plumbing, not bad inference, which is the more embarrassing kind of bug because it means my error bars had been describing the wrong stage.
+
+And the section on the person I felt most strongly about was the least reliable of anyone's. Four of the five findings there did not hold up. That correlation is the whole essay in one line. My intuition was not a signal that pointed at truth. It was a signal that pointed at where I would accept weak evidence.
+
+## The eleven thousand
+
+The pipeline also extracted 11,613 individual "facts" from the corpus.
+
+None of them have been verified. Not by a human, not by a second model, not by anything. They exist because the extraction step ran and produced output, and output is not evidence.
+
+I have not cited a single one and I do not intend to. I mention the number only because it is the exact shape of the trap. Eleven thousand rows in a database, timestamped, each linked to a real message, sitting in a file whose name makes it sound authoritative. It would be very easy to open that table, sort by relevance, and paste three rows into a document. Everything about the artifact says "findings." Nothing about it earns the word.
+
+If you take one operational rule from this, make it that one. In any evidence pipeline, keep the verified and the unverified in separate places, and label the unverified in a way that survives being copied out of context. Mine now records a human verdict that overrides the tool in both directions, retained as well as rejected, because an automated pass that only gets overruled downward is just a slower way of agreeing with yourself.
+
+## What I actually learned
+
+The instinct to gather proof was correct. If your working life is being characterised in ways that do not match your memory, an archive with timestamps is worth more than a better memory, and building the pipeline was not the mistake.
+
+The mistake would have been stopping at the first result. And I would have, if the numbers had been slightly less flattering to check. That is the part I keep turning over: I ran the validation because 422 felt too good, not because I had a policy of validating. If the tool had returned 40 contradictions instead of 203, I do not think I would have spent a weekend labelling. The check happened for the wrong reason and it is only luck that it happened at all.
+
+There is a broader version of this that applies well beyond a dispute at work. A tool built by an interested party, evaluated only by that same party, tells you what the party already believed with a database attached. The only thing that makes it evidence rather than elaborate agreement is a measurement of the tool itself, made against a sample you scored before you saw what it decided, and reported with the number that makes you look worst. Mine is 37 percent. I put it in the report.
+
+The other thing I learned is smaller and more useful day to day. My perception of being systematically avoided was substantially correct and materially overstated, at the same time, and I could not tell which parts were which from the inside. Not because I was being dishonest. Because that is what it is like in there. Living inside a pattern gives you excellent recall for the instances and no sense at all of the denominator.
+
+## If you are in this
+
+Build the archive. Timestamps and message identifiers, kept somewhere that is not your work machine. That part is unambiguous and you will not regret it.
+
+Then, before you believe any summary of it, score a sample by hand and find out how wrong your summary is. Do it while you still want the summary to be true, which is the only time the exercise has any value.
+
+And be ready for it to take something away from you. Mine cost me a number I had been holding onto and one conviction about a specific person that turned out to rest on four findings that were not real. I would rather have found that out on a Saturday, with the threads open in front of me, than in a room where somebody else was checking.
+
+None of this settles what happened. It was never going to. What it changed is the size of the claim I am willing to make, and how much of it I can put a number on. That is a smaller thing than vindication and it is the only part I trust.

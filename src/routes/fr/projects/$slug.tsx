@@ -5,9 +5,9 @@ import { MESSAGES } from '@/i18n/messages'
 import { WEBSITE_URL } from '@/lib/constants'
 import { CaseStudyPage, resolveStudy } from '@/pages/case-study'
 
-const LOCALE = 'en' as const
+const LOCALE = 'fr' as const
 
-export const Route = createFileRoute('/projects/$slug')({
+export const Route = createFileRoute('/fr/projects/$slug')({
   loader: ({ params }) => {
     const found = resolveStudy(params.slug, LOCALE)
     if (!found) throw notFound()

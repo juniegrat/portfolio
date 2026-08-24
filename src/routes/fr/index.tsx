@@ -5,9 +5,9 @@ import { MESSAGES } from '@/i18n/messages'
 import { WEBSITE_URL } from '@/lib/constants'
 import { HomePage } from '@/pages/home'
 
-const LOCALE = 'en' as const
+const LOCALE = 'fr' as const
 
-export const Route = createFileRoute('/')({
+export const Route = createFileRoute('/fr/')({
   head: () => {
     const title = `${NAME}, ${MESSAGES[LOCALE]['role.title']}`
     return {

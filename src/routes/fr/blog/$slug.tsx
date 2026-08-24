@@ -1,26 +1,25 @@
-import { createFileRoute, Link, notFound } from '@tanstack/react-router'
-import { PROJECTS } from '@/data'
+import { createFileRoute, notFound } from '@tanstack/react-router'
+import { BLOG_POSTS } from '@/data'
 import { alternateLinks, localePath, OG_LOCALE } from '@/i18n/locale'
 import { MESSAGES } from '@/i18n/messages'
 import { WEBSITE_URL } from '@/lib/constants'
-import { CaseStudyPage, resolveStudy } from '@/pages/case-study'
+import { BlogPostPage, resolvePost } from '@/pages/blog-post'
 
-const LOCALE = 'en' as const
+const LOCALE = 'fr' as const
 
-export const Route = createFileRoute('/projects/$slug')({
+export const Route = createFileRoute('/fr/blog/$slug')({
   loader: ({ params }) => {
-    const found = resolveStudy(params.slug, LOCALE)
-    if (!found) throw notFound()
-    const project = PROJECTS.find((item) => item.slug === params.slug)
+    if (!resolvePost(params.slug, LOCALE)) throw notFound()
+    const entry = BLOG_POSTS.find((item) => item.slug === params.slug)
     return {
-      title: found.study.metadata?.title ?? params.slug,
-      description: project?.description[LOCALE] ?? found.study.metadata?.description ?? '',
-      image: project?.image,
+      title: entry?.title[LOCALE] ?? params.slug,
+      description: entry?.description[LOCALE] ?? '',
+      hero: entry?.hero,
     }
   },
   head: ({ loaderData, params }) => {
     if (!loaderData) return {}
-    const path = `/projects/${params.slug}`
+    const path = `/blog/${params.slug}`
     return {
       meta: [
         { title: loaderData.title },
@@ -30,8 +29,10 @@ export const Route = createFileRoute('/projects/$slug')({
         { property: 'og:description', content: loaderData.description },
         { property: 'og:url', content: `${WEBSITE_URL}${localePath(path, LOCALE)}` },
         { property: 'og:locale', content: OG_LOCALE[LOCALE] },
-        ...(loaderData.image
-          ? [{ property: 'og:image', content: `${WEBSITE_URL}${loaderData.image}` }]
+        // Falls through to the site card on the root route when a post ships
+        // without a hero.
+        ...(loaderData.hero
+          ? [{ property: 'og:image', content: `${WEBSITE_URL}${loaderData.hero}` }]
           : []),
         { name: 'twitter:title', content: loaderData.title },
         { name: 'twitter:description', content: loaderData.description },
@@ -42,21 +43,16 @@ export const Route = createFileRoute('/projects/$slug')({
       ],
     }
   },
-  component: CaseStudyRoute,
+  component: BlogPostRoute,
   notFoundComponent: () => (
     <div className="prose mt-24 pb-20">
-      <h1>{MESSAGES[LOCALE]['project.notFound']}</h1>
-      <p>
-        {MESSAGES[LOCALE]['project.notFoundBody']}{' '}
-        <Link to={localePath('/', LOCALE) as never}>
-          {MESSAGES[LOCALE]['project.notFoundLink']}
-        </Link>
-      </p>
+      <h1>{MESSAGES[LOCALE]['blog.notFound']}</h1>
+      <p>{MESSAGES[LOCALE]['blog.notFoundBody']}</p>
     </div>
   ),
 })
 
-function CaseStudyRoute() {
+function BlogPostRoute() {
   const { slug } = Route.useParams()
-  return <CaseStudyPage slug={slug} locale={LOCALE} />
+  return <BlogPostPage slug={slug} locale={LOCALE} />
 }
