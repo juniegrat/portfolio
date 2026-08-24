@@ -3,6 +3,7 @@ import { createRootRoute, HeadContent, Scripts } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { Footer } from '@/components/footer'
 import { Header } from '@/components/header'
+import { MobileBar } from '@/components/mobile-bar'
 import { ThemeProvider, themeInitScript } from '@/components/theme-provider'
 import { NAME, ROLE, SITE_DESCRIPTION } from '@/data'
 import { WEBSITE_URL } from '@/lib/constants'
@@ -74,6 +75,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
               <Footer />
             </div>
           </div>
+          <MobileBar />
         </ThemeProvider>
         <TanStackDevtools
           config={{

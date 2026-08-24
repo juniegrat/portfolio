@@ -232,6 +232,16 @@ code {
   padding-right: max(1.25rem, env(safe-area-inset-right));
 }
 
+/*
+  Hash links in the bottom bar jump to home-page sections. Smooth is the point
+  of the gesture, but it is motion, so it is opt-out.
+*/
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
 /* Keeps the footer clear of the iOS home indicator. */
 .safe-b {
   padding-bottom: calc(1rem + env(safe-area-inset-bottom));

@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { XIcon } from 'lucide-react'
+import { useEffect } from 'react'
 import { AnimatedBackground } from '@/components/ui/animated-background'
 import { Magnetic } from '@/components/ui/magnetic'
 import {
@@ -32,7 +33,9 @@ export const Route = createFileRoute('/')({
 const STAGGER_MS = 60
 
 function enter(index: number) {
-  return { className: 'enter', style: { animationDelay: `${index * STAGGER_MS}ms` } }
+  // `scroll-mt` here rather than per-section: the spread would overwrite a
+  // className set alongside it, and every section is a potential hash target.
+  return { className: 'enter scroll-mt-8', style: { animationDelay: `${index * STAGGER_MS}ms` } }
 }
 
 /**
@@ -154,13 +157,25 @@ function MagneticSocialLink({ children, link }: { children: React.ReactNode; lin
 }
 
 function Home() {
+  // Arriving from another route with a hash (the bottom bar's Blog / Contact):
+  // the router restores scroll to the top and never looks at the fragment, so
+  // the jump has to happen once this page exists. A hash change while already
+  // here is handled in `MobileBar`, where no remount occurs.
+  useEffect(() => {
+    const id = window.location.hash.slice(1)
+    if (!id) return
+    // A frame later: the sections are laid out by then.
+    const frame = requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView())
+    return () => cancelAnimationFrame(frame)
+  }, [])
+
   return (
     <main className="relative space-y-16 sm:space-y-24">
       <section {...enter(0)}>
         <p className="text-balance text-lg leading-relaxed text-muted">{SITE_DESCRIPTION}</p>
       </section>
 
-      <section {...enter(1)}>
+      <section id="projects" {...enter(1)}>
         <h2 className="mb-5 text-lg font-medium text-ink">Selected Projects</h2>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           {PROJECTS.map((project, index) => (
@@ -204,7 +219,7 @@ function Home() {
         </div>
       </section>
 
-      <section {...enter(2)}>
+      <section id="capabilities" {...enter(2)}>
         <h2 className="mb-5 text-lg font-medium text-ink">What I Work On</h2>
         <div className="divide-y divide-line border-t border-line">
           {CAPABILITIES.map((capability) => (
@@ -231,7 +246,7 @@ function Home() {
         </div>
       </section>
 
-      <section {...enter(3)}>
+      <section id="blog" {...enter(3)}>
         <h2 className="mb-3 text-lg font-medium text-ink">Blog</h2>
         <div className="flex flex-col space-y-0">
           <AnimatedBackground
@@ -257,7 +272,7 @@ function Home() {
         </div>
       </section>
 
-      <section {...enter(4)}>
+      <section id="connect" {...enter(4)}>
         <h2 className="mb-5 text-lg font-medium text-ink">Connect</h2>
         <p className="mb-5 text-muted">
           Reach me at{' '}
