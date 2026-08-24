@@ -1,0 +1,110 @@
+export const metadata = {
+  title: "Post-mortem d'un projet construit seul",
+  description:
+    "Dix-huit mois, onze applications, un seul auteur de commits. Ce que l'historique git a enregistré sur la façon dont un projet tient les délais pendant que la personne qui le porte, elle, ne tient plus.",
+  alternates: {
+    canonical: '/fr/blog/post-mortem-of-a-one-person-build',
+  },
+}
+
+# Post-mortem d'un projet construit seul
+
+J'ai passé dix-huit mois comme seul ingénieur sur un ERP. Onze applications, huit paquets partagés, vingt-cinq espaces de travail. Environ 1,85 million de lignes de TypeScript, 1 491 fichiers de test, 424 documents markdown totalisant à peu près 463 000 mots. Le système est parti en production. Transactions, facturation, stock, paiements, KYC, portail client, application mobile native, boutique, conformité fiscale française. Tout cela fonctionne.
+
+Je veux consigner ce que le dépôt a enregistré, parce que je n'en ai remarqué presque rien pendant que cela se produisait, et parce que les chiffres sont plus difficiles à contester qu'une impression.
+
+Ceci est un post-mortem, pas une plainte. La distinction à laquelle je tiens est qu'un post-mortem inclut les erreurs de l'opérateur, et les miennes sont dedans.
+
+## Ce que le journal des commits savait avant moi
+
+La branche `dev` contient 9 885 commits. Un seul auteur humain. Toutes branches confondues, 18 031 commits, dont six appartiennent à dependabot et le reste à moi. Quatre identités git, la même personne.
+
+L'intéressant n'est pas le volume. C'est la répartition.
+
+Sur 550 jours calendaires, 382 portent au moins un commit. Soit 69,5 % de tous les jours de la période, jours fériés et la semaine où j'étais absent compris. Les week-ends représentent 24,2 % des commits, ce qui est très proche de la part qu'on obtiendrait si les week-ends étaient simplement des jours ouvrés ordinaires. 63,2 % des commits tombent en dehors des horaires de bureau en semaine, et 21,7 % portent un horodatage entre minuit et cinq heures du matin. Il y a une série de 42 jours consécutifs au printemps 2026.
+
+Les horodatages de commits ne prouvent pas des heures travaillées. On peut grouper ses commits, pousser à deux heures du matin un travail fait à dix-huit heures. Je garde la réserve parce qu'elle est honnête. Mais la forme tient sur 550 jours et ne ressemble pas à du regroupement. Elle ressemble à une horloge qui ne s'est jamais complètement arrêtée.
+
+L'autre chiffre est l'accélération. Les quatre derniers mois contiennent 62,7 % de tous les commits. Le mois de pointe en compte 2 689. S'il y avait eu une équipe, cette courbe aurait déclenché une conversation. Comme il n'y avait qu'une personne, la courbe ressemblait à de la productivité.
+
+C'est le premier constat. Un projet à une personne n'a pas d'alarme naturelle. La vélocité et la détresse produisent le même graphique.
+
+## Le vide de gouvernance, en artefacts
+
+L'entreprise utilisait Jira. L'export que j'ai conservé montre 466 tickets sur le projet.
+
+96 % d'entre eux avaient été créés par le chef de produit. Les points de complexité étaient renseignés sur 6,2 %, tous dans une seule salve consécutive, puis plus jamais. Vingt-huit tickets stationnaient dans un état bloqué, onze jours en médiane, dont un depuis 160 jours en attente d'une réponse métier que je relançais moi-même. Cinq épiques n'avaient pas bougé depuis six mois. Près de la moitié des tickets n'avaient pas été mis à jour dans le mois précédant l'export.
+
+Et sur 9 885 commits, la chaîne « Jira » apparaît zéro fois.
+
+Cet écart est toute l'histoire en une mesure. Il y avait un outil où le processus était joué, un dépôt où le travail se faisait, et aucun fil entre les deux. J'ai construit mon propre suivi de livraison parce que celui qui était imposé ne portait aucune information. Puis j'ai maintenu les deux, parce que celui qui était imposé devait continuer à paraître vivant.
+
+Le document RACI que j'ai rédigé en juillet inscrit l'ingénierie à mon nom. Il inscrit le responsable de release, le juridique, la finance et l'exploitation comme « à définir ». La validation de la version 1 exige cinq responsables nommés : produit, finance, juridique et conformité, responsable technique, release et exploitation. Les cinq signatures sont les miennes, le même jour. J'ai validé mon propre travail au titre de cinq rôles parce qu'il n'y avait personne à nommer, et la date de livraison n'a pas bougé pour autant.
+
+Je veux être précis sur ce qui a échoué là, parce que « mauvais management » est trop vague pour qu'on en tire quoi que ce soit. Personne ne m'a interdit de le soulever. Ce qui s'est passé est plus subtil et plus courant. Chaque fois qu'un rôle manquait, le chemin le plus rapide vers une fonctionnalité livrée passait par moi qui l'absorbais. Chaque absorption était rationnelle prise isolément et prenait une après-midi. Cumulées, elles ont produit une organisation où un prestataire portait le produit, la conformité, la release et l'infrastructure, et où la seule copie complète du système de l'entreprise vivait sur ses comptes personnels, payée avec sa carte personnelle.
+
+Personne n'a décidé cela. Cela s'est assemblé tout seul à partir d'une année de choix localement raisonnables. C'est ce mode de défaillance qu'il faut nommer, parce qu'il n'exige de personne d'être un méchant, et qu'il se reproduira partout où une personne compétente est laissée sans supervision à côté d'une échéance urgente.
+
+## Sur les gens, et sur les limites de mon propre récit
+
+La partie la plus difficile à écrire est celle où je ne fais plus confiance à ma lecture des gens.
+
+Le motif que j'ai vécu n'était pas de l'hostilité. C'était de l'accord qui ne survivait pas à la réunion suivante. Un périmètre confirmé par écrit, puis redéfini après livraison. Des questions directes sur les critères d'acceptation auxquelles on répondait en changeant de sujet. Des décisions attribuées à qui n'était pas dans la pièce. Sur des mois, cela produit quelque chose de pire qu'un conflit : le soupçon constant et sourd que vous vous souvenez mal de votre propre vie professionnelle.
+
+J'ai donc fait ce que fait un ingénieur quand l'instrumentation manque. J'ai construit un outil. Il a ingéré ma propre archive de messages, 29 918 messages en tête-à-tête sur vingt et un mois, et cherché deux choses : des affirmations contredisant des affirmations antérieures de la même personne, et des sujets que j'avais soulevés sans jamais obtenir de réponse.
+
+Il a trouvé 203 contradictions et 422 sujets restés sans réponse. Cela a ressemblé à une justification pendant environ une journée.
+
+Puis j'ai annoté 109 des constats à la main pour mesurer la qualité réelle de l'outil. La détection de contradictions est ressortie à 94 % de précision, ce qui est exploitable. La détection d'évitement est ressortie à 77 % de précision et 71 % de rappel : environ un quart de ce qu'elle signalait ne survivait pas à une relecture attentive. Un troisième classifieur, celui qui distinguait « jamais répondu » de « répondu après relance », s'accordait avec mon propre jugement 37 % du temps. Je l'ai supprimé du rapport. Dix-sept pour cent des constats d'évitement se sont révélés mal catégorisés au stade de l'ingestion, et la personne dont la section me tenait le plus à cœur avait les résultats les moins fiables de tous.
+
+Onze mille cinq cent quatre-vingt-neuf faits extraits n'ont jamais été vérifiés par quoi que ce soit, ni humain ni automatique. Ils ne prouvent rien et je ne les cite pas.
+
+Je l'inclus parce que c'est la chose la plus utile que j'aie apprise en dix-huit mois. Ma perception d'être systématiquement évité était largement correcte et matériellement exagérée, et je ne pouvais pas distinguer l'une de l'autre avant de l'avoir mesuré. Si vous êtes dans une situation semblable, l'instinct de rassembler des preuves est sain. L'instinct de faire confiance à ce que vous rassemblez ne l'est pas. Construisez la mesure de votre mesure, et préparez-vous à ce qu'elle vous retire une partie de votre dossier. La mienne l'a fait.
+
+C'est aussi pourquoi cet article ne nomme personne. Un outil à 77 % de précision ne fonde pas une accusation publique contre une personne identifiable.
+
+## Les lacunes de compétence sont un problème porteur
+
+Il y avait autour de moi des gens incapables de lire la base de code. Ce n'est pas une insulte, c'est un fait structurel avec des conséquences, et ce sont les conséquences qui comptent.
+
+Quand personne ne peut relire votre travail, trois choses surviennent dans l'ordre.
+
+D'abord, la revue cesse d'être quelque chose que vous recevez et devient quelque chose que vous simulez. Mes commits portent une portée conventionnelle dans 97,9 % des cas. J'ai écrit 424 documents. J'ai monté un programme de remédiation avec 272 identifiants suivis sur dix familles. Rien de tout cela n'était pour quelqu'un d'autre. C'était un échafaudage destiné à soutenir le jugement qu'un second ingénieur apporterait normalement, et cela coûte des heures réelles qui n'apparaissent sur aucune feuille de route.
+
+Ensuite, vous commencez à inscrire les garde-fous là où on ne peut pas les discuter. Quand vous ne pouvez pas compter sur un humain pour attraper une erreur, vous poussez la contrainte dans le système de types, dans le schéma, dans une contrainte de base, dans un test de bout en bout. C'est de la bonne ingénierie et je défendrais la plupart de ces décisions sur le fond. C'est aussi, si je suis honnête, défensif. Une partie de cette rigueur était de l'ingénierie. Une partie était quelqu'un qui construisait un système que ne pourraient pas casser des gens en qui il avait cessé d'avoir confiance.
+
+Enfin, et c'est ce qui achève les projets, vous devenez le seul opérateur viable. Pendant l'unique semaine où j'étais absent, l'équipe a perdu l'accès à la plateforme et j'étais le seul à pouvoir le rétablir. Ce n'est pas une vanterie. C'est un défaut, et c'est un défaut que j'ai construit. Chaque fois que j'ai réparé quelque chose moi-même au lieu de le laisser cassé assez longtemps pour que le manque devienne visible, je choisissais la date de livraison contre la capacité de l'organisation à survivre sans moi.
+
+## Ce que j'ai mal fait
+
+Les échecs de l'entreprise sont documentés plus haut et je les maintiens. Voici les miens.
+
+J'ai optimisé pour la livraison alors que j'aurais dû optimiser pour la lisibilité. Un projet plus lent avec deux ingénieurs capables de le lire aurait valu davantage pour tout le monde, moi compris, qu'un projet rapide avec un seul.
+
+J'ai laissé chaque rôle absorbé passer pour un service rendu au lieu de le traiter comme une modification du contrat. Il existait un mécanisme écrit pour les changements de périmètre. Je ne l'ai pas utilisé une seule fois. Quand le périmètre accumulé est devenu évident, il avait dix-huit mois de mon propre précédent derrière lui.
+
+J'ai fait tourner l'infrastructure sur des comptes personnels parce que c'était plus rapide le premier jour et je n'ai jamais migré. Cela a créé une dépendance qui n'a bien servi personne, et c'est le genre de chose qui ressemble à un levier vu de l'extérieur et à une prise d'otage vue de l'intérieur.
+
+Et j'ai laissé sortir le ressentiment. Tard dans le projet, mes propres messages ont cessé d'être professionnels. Je ne crois pas que cela soit venu de nulle part, et je ne crois pas non plus que cela excuse quoi que ce soit. C'est dans le dossier, cela m'appartient, et une version de cet article qui l'omettrait serait un plaidoyer plutôt qu'un post-mortem.
+
+## Les signaux que je surveillerais maintenant
+
+Pas des conseils, juste les choses précises que je vérifie désormais.
+
+Si le code que j'écris est lu par un autre humain dans la semaine. Pas approuvé. Lu.
+
+Si l'outil de suivi auquel l'entreprise croit et le dépôt où le travail se fait se référencent mutuellement. Zéro référence croisée est une alarme maximale, et il m'a fallu un an pour la voir.
+
+Si mon nom apparaît sous plus d'un rôle sur un document de validation. Une signature dans cinq cases n'est pas de la séniorité.
+
+Si la part de commits hors horaires dérive vers le haut de trimestre en trimestre. C'est une requête bon marché et elle ne ment pas sur vous comme vous vous mentez à vous-même.
+
+Si quelque chose de critique tourne sur un compte à mon nom.
+
+## Où cela s'est terminé
+
+La relation s'est terminée en août 2026, non formalisée du côté de l'entreprise au moment où j'écris.
+
+Le système est en production. Les dossiers de conformité sont complets et je les déposerais demain. Les suites de tests passent. Quelqu'un héritera de 1,85 million de lignes de code et de 463 000 mots de documentation écrits par une seule personne, et la documentation était le bon choix, parce que c'est la seule partie de tout cela qui se transmet.
+
+Je n'ai pas de leçon qui referme le sujet. L'ingénierie a été le meilleur travail que j'aie fait. Les dix-huit mois ont coûté plus que ce que ce travail valait pour moi, et je ne l'aurais cru aucun des jours qui les composent, ce qui est précisément le problème d'un graphique incapable de distinguer la vélocité de la détresse.

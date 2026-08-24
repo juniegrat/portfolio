@@ -1,0 +1,66 @@
+export const metadata = {
+  title: 'ASM : moniteur de surface d\'attaque',
+  description:
+    "Un moniteur de surface d'attaque auto-hébergé bâti sur les CLI de ProjectDiscovery. Pourquoi il délègue au lieu de réimplémenter, pourquoi SQLite constitue tout le backend, et pourquoi il rapporte des différences plutôt que des constats.",
+  alternates: {
+    canonical: '/fr/projects/asm',
+  },
+}
+
+# ASM : moniteur de surface d'attaque
+
+Découverte continue des actifs exposés sur Internet et analyse de vulnérabilités, derrière un tableau de bord que vous hébergez vous-même. Environ 4 900 lignes de Python et une interface TanStack Start, construites sur deux mois en 2026.
+
+## Le problème
+
+La gestion commerciale de surface d'attaque est un bon produit avec une contrepartie structurelle : pour vous dire ce que vous exposez, l'éditeur doit détenir un inventaire complet de ce que vous exposez. Vous lui envoyez vos domaines, il vous renvoie vos points faibles, et cet inventaire réside désormais sur l'infrastructure de quelqu'un d'autre.
+
+Pour la plupart des entreprises, l'échange est acceptable. Pour certaines, non, et celles pour qui il ne l'est pas sont précisément celles qui veulent le plus ce produit : activités réglementées, entreprises sous clause de sécurité client interdisant la reconnaissance par un tiers, et toute organisation dont la liste d'actifs est elle-même sensible.
+
+Les scanners open source sur lesquels ces plateformes sont bâties sont gratuits et excellents. Ce qui manque, c'est la couche au-dessus : l'état entre deux exécutions, la détection de changement, l'alerte, et quelque chose à regarder. Cette couche est tout le projet.
+
+## Déléguer plutôt que réimplémenter
+
+Le moteur n'implémente ni l'énumération de sous-domaines, ni le sondage HTTP, ni la détection de vulnérabilités. Il exécute `subfinder`, puis `httpx`, puis `nuclei`, et analyse leur sortie.
+
+C'est le genre de décision qui paraît paresseuse en revue et qui est généralement la bonne. La valeur de nuclei n'est pas son moteur de correspondance, c'est sa bibliothèque communautaire de templates et le rythme auquel elle absorbe les nouvelles CVE. Réimplémenter le moteur revient à n'hériter de rien de tout cela et à maintenir un catalogue de détection pour toujours, ce qui est un travail à plein temps que plusieurs entreprises font déjà mieux.
+
+Les coûts sont réels et méritent d'être nommés plutôt qu'escamotés. L'installation est plus lourde, puisqu'il faut une chaîne d'outils Go et quatre binaires avant que quoi que ce soit ne tourne. Les frontières de processus imposent d'analyser du texte plutôt que d'appeler des fonctions : un changement de format en amont vous casse à l'exécution et non à la compilation. Et vous héritez du rythme de publication de l'amont, régressions comprises.
+
+Je referais le même choix, mais je ne prétendrais pas que l'histoire de l'empaquetage est bonne.
+
+## SQLite comme backend complet
+
+Il n'y a pas de serveur d'API. Le tableau de bord est une application TanStack Start dont les fonctions serveur ouvrent le fichier SQLite que le moteur Python écrit.
+
+La forme conventionnelle serait : le moteur écrit en base, l'API lit la base, l'interface appelle l'API. Cette couche intermédiaire existe pour servir plusieurs clients, faire respecter les accès à travers une frontière réseau, et permettre aux morceaux de monter en charge séparément. Un outil auto-hébergé sur une seule machine a un client, aucune frontière réseau entre le lecteur et le fichier, et rien à faire monter en charge indépendamment. Cette couche aurait été du cérémonial.
+
+La supprimer a supprimé une unité de déploiement, un port, un format de sérialisation, et toute une classe de bogues du type « l'API n'est plus synchrone avec le schéma ».
+
+La limite est honnête et je l'ai assumée dès la conception : cela tourne sur une seule machine. Il n'y a pas d'histoire de mise à l'échelle horizontale, et si le moteur et le tableau de bord devaient un jour vivre sur des machines différentes, la couche d'API revient et c'est une vraie réécriture. Pour le déploiement visé, une machine dans votre propre réseau, ce plafond est loin.
+
+## Rapporter des différences, pas des constats
+
+C'est la partie qui rend l'outil utile plutôt que simplement fonctionnel.
+
+Une exécution sur un parc réel produit des centaines de résultats, et presque tous sont ceux d'hier. Un outil qui vous les envoie tous chaque nuit vous apprend à filtrer le courrier, et au bout de deux semaines plus personne ne le lit. Le constat qui comptait arrive dans un message déjà classé comme du bruit.
+
+Chaque actif et chaque constat portent donc `first_seen` et `last_seen`. Une exécution met à jour `last_seen` sur tout ce qu'elle observe, et tout ce dont le `first_seen` égale l'exécution en cours est nouveau. Les alertes ne portent que cet ensemble.
+
+La conséquence est qu'une nuit calme n'envoie rien du tout, et qu'un message de cet outil signifie que quelque chose a changé. Cela représente peu de code et c'est toute la différence entre un scanner et un moniteur.
+
+Cela vous donne aussi un historique gratuitement. Comme les lignes ne sont jamais écrasées, vous pouvez dire quand un actif est apparu et quand il a cessé de répondre, ce qui est généralement la première question d'un incident et exactement ce qu'un scan sans état ne peut pas vous dire.
+
+## Un périmètre délibérément inconfortable
+
+La configuration est livrée pointée sur `example.com`.
+
+Scanner une infrastructure qui ne vous appartient pas est illégal dans la plupart des juridictions, et un outil qui enchaîne l'énumération de sous-domaines vers une analyse active de vulnérabilités rend cela trivialement facile à faire par accident, avec une modification négligente d'un fichier de configuration. Une valeur par défaut qui ne résout vers rien impose un acte délibéré avant la première exécution réelle, et l'exigence d'autorisation est indiquée dans le readme plutôt qu'enfouie dans une licence.
+
+Cela coûte une étape à l'installation. C'est le bon arbitrage.
+
+## Ce que je changerais
+
+Le chemin d'installation est la partie la plus faible. Quatre binaires Go avant la première exécution est une vraie barrière, et la correction honnête consiste à livrer une image conteneur avec la chaîne d'outils incluse.
+
+L'analyse de sortie CLI est une dette permanente. Cela fonctionne, et cela continuera de fonctionner jusqu'à ce qu'une version amont change le nom d'un champ, moment auquel cela échouera en production plutôt qu'en intégration continue. Des tests de contrat contre des versions de binaires épinglées attraperaient cela, et ils n'existent pas encore.

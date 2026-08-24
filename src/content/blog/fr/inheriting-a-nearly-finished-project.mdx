@@ -1,0 +1,86 @@
+export const metadata = {
+  title: "Hériter d'un projet presque terminé",
+  description:
+    "Un projet décrit comme presque achevé, transmis sous la forme de vingt fichiers PowerPoint et d'un dossier de clés d'API. Ce que disaient les artefacts, et ce que j'aurais dû demander le premier jour.",
+  alternates: {
+    canonical: '/fr/blog/inheriting-a-nearly-finished-project',
+  },
+}
+
+# Hériter d'un projet presque terminé
+
+Le premier commit de l'ERP que j'ai passé dix-huit mois à construire date du 15 janvier 2025. Il contient 1 819 fichiers et 177 939 lignes, et presque rien de tout cela n'est de moi. C'est un template d'administration acheté sur étagère, importé en bloc, avec son routage, sa bibliothèque de composants et une page de réglages pour une application qui n'existait pas encore.
+
+Cet import est l'image honnête de ce que « déjà bien avancé » voulait dire. Une coquille qui ressemble à un logiciel.
+
+Au moment de la mise en production, le système pesait environ 1,85 million de lignes de TypeScript réparties sur onze applications. La part préexistante représente moins de dix pour cent de la base finale, et aucun de ces dix pour cent n'était de la logique métier. Il n'y avait pas de modèle de transaction, pas de registre de stock, pas de journal fiscal, pas de parcours KYC, pas de cycle de vie de facture. Il y avait une barre latérale.
+
+Je n'écris pas cela pour rejuger une estimation. Estimer est difficile et j'ai moi-même donné de mauvaises estimations. Je l'écris parce que l'écart entre « presque terminé » et ce que j'ai réellement reçu est lisible dans les fichiers eux-mêmes, et que ce sont les fichiers qui se généralisent. Si l'on vous confie un projet, les artefacts vous diront où il en est vraiment, et ils vous le diront plus vite que n'importe quelle conversation.
+
+## Le cahier des charges, tel qu'il existait sur le disque
+
+Les exigences sont arrivées sous la forme de vingt fichiers Office dans un dossier intitulé cahier des charges historique. Environ sept mégaoctets au total : onze présentations PowerPoint, sept tableurs, deux PDF.
+
+Cinq des onze présentations portent un préfixe de nom de fichier signifiant « en cours ». Leurs numéros de version ne concordent pas entre eux. Configuration est en V2-1, Administration en V2-3, Transactions en V2-7, Gestion en V2-5, Comptabilité en V2-2. Un flux de gestion des opérations de fonte est estampillé v2306. La description de la base de données est un tableur en v7. Aucun document de l'ensemble ne réconcilie ces numéros ni ne dit quelle combinaison constitue le système convenu.
+
+Deux des noms de fichiers contiennent des fautes de frappe, dans l'artefact livré, dans le dossier présenté comme le cahier des charges. Je le mentionne non pour être désagréable sur l'orthographe, mais parce qu'un document que personne n'a renommé en deux ans est un document que personne n'a ouvert en deux ans : le nommage des fichiers est un indicateur bon marché et fiable pour savoir si un corpus est vivant ou archivé.
+
+Ce qui compte davantage est la catégorie de ce qui manquait. Il n'y avait pas de critères d'acceptation. Pas de critères vagues : aucun. Il n'existait nulle part de décision signée consignant ce qu'un opérateur devait effectivement pouvoir faire. Pas de wiki, pas d'espace Confluence, pas d'outil de suivi des exigences avec un modèle d'états. Le canal de discussion des développeurs contenait environ 272 mégaoctets de pièces jointes, de dumps d'API, de schémas entité-relation et de notes de session de test, et pas une seule ligne de conversation exportée. Le canal général en contenait environ 850, essentiellement un enregistrement de session de test de 2024 et une série de présentations d'avancement.
+
+L'inventaire réel était donc : un template d'interface, un jeu de présentations dans des états de brouillon mutuellement incohérents, et un site archéologique.
+
+## Ce qui manquait plutôt que ce qui était mauvais
+
+Les présentations n'étaient pas mauvaises. Cela mérite d'être dit, parce que « le cahier des charges était nul » est la version paresseuse de cette histoire et ce n'est pas ce qui s'est passé.
+
+Elles décrivaient l'intention de façon raisonnable. Quelqu'un avait réfléchi au flux de fonte. Le tableur de base de données contenait de la vraie connaissance métier. Ce qui manquait, c'était tout mécanisme par lequel l'intention devenait un engagement. Rien dans ce dossier ne pouvait échouer. Il n'existait aucune formulation du type « le système est correct lorsqu'un opérateur peut faire X et que le résultat est Y », donc aucun test que je puisse écrire ne prouverait jamais qu'une fonctionnalité était terminée.
+
+Cette absence est ce qui transforme un projet de neuf mois en projet de dix-huit, et elle le fait discrètement. Sans critères d'acceptation, « terminé » se décide en conversation, après livraison, par celui qui parle. Le périmètre ne dérive pas. Il est renégocié rétroactivement, à chaque fois, et cette renégociation est invisible dans n'importe quel outil de suivi parce qu'elle se déroule en messagerie.
+
+Si je pouvais mettre une phrase devant chaque ingénieur qui hérite d'un projet, ce serait celle-ci. Ne demandez pas si le cahier des charges existe. Demandez quel document servira à vous évaluer, et demandez à le voir. Si la réponse est une présentation, vous n'héritez pas d'un produit presque terminé. Vous héritez d'une intention.
+
+## La passation est arrivée en pièces jointes
+
+En juillet 2026, dix-huit mois après le début, j'ai passé un scanner de secrets sur l'archive exportée des conversations d'équipe, pour savoir ce qu'elle contenait avant d'en déplacer quoi que ce soit vers un disque de sauvegarde.
+
+Vingt-deux résultats. Treize classés critiques.
+
+Une clé privée, envoyée en pièce jointe. Un fichier en clair contenant les identifiants de six fournisseurs à la fois, dont deux plateformes cloud, deux API de modèles, le service d'e-mails transactionnels et un secret client d'annuaire. Trois jetons d'accès cloud distincts. Un fichier d'environnement contenant des secrets client. Un tableur de jetons d'accès par agence posé à la racine d'un dossier partagé.
+
+Rien de tout cela n'a fuité par un attaquant. C'était la passation. C'est ainsi que l'accès aux systèmes de production se transmettait entre collègues : sous forme de fichiers dans une fenêtre de discussion, où ils restaient, indexés, aussi longtemps que l'espace de travail conservait son historique.
+
+Je veux être prudent ici, parce qu'il serait facile de lire ce paragraphe comme une accusation d'incompétence, et ce n'en est pas une pour l'essentiel. Les identifiants finissent en messagerie parce que la messagerie est le seul outil du bâtiment qui livre un fichier à un collègue en trente secondes de façon fiable. Toutes les organisations sans gestionnaire de secrets que j'ai vues ont exactement ce dossier. Le problème n'est pas qu'une personne a été négligente une fois. Le problème est que le chemin rapide et le chemin sûr étaient deux chemins différents, et que personne n'avait reçu le second.
+
+Mais cela vous dit quelque chose de précis sur la maturité du projet. Un système dont les identifiants vivent dans un journal de conversation n'a pas encore d'histoire d'exploitation. Et un projet sans histoire d'exploitation n'est ni à quatre-vingts ni à quatre-vingt-dix pour cent, quelle que soit l'allure de l'interface, parce que vous n'avez encore payé aucune des parties qui viennent après l'interface.
+
+## Pourquoi l'estimation n'était probablement pas un mensonge
+
+J'y ai réfléchi plus que prévu, et je ne pense plus que quiconque me trompait.
+
+Un template d'administration ressemble réellement à un produit fini. Il a un tableau de bord avec des graphiques. Il a une table d'utilisateurs avec une colonne de statut. Il a une page de réglages à onglets. Pour une personne non technique, et honnêtement pour un ingénieur fatigué en fin de semaine, cela ne se distingue quasiment pas d'un système qui marche, et le travail restant ressemble à du remplissage de données. Personne dans le bâtiment n'avait de moyen de voir que la barre latérale était la partie bon marché.
+
+Il y a ensuite l'effet de second ordre. Si les trois derniers points d'avancement ont dit que le projet était presque terminé, le quatrième le dira aussi, parce que le réviser à la baisse demande à quelqu'un d'admettre que les trois précédents étaient faux. Les estimations optimistes deviennent porteuses une fois répétées. Elles cessent d'être des prévisions et deviennent des positions.
+
+Cette lecture m'est plus utile que de croire qu'on m'a menti. Un mensonge suppose un menteur et se règle en l'écartant. Ceci suppose un instrument, et l'instrument n'a rien de glorieux : quelqu'un dont le métier est de convertir l'intention en critères capables d'échouer, et qui n'est pas la même personne que celle qui écrit le code.
+
+## Ce que je vérifie désormais avant de reprendre un projet
+
+Aucune de ces vérifications ne prend plus d'une après-midi, et je n'en ai fait aucune.
+
+Lire le premier commit. Sa taille et son contenu vous disent quelle part du « système existant » est un template. Un premier commit de 1 819 fichiers est un achat, pas une fondation.
+
+Demander le document sur lequel vous serez jugé, et le lire en cherchant des affirmations susceptibles de se révéler fausses. Une exigence qui ne peut pas échouer n'est pas une exigence.
+
+Demander où vivent les identifiants. La réponse décrit la maturité opérationnelle de toute l'organisation en une phrase, et vous l'obtiendrez honnêtement, parce que personne n'y voit un test.
+
+Demander qui a lu la base de code en dehors de la personne qui part. Si la réponse est personne, chiffrez-le, parce qu'on ne vous demande pas de maintenir un système. On vous demande de le devenir.
+
+Vérifier si l'outil de suivi et le dépôt se référencent mutuellement. Sur 9 885 commits en dix-huit mois, l'outil de gestion de projet de l'entreprise a été mentionné zéro fois. Ce chiffre m'était accessible au trentième jour et je ne l'ai regardé qu'au dix-septième mois.
+
+## La part qui m'appartient
+
+Je n'ai rien demandé de tout cela. Non pas parce qu'on m'en empêchait, mais parce qu'au début cela paraissait impoli, plus tard trop tard, et qu'entre les deux il y avait toujours quelque chose de plus urgent à construire.
+
+C'est le mécanisme réel. Pas un employeur hostile retenant l'information, mais un nouveau prestataire qui veut paraître compétent et décide que demander des critères d'acceptation passera pour de la réticence à démarrer. Alors il démarre. Et une fois qu'il a démarré et livré quelque chose d'impressionnant le premier mois, le levier pour demander a disparu, parce qu'il est désormais celui qui livre sans avoir besoin de tout cela.
+
+Le template faisait 177 939 lignes. Le système s'est arrêté autour de 1,85 million. La distance entre ces deux nombres est ce que « presque terminé » voulait dire, et chacune des questions de la liste ci-dessus l'aurait fait apparaître dès la première semaine.

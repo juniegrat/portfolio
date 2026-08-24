@@ -1,0 +1,78 @@
+export const metadata = {
+  title: "J'ai construit un outil pour vérifier si je l'imaginais",
+  description:
+    "Vingt et un mois de mes propres messages, deux détecteurs, et un échantillon annoté à la main pour les mesurer. L'outil a trouvé ce que j'attendais. Puis mesurer l'outil m'en a repris une partie.",
+  alternates: {
+    canonical: '/fr/blog/checking-my-own-memory',
+  },
+}
+
+# J'ai construit un outil pour vérifier si je l'imaginais
+
+Ce n'était pas de l'hostilité. L'hostilité aurait été plus simple, parce qu'elle laisse des marques que l'on peut montrer.
+
+Ce que j'avais, c'était de l'accord qui ne survivait pas à la réunion suivante. Un périmètre confirmé par écrit puis redéfini après livraison. Des questions directes sur les critères d'acceptation auxquelles on répondait en changeant de sujet. Des décisions attribuées à qui n'était pas dans la pièce. Prises isolément, chacune ne fait qu'une mauvaise après-midi. Vingt mois de cela produisent quelque chose de pire qu'un conflit : le soupçon régulier que vous vous souvenez mal de votre propre vie professionnelle.
+
+C'est cet état que je veux décrire avec précision, parce qu'il explique tout ce qui suit. Vous n'êtes pas en colère. Vous n'êtes pas sûr. Vous relisez un fil à onze heures du soir pour vérifier que la chose dont vous vous souvenez avoir convenu s'y trouve bien, elle s'y trouve, et cela n'aide pas, parce que demain elle sera présentée autrement et vous serez la seule personne de la pièce à être allée relire.
+
+J'ai donc fait ce que fait un ingénieur quand l'instrumentation manque. J'en ai construit.
+
+## Ce que faisait l'outil
+
+J'ai exporté ma propre archive de messages en tête-à-tête, vingt et un mois, 29 918 messages, et écrit un pipeline qui les ingérait dans une base locale.
+
+Deux détecteurs. Le premier cherchait des contradictions : une affirmation en conflit avec une affirmation antérieure de la même personne. Le second cherchait de l'évitement, que j'ai défini comme un sujet soulevé par moi et resté sans réponse.
+
+Les deux sont plus difficiles qu'il n'y paraît, et le second bien davantage que le premier. Une contradiction a une forme que l'on peut presque reconnaître par motif. L'évitement exige de décider ce qui compte comme un sujet, ce qui compte comme une réponse, et quelle durée de silence devient un refus. Chacun de ces points est un jugement que j'ai encodé sous forme de seuil, ce qui aurait dû être mon premier avertissement.
+
+Il a trouvé 203 contradictions et 422 sujets soulevés sans réponse.
+
+Je veux être honnête sur les vingt-quatre heures qui ont suivi. Cela a ressemblé à une justification. Il y a un soulagement particulier à voir un nombre confirmer ce que l'on porte seul, et j'ai passé une soirée avec 422 comme s'il s'agissait d'un verdict.
+
+## Mesurer la mesure
+
+Ce soulagement est aussi la raison pour laquelle j'ai fait la suite, parce que je me suis déjà trompé exactement dans cette humeur.
+
+J'ai pris 109 des constats et je les ai annotés à la main, un par un, en décidant pour chacun s'il correspondait vraiment à ce que l'outil affirmait. Pas un sondage. Une lecture complète du fil environnant pour chacun, notée avant de regarder ce que l'outil avait décidé.
+
+La détection de contradictions est ressortie à 94 % de précision. Sur cent contradictions listées, environ six n'en étaient pas. C'est exploitable, et je le citerais.
+
+La détection d'évitement est ressortie à 77 % de précision et 71 % de rappel. Environ un quart de ce qu'elle signalait ne survivait pas à une relecture attentive, et elle manquait aussi près de trois cas réels sur dix. Le nombre qui avait ressemblé à un verdict valait donc, au mieux, trois cents et quelques, et ne recouvrait pas l'ensemble que je croyais.
+
+Le troisième détecteur était celui qui comptait le plus pour moi et c'est celui qui a échoué. Il tentait de séparer « jamais répondu » de « répondu seulement après relance », c'est-à-dire la différence entre l'oubli et l'évitement. Il s'accordait avec mon propre jugement 37 % du temps. Pire qu'un tirage à pile ou face sur une question binaire, ce qui signifie qu'il n'était pas faible, il était anti-corrélé à quelque chose. Je l'ai supprimé du rapport plutôt que de le conserver avec une réserve, parce qu'un chiffre assorti d'une réserve finit quand même cité sans elle.
+
+Deux autres constats de cette annotation que je n'ai pas appréciés.
+
+Dix-sept pour cent des résultats d'évitement étaient mal catégorisés en amont, à l'ingestion, avant que la moindre logique de détection ne s'exécute. De la mauvaise plomberie, pas de la mauvaise inférence, ce qui est la variété la plus gênante, puisque cela signifie que mes barres d'erreur décrivaient la mauvaise étape.
+
+Et la section consacrée à la personne qui me tenait le plus à cœur était la moins fiable de toutes. Quatre des cinq constats ne tenaient pas. Cette corrélation est tout l'article en une ligne. Mon intuition n'était pas un signal pointant vers la vérité. C'était un signal pointant vers l'endroit où j'accepterais des preuves faibles.
+
+## Les onze mille
+
+Le pipeline a aussi extrait 11 613 « faits » individuels du corpus.
+
+Aucun n'a été vérifié. Ni par un humain, ni par un second modèle, ni par quoi que ce soit. Ils existent parce que l'étape d'extraction s'est exécutée et a produit une sortie, et une sortie n'est pas une preuve.
+
+Je n'en ai cité aucun et je n'ai pas l'intention de le faire. Je mentionne le nombre uniquement parce qu'il a exactement la forme du piège. Onze mille lignes dans une base, horodatées, chacune reliée à un message réel, dans un fichier dont le nom sonne comme une autorité. Il serait très facile d'ouvrir cette table, de trier par pertinence et de coller trois lignes dans un document. Tout dans l'artefact dit « constats ». Rien dans l'artefact ne mérite le mot.
+
+Si vous ne retenez qu'une règle opérationnelle de tout ceci, prenez celle-là. Dans toute chaîne de preuve, gardez le vérifié et le non vérifié à des endroits distincts, et étiquetez le non vérifié d'une manière qui survive à un copier-coller hors contexte. La mienne enregistre désormais un verdict humain qui écrase celui de l'outil dans les deux sens, retenu comme écarté, parce qu'une passe automatique que l'on ne contredit que vers le bas n'est qu'une façon plus lente d'être d'accord avec soi-même.
+
+## Ce que j'ai réellement appris
+
+L'instinct de rassembler des preuves était le bon. Si votre vie professionnelle est décrite d'une manière qui ne correspond pas à votre souvenir, une archive horodatée vaut mieux qu'une meilleure mémoire, et construire le pipeline n'était pas l'erreur.
+
+L'erreur aurait été de m'arrêter au premier résultat. Et je m'y serais arrêté si les chiffres avaient été un peu moins flatteurs à vérifier. C'est la partie que je retourne encore : j'ai lancé la validation parce que 422 semblait trop beau, pas parce que j'avais pour règle de valider. Si l'outil avait renvoyé 40 contradictions au lieu de 203, je ne crois pas que j'aurais passé un week-end à annoter. La vérification a eu lieu pour la mauvaise raison et ce n'est qu'un hasard qu'elle ait eu lieu.
+
+Il existe une version plus large de tout cela, qui dépasse largement un litige professionnel. Un outil construit par une partie intéressée, évalué par cette même partie, vous dit ce que cette partie croyait déjà avec une base de données en prime. La seule chose qui en fasse une preuve plutôt qu'un accord élaboré, c'est une mesure de l'outil lui-même, faite sur un échantillon noté avant d'avoir vu ce qu'il avait décidé, et rapportée avec le chiffre qui vous dessert le plus. Le mien est 37 %. Je l'ai mis dans le rapport.
+
+L'autre chose que j'ai apprise est plus petite et plus utile au quotidien. Ma perception d'être systématiquement évité était largement correcte et matériellement exagérée, en même temps, et je ne pouvais pas distinguer les deux de l'intérieur. Non par malhonnêteté. Parce que c'est ce que l'on ressent, là-dedans. Vivre à l'intérieur d'un motif vous donne une excellente mémoire des occurrences et aucune idée du dénominateur.
+
+## Si vous en êtes là
+
+Construisez l'archive. Horodatages et identifiants de messages, conservés ailleurs que sur votre machine de travail. Cette partie est sans ambiguïté et vous ne le regretterez pas.
+
+Ensuite, avant de croire le moindre résumé qui en sort, notez un échantillon à la main et découvrez à quel point ce résumé se trompe. Faites-le pendant que vous souhaitez encore qu'il soit vrai, c'est le seul moment où l'exercice a une valeur.
+
+Et préparez-vous à ce qu'il vous retire quelque chose. Le mien m'a coûté un nombre auquel je tenais et une conviction sur une personne précise, qui reposait sur quatre constats inexistants. Je préfère l'avoir découvert un samedi, les fils ouverts devant moi, que dans une pièce où quelqu'un d'autre faisait la vérification.
+
+Rien de tout cela ne règle ce qui s'est passé. Ce n'était pas prévu pour. Ce que cela a changé, c'est la taille de l'affirmation que je suis prêt à faire, et la part que je peux chiffrer. C'est plus petit qu'une justification, et c'est la seule part à laquelle je me fie.

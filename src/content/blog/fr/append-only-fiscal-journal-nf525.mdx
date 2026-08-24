@@ -1,0 +1,102 @@
+export const metadata = {
+  title: 'Un journal fiscal en ajout seul pour NF525',
+  description:
+    "La loi française impose aux logiciels d'encaissement de prouver que leurs enregistrements n'ont pas été altérés. Voici comment j'ai construit la chaîne, pourquoi elle utilise un HMAC plutôt qu'un bi-clé, et ce que la certification impose à votre processus de publication.",
+  alternates: {
+    canonical: '/fr/blog/append-only-fiscal-journal-nf525',
+  },
+}
+
+# Un journal fiscal en ajout seul pour NF525
+
+Si vous vendez à des particuliers en France et que votre logiciel enregistre le paiement, la loi a un avis sur votre base de données.
+
+L'exigence vient de l'article 286 du CGI et se concrétise via NF525, le référentiel de certification des logiciels de gestion d'encaissement. Il demande quatre propriétés : inaltérabilité, sécurisation, conservation et archivage. En pratique, celle qui façonne votre architecture est la première. Vous devez pouvoir démontrer, devant un auditeur, qu'un paiement enregistré n'a été ni modifié ni supprimé depuis son écriture.
+
+L'essentiel de ce qui s'écrit sur le sujet s'adresse aux comptables et s'arrête à « il vous faut une solution certifiée ». Je veux consigner ce que cela a voulu dire dans le code, parce que j'en ai construit un et que les décisions de conception ont été plus intéressantes que prévu.
+
+Rien ici ne constitue un conseil juridique. La certification est un processus audité, et c'est l'audit qui compte, pas un article de blog.
+
+## Le motif attendu par le référentiel
+
+Le motif de référence décrit dans la documentation d'accompagnement INFOCERT pour le référentiel V2.3 est une chaîne de signatures :
+
+1. Hacher l'enregistrement.
+2. Signer l'empreinte avec un bi-clé asymétrique.
+3. Chaîner la signature précédente dans l'entrée suivante.
+4. Encoder le résultat.
+
+La construction est familière. Chaque entrée s'engage sur celle qui la précède : altérer une ligne ancienne invalide toutes les signatures suivantes. Supprimer une ligne casse la séquence. On ne peut pas réécrire l'histoire sans la clé privée et sans refaire toutes les entrées postérieures.
+
+Le référentiel admet également ce qu'il appelle une solution alternative : une construction différente qui n'affaiblit pas la conformité, acceptée sous réserve d'une documentation préalable, d'une étude de recevabilité et d'un audit. C'est la voie que j'ai prise, et le raisonnement est la partie qui mérite d'être expliquée.
+
+## Pourquoi un HMAC plutôt qu'un bi-clé
+
+Le motif asymétrique vous achète une propriété précise : quiconque détient la clé publique peut vérifier une signature sans pouvoir en produire. Cette séparation compte quand le vérificateur et le signataire sont deux parties aux intérêts distincts.
+
+Pour un produit SaaS dont l'éditeur exploite les serveurs, cette séparation est largement théorique. La clé privée réside sur une infrastructure que l'éditeur contrôle. Un auditeur ne reçoit pas une clé publique pour vérifier des millions de lignes sur son propre matériel. Il vérifie avec un matériel de clé maîtrisé, pendant un audit, sous preuve scellée, sur votre système ou sur une copie. La frontière de confiance est la même dans les deux cas, puisque dans les deux cas c'est l'éditeur qui a la garde du secret.
+
+Dans ces conditions, un HMAC-SHA256 sur une sérialisation canonique de l'enregistrement achète la même garantie d'intégrité avec une surface opérationnelle sensiblement moindre. Pas de bi-clé à générer, distribuer, faire tourner sous deux formes, ou expédier par accident dans un bundle client. Un secret côté serveur, un algorithme, un chemin de vérification.
+
+L'implémentation telle que construite :
+
+```ts
+// chaque entrée s'engage sur la précédente
+const input = canonicalise({
+  version: HMAC_INPUT_VERSION,
+  sequence,
+  scope,
+  payload,
+  previousDigest,
+})
+
+const digest = createHmac('sha256', FISCAL_JOURNAL_HMAC_SECRET)
+  .update(input)
+  .digest('base64url')
+```
+
+Les lignes atterrissent dans une table en ajout seul, protégée au niveau de la base plutôt que par la politesse applicative. Chaque ligne stocke son numéro de séquence, sa portée, l'empreinte précédente et la sienne. L'allocation de séquence à l'intérieur d'une portée est protégée par un verrou consultatif, pour que deux transactions concurrentes ne se croient pas toutes deux l'entrée 4001.
+
+Un mot sur `canonicalise`, parce que c'est là que ce genre de schéma casse habituellement. Si votre sérialisation est « JSON.stringify de l'objet », votre chaîne ne vaut que la stabilité de l'ordre des clés, du format des nombres, et de ce qu'une future version de bibliothèque décidera de faire des dates. À la moindre dérive, la vérification échoue sur des enregistrements auxquels personne n'a touché, ce qui est pire qu'inutile : votre alarme d'intégrité crie au loup et quelqu'un finira par la désactiver. Figez la sérialisation, versionnez-la explicitement, et écrivez la version dans la matière signée.
+
+## Versionner la clé, et pourquoi elle est dans la matière signée
+
+Le secret changera. Quelqu'un part, un incident survient, ou votre propre politique impose une rotation. Mais les empreintes écrites sous l'ancien secret doivent rester vérifiables, puisqu'elles constituent l'enregistrement fiscal et sont conservées des années.
+
+Chaque ligne porte donc une version de clé de signature, associée à la version de la matière HMAC, et la vérification sélectionne le matériel de clé d'après la version inscrite sur la ligne plutôt qu'en supposant la version courante. Sans cela, une rotation invalide silencieusement tout votre historique, et vous l'apprenez pendant l'audit.
+
+## L'essentiel est le refus, pas l'algorithme
+
+La ligne la plus importante de l'implémentation n'est pas cryptographique.
+
+En production, un ajout est refusé si le secret du journal est absent, et refusé si la version du logiciel n'est pas renseignée. Ni journalisé puis ignoré, ni écrit sans signature avec un avertissement. Refusé, de sorte que la transaction échoue.
+
+Cela paraît absurde la première fois qu'on l'écrit, puisque cela signifie qu'un déploiement mal configuré supprime la capacité d'encaisser. C'est précisément l'objectif. L'alternative est un système qui continue d'accepter de l'argent tout en écrivant discrètement des enregistrements impossibles à prouver, ce qui est exactement la défaillance que la certification existe pour empêcher. Un paiement que vous ne pouvez pas prouver est pire qu'un paiement que vous n'avez pas pris, et un seul des deux est rattrapable.
+
+La version du logiciel est là parce que NF525 rattache la conformité à une version déclarée d'un produit nommé. Un enregistrement doit dire quelle version du logiciel l'a écrit.
+
+## Ce que la certification fait à votre processus de publication
+
+C'est la partie que j'ai sous-estimée.
+
+Une fois qu'une version est déposée comme référence auditée, tout changement affectant l'intégrité du journal fiscal, l'inaltérabilité, la conservation, l'archivage, la signature ou le périmètre fonctionnel certifié impose une revue de version majeure, et peut imposer un renouvellement du certificat.
+
+Ce n'est pas une contrainte de code, c'est une contrainte de processus, et elle porte plus loin que le module du journal. Elle signifie qu'une refonte touchant la sérialisation devient un événement de gouvernance. Elle signifie qu'il vous faut une règle écrite définissant ce qui compte comme touchant à la surface certifiée, arrêtée avant que quelqu'un n'ouvre une pull request, et non pendant. Elle signifie que le code du journal fiscal est le seul endroit du dépôt où « je vais juste nettoyer ça » est le mauvais réflexe.
+
+J'ai consigné cette règle dans une décision d'architecture et je le referais au premier jour plutôt qu'au quatorzième mois.
+
+## Les décisions voisines
+
+Deux arbitrages de périmètre ont réduit la charge plus sûrement que n'importe quel détail d'implémentation.
+
+L'ERP n'est pas le grand livre de référence. Il alimente un système comptable externe. Trancher cela explicitement, et l'inscrire, a placé l'obligation légale de piste d'audit FEC chez l'outil comptable et laissé le mode de comptabilisation désactivé dans l'ERP. Sans décision délibérée, vous héritez des deux jeux d'obligations par défaut.
+
+Pour le registre sectoriel, une annulation est une annulation logique. Les lignes ne sont jamais supprimées. Une ligne annulée conserve un horodatage `voided_at` et disparaît de la vue par défaut tout en restant dans l'enregistrement. Même principe que le journal : la valeur d'un registre tient à ce qu'il ne peut pas perdre.
+
+## Si vous démarrez
+
+Déterminez d'abord si votre produit est le système de référence pour les encaissements auprès de particuliers. Cette seule réponse détermine si tout ce qui précède vous concerne, et beaucoup d'équipes supposent que oui alors qu'une caisse certifiée en amont porte déjà l'obligation.
+
+Rédigez ensuite l'argumentaire de recevabilité avant le code, pas après. Si vous prenez la voie alternative, vous devrez expliquer à un auditeur pourquoi votre construction équivaut au motif de référence sur l'intégrité, sur l'authentification de l'origine et sur la conservation. Écrire cet argumentaire en premier vous dit ce que le code doit faire. J'ai écrit le mien en second et il a modifié l'implémentation, ce qui veut dire que la première version était fausse d'une manière que j'aurais pu connaître gratuitement.
+
+Et concentrez les tests sur les cas d'échec. Un vérificateur de chaîne qui passe sur des données saines ne prouve pas grand-chose. Le mien a des tests unitaires qui inversent un octet, permutent deux lignes et retirent une entrée au milieu, et la vérification doit échouer à chaque fois. Ces trois tests sont toute la valeur de la fonctionnalité.

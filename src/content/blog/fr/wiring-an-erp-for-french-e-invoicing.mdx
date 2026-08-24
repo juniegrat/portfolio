@@ -1,0 +1,112 @@
+export const metadata = {
+  title: 'Brancher un ERP sur la facturation électronique française',
+  description:
+    "L'échéance de septembre 2026 n'est pas un problème de PDF. Ce que le mandat exige réellement, la couture qui survit à un changement de prestataire, et les verrous qui empêchent un déploiement mal configuré de transmettre.",
+  alternates: {
+    canonical: '/fr/blog/wiring-an-erp-for-french-e-invoicing',
+  },
+}
+
+# Brancher un ERP sur la facturation électronique française
+
+Au 1er septembre 2026, toute entreprise assujettie à la TVA en France doit être capable de recevoir une facture électronique structurée. Les grandes entreprises et les ETI doivent en émettre à partir de la même date. Les autres suivent au 1er septembre 2027, sur les mêmes rails.
+
+C'est la réception qui prend les équipes de court, parce qu'elle s'applique à tout le monde en même temps et qu'aucun seuil de taille ne permet de s'y soustraire. Si vos fournisseurs commencent à envoyer des factures structurées via une plateforme en septembre, il faut bien que quelque chose, chez vous, les accepte.
+
+J'ai passé une partie de l'année dernière à intégrer tout cela dans un ERP. La quasi-totalité de ce qui est écrit sur le sujet est en français et s'adresse aux directions financières : voici donc le point de vue de l'ingénierie. Ce que le mandat demande réellement à votre système, où j'ai placé les coutures, et quelles parties je me suis délibérément abstenu de déclarer terminées.
+
+Ceci n'est pas un conseil juridique. Le périmètre applicable à une entreprise donnée relève de son expert-comptable, et les règles ont bougé deux fois pendant que je construisais.
+
+## Ce n'est pas un problème de PDF
+
+L'idée fausse la plus coûteuse consiste à voir là de la génération de factures avec une étape en plus. Vous produisez déjà un PDF, il suffirait donc d'y attacher du XML et de l'envoyer par e-mail.
+
+Trois choses cassent ce modèle.
+
+La facture ne voyage plus directement vers votre client. Elle passe par une plateforme partenaire, qui la route vers la plateforme du destinataire. Votre système dialogue avec une plateforme, pas avec un acheteur, et doit savoir sur quelle plateforme le destinataire est enregistré.
+
+Le document doit être structuré selon une norme sémantique européenne, EN16931, et pas simplement lisible par une machine. Un PDF accompagné d'un tableur n'est pas une facture sous ce régime.
+
+Enfin, la facture acquiert un cycle de vie qui survit à l'envoi. Déposée, reçue, acceptée, rejetée, paiement déclaré. Ces statuts vous reviennent de façon asynchrone et vous êtes censé les enregistrer. Une facture n'est plus un document que vous avez émis, c'est une machine à états dont vous êtes responsable.
+
+C'est ce troisième point qui remodèle votre modèle de données. Le reste n'est que de la sérialisation.
+
+## Choisir le format
+
+EN16931 admet deux syntaxes conformes : UBL et CII. Les deux sont valides, et vous rencontrerez des avis très arrêtés sur celle qu'il faut retenir.
+
+J'ai choisi CII en premier, au profil Factur-X étendu. Le raisonnement est étroit plutôt qu'esthétique. Factur-X, le format hybride PDF/A-3 sur lequel s'appuie la pratique française, embarque précisément du CII. Générer du CII permet au même artefact de servir à la fois la soumission structurée et le document hybride, et UBL pourra s'ajouter plus tard comme export alternatif depuis le même modèle normalisé. Partir d'UBL aurait imposé de traîner une étape de conversion pour atteindre le format que l'écosystème remet effectivement aux humains.
+
+Si votre activité est plus transfrontalière que domestique, ce calcul change et commencer par UBL se défend.
+
+## La couture qui compte
+
+La décision la plus utile que j'aie prise a été de refuser que le prestataire entre dans le code d'orchestration.
+
+Il y a une seule interface d'adaptateur. Tout ce qui se trouve au-dessus, l'évaluation de conformité, la génération de l'artefact, la soumission, l'enregistrement du cycle de vie, dialogue avec cette interface et ignore tout de ce qu'il y a en face. En dessous se trouvent les adaptateurs concrets : un simulateur local et un pont vers un prestataire réel.
+
+Le motif est banal et je ne l'écrirais pas si la raison n'avait pas été autre chose que l'abstraction pour l'abstraction. Au démarrage, le prestataire n'était pas choisi. Il est resté indéterminé pendant des mois pendant que la finance et le juridique tranchaient, et les identifiants de production n'étaient toujours pas livrés au moment où je me suis arrêté. Si les appels au prestataire avaient été écrits en dur dans le flux de facturation, cette incertitude aurait tout bloqué. À la place, l'ensemble du pipeline a été construit, testé et démontrable contre un simulateur, la question du prestataire restant ouverte derrière un seul fichier.
+
+Le corollaire est une règle de test que je garderais sur n'importe quelle intégration réglementaire. L'adaptateur de bac à sable est un simulateur local déterministe, et l'intégration continue exécute tout le pipeline sans une seule clé d'API. Les tests de contrat du prestataire réel s'exécutent contre un comportement HTTP enregistré. Si votre suite de tests de conformité a besoin d'un identifiant pour tourner, elle cessera de tourner, et elle cessera précisément la semaine où quelqu'un fera une rotation de clé avant une échéance.
+
+## Ce que fait le pipeline
+
+Le flux est linéaire et chaque étape est enregistrée.
+
+Une facture est d'abord évaluée : une passe de validation qui remonte des blocages plutôt que de lever une exception. Identité de routage manquante, données de tiers incomplètes, tout ce qu'EN16931 exige et que la facture ne porte pas. Cette évaluation s'exécute sur un instantané immuable de la facture et non sur l'enregistrement vivant, ce qui compte, car la facture peut être modifiée jusqu'à son émission et l'artefact doit correspondre à ce qui a été émis, pas à ce que la ligne en base raconte aujourd'hui.
+
+À partir de cet instantané, le système génère le document structuré, le valide, le hache en SHA-256 et le recopie vers un stockage objet. L'adaptateur soumet ensuite, et l'événement de cycle de vie est écrit.
+
+L'empreinte est la partie que je ne sauterais pas. Quand un prestataire convertit votre soumission en document hybride final, vous voulez pouvoir prouver plus tard que ce qu'il a archivé correspond à ce que vous avez envoyé. Sans votre propre empreinte au moment de la génération, cette réconciliation est une discussion, pas une vérification.
+
+## Fermé par défaut, en production seulement
+
+La transmission en production est placée derrière des verrous explicites, qui refusent au lieu d'avertir.
+
+Il y a un coupe-circuit, une variable d'environnement qui doit être positionnée avant que quoi que ce soit soit transmis. L'enregistrement du prestataire doit être vérifié pour la société ou l'établissement émetteur. L'identité de routage doit être présente. Le prestataire d'archivage à valeur probante et la référence d'approbation de la durée de conservation doivent tous deux être configurés.
+
+Si l'un de ces éléments manque, la soumission en production est refusée. Ni mise en file d'attente, ni journalisée puis ignorée.
+
+La raison est que le mode de défaillance inverse est bien pire qu'une indisponibilité. Une facture transmise par une route mal configurée est un document fiscal qui existe désormais dans l'écosystème, adressé à la mauvaise plateforme, et que vous ne pouvez pas rappeler. Un déploiement incapable de transmettre est un incident réglé en une heure. Un déploiement qui transmet de travers est une procédure de correction avec un client et peut-être avec l'administration.
+
+Le développement et le bac à sable restent permissifs, parce que la même sévérité en local n'apprend qu'une chose aux développeurs : désactiver la vérification.
+
+## Un détail de sécurité à reprendre
+
+Le prestataire appelle un webhook quand une facture change d'état. Ce point d'entrée porte un identifiant de compte de plateforme dans son chemin, et il est signé par un HMAC.
+
+La version naïve signe le corps de la requête. Ce n'est pas suffisant ici, et la raison tient au routage multi-tenant. Si la signature ne couvre que le corps, une charge utile valablement signée pour un compte peut être rejouée contre le chemin d'un autre compte, puisque le chemin ne fait pas partie de ce qui a été signé. Dans un système où chaque compte correspond aux données fiscales d'une société différente, c'est une écriture inter-tenant.
+
+La signature couvre donc `timestamp.platformAccountId.body`, avec l'identifiant de compte issu du chemin à l'intérieur de la matière signée. Une charge utile signée pour un compte échoue à la vérification lorsqu'elle est rejouée sur le point d'entrée d'un autre, et l'horodatage borne le rejeu en général. Le point d'entrée refuse par ailleurs toute requête lorsque le secret de signature n'est pas défini, plutôt que de retomber sur l'acceptation d'appels non signés dans une configuration de développement arrivée en production.
+
+Cela se généralise bien au-delà de la facturation électronique. Dès qu'un chemin de webhook porte un identifiant de tenant, cet identifiant appartient à la signature.
+
+## Deux distinctions que l'on confond
+
+Elles m'ont coûté du temps, elles méritent donc d'être énoncées clairement.
+
+Le flux de validation et d'archivage de factures d'une plateforme n'est pas une certification de logiciel de caisse. Un prestataire fait une démonstration de facturation électronique, et cela remonte en interne sous la forme « nous sommes certifiés ». Ce sont deux régimes distincts, avec des périmètres, des audits et des obligations différents. Être raccordé à une plateforme conforme ne dit rien de la conformité de votre logiciel aux règles applicables aux caisses, et l'inverse est tout aussi vrai.
+
+L'archivage technique n'est pas l'archivage à valeur probante. Recopier votre XML structuré vers un stockage objet vous donne de la durabilité et une copie que vous pouvez servir. Cela ne vous donne pas un archivage à valeur probante au sens du droit français, qui suppose un prestataire qualifié, une durée de conservation approuvée et un export de preuve vérifiable. J'ai qualifié la copie de stockage de « technique » explicitement, dans le code et dans la décision d'architecture, parce que l'écart entre ces deux mots est exactement le genre de chose que l'on oublie en huit mois et que l'on affirme ensuite avec aplomb devant un auditeur.
+
+## Ce que je n'ai pas terminé
+
+La liste honnête, parce qu'un retour sur la conformité qui se présente comme complet n'aide personne.
+
+La validation est structurelle plutôt que XSD et schematron complets. Une validation sérieuse suppose aussi d'enregistrer quelle version du validateur a accepté chaque artefact, puisqu'un document validé en 2026 devra être montré comme ayant été validé sous les règles de 2026.
+
+La réconciliation du document hybride est conçue mais non bouclée. Le prestataire convertit de façon asynchrone : il faut donc récupérer l'artefact final, le hacher et le comparer à l'empreinte de l'instantané. Tant que cette boucle ne tourne pas, l'empreinte est une affirmation et non une vérification.
+
+La réception entrante, l'e-reporting et la déclaration de paiement sont modélisés par des tables et une fonction de synchronisation, et délibérément non revendiqués comme terminés. Le chemin sortant est celui qui repose sur un contrat prestataire éprouvé.
+
+L'archivage à valeur probante n'est pas tranché et ne pouvait pas l'être : c'est une décision d'achat et de juridique, pas d'ingénierie.
+
+J'ai inscrit cette liste dans le dépôt, sous forme de checklist, avec le même poids que les éléments terminés. Sur une fonctionnalité réglementée, l'écart entre ce qui fonctionne et ce dont on a prouvé le fonctionnement est la seule chose qui intéresse un auditeur, et c'est la première à devenir floue quand une échéance approche.
+
+## Si vous démarrez maintenant
+
+Il vous reste environ une semaine avant l'obligation de réception : la démarche réaliste n'est donc pas de construire tout cela.
+
+Renseignez-vous sur la plateforme que vos fournisseurs vont utiliser et assurez-vous que quelque chose, chez vous, sait accepter un document structuré, même si la première version se contente de le déposer dans une table pour qu'un humain le traite. La réception est un problème plus petit que l'émission, et c'est celui qui engage tout le monde en septembre.
+
+Construisez ensuite le chemin d'émission derrière un adaptateur, contre un simulateur, sans attendre que la décision sur le prestataire tombe. Là où j'étais, cette décision a pris des mois, et le pipeline était terminé bien avant qu'elle n'arrive.
