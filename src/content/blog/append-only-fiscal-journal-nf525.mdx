@@ -1,0 +1,102 @@
+export const metadata = {
+  title: 'An append-only fiscal journal for NF525',
+  description:
+    'French law requires point-of-sale software to prove its own records have not been altered. Here is how I built the chain, why it uses HMAC instead of a signing key pair, and what certification does to your release process.',
+  alternates: {
+    canonical: '/blog/append-only-fiscal-journal-nf525',
+  },
+}
+
+# An append-only fiscal journal for NF525
+
+If you sell to consumers in France and your software records the payment, the law has an opinion about your database.
+
+The requirement comes from article 286 of the CGI and is operationalised through NF525, the certification standard for cash management software. It asks for four properties: inalterability, security, conservation, and archiving. In practice, the one that shapes your architecture is the first. You have to be able to demonstrate, to an auditor, that a recorded payment has not been modified or removed since it was written.
+
+Most engineering writing about this is in French, aimed at accountants, and stops at the level of "you need a certified solution." I want to write down what it actually meant in code, because I built one and the design decisions were more interesting than I expected.
+
+Nothing here is legal advice. Certification is an audited process and the audit is the thing that counts, not a blog post.
+
+## The pattern the standard expects
+
+The reference pattern described in INFOCERT's onboarding material for the V2.3 référentiel is a signature chain:
+
+1. Hash the record.
+2. Sign the hash with an asymmetric key pair.
+3. Chain the previous signature into the next record's input.
+4. Encode the result.
+
+This is a familiar construction. Each entry commits to its predecessor, so altering an old row invalidates every signature after it. Deleting a row breaks the sequence. You cannot rewrite history without the private key and without redoing all subsequent entries.
+
+The standard also permits what it calls a solution alternative: a different construction that does not weaken conformity, accepted subject to prior documentation, a receivability study, and audit. That route is what I took, and the reasoning is the part worth explaining.
+
+## Why HMAC rather than a signing key pair
+
+The asymmetric pattern buys you one specific property: anyone holding the public key can verify a signature without being able to produce one. That separation matters when the verifier and the signer are different parties with different interests.
+
+For a SaaS product where the editor operates the servers, that separation is mostly theoretical. The private key lives on infrastructure the editor controls. An auditor does not receive a public key and independently verify millions of rows on their own hardware. They verify against controlled key material during an audit, with sealed evidence, on your system or a copy of it. The trust boundary is the same either way, because in both cases the editor custodies the secret.
+
+Given that, HMAC-SHA256 over a canonical serialisation of the record buys the same integrity guarantee with meaningfully less operational surface. No key pair to generate, distribute, rotate across two forms, or accidentally ship to a client bundle. One server-side secret, one algorithm, one verification path.
+
+The as-built design:
+
+```ts
+// each entry commits to the one before it
+const input = canonicalise({
+  version: HMAC_INPUT_VERSION,
+  sequence,
+  scope,
+  payload,
+  previousDigest,
+})
+
+const digest = createHmac('sha256', FISCAL_JOURNAL_HMAC_SECRET)
+  .update(input)
+  .digest('base64url')
+```
+
+Rows land in an append-only table with database-level guardrails rather than application-level politeness. Each row stores its sequence number, its scope, the previous digest, and its own digest. Sequence allocation inside a scope is protected by an advisory lock, so two concurrent transactions cannot both believe they are entry 4,001.
+
+I want to flag the word `canonicalise`, because it is where this kind of scheme usually breaks. If your serialisation is "JSON.stringify the object," your chain is only as stable as key ordering, number formatting, and whatever a future library upgrade decides to do with dates. Any drift and verification fails on records that were never touched, which is worse than useless, because now your integrity alarm cries wolf and someone will disable it. Pin the serialisation, version it explicitly, and write the version into the input.
+
+## Key versioning, and why it is in the input
+
+The secret will change. Someone leaves, an incident happens, or your own policy requires rotation. But the digests written under the old secret must stay verifiable, because they are the fiscal record and they are retained for years.
+
+So each row carries a signing key version, mapped to the HMAC input version, and verification selects key material by the version recorded on the row rather than assuming the current one. Without this, rotation silently invalidates your entire history, and you find out during the audit.
+
+## Fail-closed is the requirement, not the algorithm
+
+The most important line in the implementation is not cryptographic.
+
+In production, an append is refused if the journal secret is absent, and refused if the software version is not set. Not logged and skipped. Not written unsigned with a warning. Refused, so the transaction fails.
+
+This feels wrong the first time you write it, because it means a misconfigured deploy takes down the ability to take payments. That is precisely the point. The alternative is a system that keeps accepting money while quietly writing records that cannot be proven, which is the exact failure the certification exists to prevent. A payment you cannot prove is worse than a payment you did not take, and only one of those is recoverable.
+
+The software version is in there because NF525 ties conformity to a declared version of a named product. A record needs to say which version of the software wrote it.
+
+## What certification does to your release process
+
+This is the part I underestimated.
+
+Once a version is submitted as the audited baseline, any change affecting fiscal journal integrity, inalterability, conservation, archiving, signing, or the certified functional scope requires a major version review, and may require refreshing the certificate.
+
+That is not a code constraint, it is a workflow constraint, and it reaches further than the journal module. It means a refactor that touches serialisation is a governance event. It means you need a documented rule for what counts as touching the certified surface, decided before someone opens the pull request rather than during it. It means the fiscal journal code is the one place in the codebase where "let me just clean this up" is the wrong instinct.
+
+I wrote that rule down as an ADR and I would do it again on day one rather than month fourteen.
+
+## The decisions next door
+
+Two adjacent scoping calls did more to reduce work than any implementation detail.
+
+The ERP is not the general ledger of record. It feeds an external accounting system. Deciding that explicitly, and recording it, meant the statutory FEC export obligation sits with the accounting package and the posting mode in the ERP stays disabled. If you do not make that decision deliberately, you inherit both sets of obligations by default.
+
+For the sector register, cancellation is a soft void. Rows are never deleted. A voided row keeps a `voided_at` timestamp and drops out of the default list view while remaining in the record. Same principle as the journal: the register's value comes from what it cannot lose.
+
+## If you are starting this
+
+Decide first whether your product is the system of record for consumer payments. That single answer determines whether any of this applies to you, and a lot of teams assume it does when a certified point-of-sale sits upstream and already carries the obligation.
+
+Then write the receivability argument before the code, not after. If you are taking the alternative route, you will have to explain to an auditor why your construction is equivalent to the reference pattern on integrity, on authentication of origin, and on conservation. Writing that argument first tells you what the code has to do. I wrote mine second and it changed the implementation, which means the first version was wrong in ways I could have known about for free.
+
+And put the tests on the failure cases. A chain verifier that passes on good data proves very little. Mine has unit tests that flip a byte, reorder two rows, and drop an entry from the middle, and the verification has to fail on each. Those three tests are the entire value of the feature.

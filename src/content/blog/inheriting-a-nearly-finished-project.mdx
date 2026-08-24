@@ -1,0 +1,86 @@
+export const metadata = {
+  title: 'Inheriting a nearly finished project',
+  description:
+    'A project described as almost complete, handed over as twenty PowerPoint files and a folder of API keys. What the artifacts said, and what I should have asked for on day one.',
+  alternates: {
+    canonical: '/blog/inheriting-a-nearly-finished-project',
+  },
+}
+
+# Inheriting a nearly finished project
+
+The first commit on the ERP I spent eighteen months building landed on 15 January 2025. It contains 1,819 files and 177,939 lines, and almost none of it is mine. It is an off-the-shelf admin template, imported wholesale, with routing and a component library and a settings page for an application that did not exist yet.
+
+That import is the honest picture of what "already largely done" meant. A shell that looks like software.
+
+By the time the system went live it held roughly 1.85 million lines of TypeScript across eleven applications. The pre-existing portion works out to under ten percent of the final codebase, and none of that ten percent was domain logic. There was no transaction model, no stock ledger, no fiscal journal, no KYC flow, no invoice lifecycle. There was a sidebar.
+
+I am not writing this to relitigate an estimate. Estimates are hard and I have given bad ones. I am writing it because the gap between "nearly finished" and what I actually received is legible in the files themselves, and the files are the part that generalizes. If you are being handed a project, the artifacts will tell you where it really stands, and they will tell you faster than any conversation.
+
+## The specification, as it existed on disk
+
+The requirements arrived as twenty Office files in a folder called historical specification. About seven megabytes in total: eleven PowerPoint decks, seven spreadsheets, two PDFs.
+
+Five of the eleven decks carry a filename prefix meaning "in progress." Their version numbers do not agree with each other. Configuration sits at V2-1, Administration at V2-3, Transactions at V2-7, Management at V2-5, Accounting at V2-2. A process flow for melting operations is stamped v2306. The database description is a spreadsheet at v7. There is no document anywhere in the set that reconciles those numbers or says which combination constitutes the agreed system.
+
+Two of the filenames contain typos, in the delivered artifact, in the folder presented as the specification. I mention this not to be unkind about spelling. I mention it because a document nobody has renamed in two years is a document nobody has opened in two years, and file naming is a cheap and reliable proxy for whether a corpus is alive or archived.
+
+What matters more is the category of thing that was absent. There were no acceptance criteria. Not vague ones, none. There was no signed decision anywhere recording what an operator was actually required to be able to do. No wiki, no Confluence space, no requirements tracker with a state model. The team chat channel for developers held about 272 megabytes of attachments, API dumps, entity-relationship diagrams, test session notes, and not one exported line of conversation. The general channel held around 850 megabytes, mostly a recorded test session from 2024 and a run of status decks.
+
+So the true inventory was a UI template, a set of slide decks in mutually inconsistent draft states, and an archaeology site.
+
+## What was missing rather than wrong
+
+The decks were not bad. That is worth saying, because "the spec was garbage" is the lazy version of this story and it is not what happened.
+
+The decks described intent reasonably well. Someone had thought about the melting workflow. The database spreadsheet had real domain knowledge in it. What was missing was any mechanism by which intent became a commitment. Nothing in that folder could be failed. There was no statement of the form "the system is correct when an operator can do X and the result is Y," so there was no test I could write that would ever prove a feature finished.
+
+That absence is what turns a nine-month project into an eighteen-month one, and it does it quietly. Without acceptance criteria, "done" is decided in conversation, after delivery, by whoever is talking. Scope does not creep. It gets renegotiated retroactively, every time, and the renegotiation is invisible in any tracker because it happens in chat.
+
+If I could put one sentence in front of every engineer inheriting a project it would be this. Do not ask whether the specification exists. Ask what document you will be measured against, and ask to see it. If the answer is a deck, you are not inheriting a nearly finished product. You are inheriting an intention.
+
+## The handover arrived as chat attachments
+
+In July 2026, eighteen months in, I ran a secret scanner over the exported team conversation archive to see what was in it before moving any of it to a backup drive.
+
+Twenty-two findings. Thirteen rated critical.
+
+A private key, sent as a file attachment. A plaintext file holding credentials for six different providers at once, including two cloud platforms, two model APIs, the transactional email service, and a directory client secret. Three separate cloud access tokens. An environment file with client secrets in it. A spreadsheet of per-agency access tokens sitting at the top level of a shared folder.
+
+None of this was leaked by an attacker. This was the handover. This is how access to production systems was transmitted between colleagues, as files in a chat window, where they stayed, searchable, for as long as the workspace retained history.
+
+I want to be careful here, because it would be easy to read that paragraph as an accusation of incompetence, and it mostly is not. Credentials end up in chat because chat is the only tool in the building that reliably delivers a file to a colleague in thirty seconds. Every organization I have seen without a secret manager has this exact folder. The problem is not that someone was careless once. The problem is that the fast path and the safe path were different paths, and nobody had been given the safe one.
+
+But it does tell you something precise about project maturity. A system whose credentials live in a chat log does not have an operations story yet. And a project without an operations story is not eighty or ninety percent done regardless of how the interface looks, because you have not yet paid for any of the parts that come after the interface.
+
+## Why the estimate was probably not a lie
+
+I have thought about this more than I expected to, and I no longer think anyone was deceiving me.
+
+An admin template genuinely does look like a finished product. It has a dashboard with charts. It has a users table with a status column. It has a settings page with tabs. To a non-engineer, and honestly to a tired engineer at the end of a long week, that is close to indistinguishable from a working system, and the remaining work looks like filling in data. Nobody in the building had a way to see that the sidebar was the cheap part.
+
+Then there is the second-order effect. If the last three status updates said the project was nearly done, the fourth one says nearly done as well, because revising it downward requires someone to volunteer that the previous three were wrong. Optimistic estimates become load-bearing once they have been repeated. They stop being predictions and turn into positions.
+
+That reading is more useful to me than believing I was lied to. A lie needs a liar and can be solved by removing them. This needs an instrument, and the instrument is unglamorous: someone whose job is to convert intent into criteria that can fail, and who is not the same person writing the code.
+
+## What I check now before taking on inherited work
+
+None of these take longer than an afternoon, and I did none of them.
+
+Read the first commit. Its size and contents tell you how much of the existing system is a template. A first commit of 1,819 files is a purchase, not a foundation.
+
+Ask for the document you will be judged against, and read it looking for statements that could turn out false. A requirement that cannot fail is not a requirement.
+
+Ask where credentials live. The answer describes the operational maturity of the whole organization in one sentence, and you will get it honestly, because nobody thinks it is a test.
+
+Ask who has read the codebase besides the person leaving. If the answer is nobody, price that, because you are not being asked to maintain a system. You are being asked to become it.
+
+Check whether the tracker and the repository reference each other. Across 9,885 commits in eighteen months, the company's project management tool was mentioned zero times. That number was available to me on day thirty and I did not look at it until month seventeen.
+
+## The part that was mine
+
+I did not ask any of this. Not because I was prevented, but because at the start it felt rude, and later it felt too late, and in between there was always something more urgent to build.
+
+That is the actual mechanism. Not a hostile employer withholding information, but a new contractor who wants to seem capable deciding that asking for acceptance criteria will read as reluctance to start. So he starts. And once he has started and shipped something impressive in the first month, the leverage to ask is gone, because now he is the person who ships without needing all that.
+
+The template was 177,939 lines. The system ended at roughly 1.85 million. The distance between those two numbers is what "nearly finished" turned out to mean, and every question in the list above would have surfaced it in the first week.

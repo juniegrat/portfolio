@@ -147,6 +147,20 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: 'post-mortem-of-a-one-person-build',
     uid: 'blog-1',
   },
+  {
+    title: 'Inheriting a nearly finished project',
+    description:
+      'What "already largely done" turned out to mean, measured in the files I was handed.',
+    slug: 'inheriting-a-nearly-finished-project',
+    uid: 'blog-2',
+  },
+  {
+    title: 'An append-only fiscal journal for NF525',
+    description:
+      'Proving to a French auditor that your records were never altered, and what that does to your release process.',
+    slug: 'append-only-fiscal-journal-nf525',
+    uid: 'blog-3',
+  },
 ]
 
 export const SOCIAL_LINKS: SocialLink[] = [
