@@ -13,6 +13,11 @@ export type Project = {
   video?: string
   image?: string
   id: string
+  /**
+   * Set when a writeup exists at src/content/projects/<slug>.mdx. The card then
+   * links to /projects/<slug> instead of straight out to the repository.
+   */
+  slug?: string
 }
 
 export type Capability = {
@@ -83,6 +88,7 @@ export const PROJECTS: Project[] = [
     year: '2026',
     image: '/projects/asm.webp',
     id: 'asm',
+    slug: 'asm',
   },
   {
     name: 'Coin Detector',
@@ -150,6 +156,16 @@ export const CAPABILITIES: Capability[] = [
 // index renders; `date` only drives the dateline. Drop `hero` and the card falls
 // back to a typographic plate.
 export const BLOG_POSTS: BlogPost[] = [
+  {
+    title: 'Wiring an ERP for French e-invoicing',
+    description:
+      'The September 2026 deadline is not a PDF problem. The seams that survive a vendor change, and the gates that stop a bad deploy transmitting.',
+    slug: 'wiring-an-erp-for-french-e-invoicing',
+    uid: 'blog-4',
+    date: '2026-08-24',
+    hero: '/blog/e-invoicing.webp',
+    minutes: 8,
+  },
   {
     title: 'Post-mortem of a one-person build',
     description:

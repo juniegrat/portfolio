@@ -185,7 +185,18 @@ function Home() {
               </div>
               <div className="px-1">
                 <div className="flex items-baseline justify-between gap-3">
-                  {project.link ? (
+                  {/* A writeup wins over the repository link: it is the better
+                      first stop, and the case study carries a Source link out. */}
+                  {project.slug ? (
+                    <Link
+                      className="group relative inline-block font-[450] text-ink"
+                      to="/projects/$slug"
+                      params={{ slug: project.slug }}
+                    >
+                      {project.name}
+                      <span className="absolute bottom-0.5 left-0 block h-[1px] w-full max-w-0 bg-accent transition-[max-width] duration-200 ease-snap group-hover:max-w-full"></span>
+                    </Link>
+                  ) : project.link ? (
                     <a
                       className="group relative inline-block font-[450] text-ink"
                       href={project.link}

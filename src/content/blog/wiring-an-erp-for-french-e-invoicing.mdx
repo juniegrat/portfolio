@@ -1,0 +1,112 @@
+export const metadata = {
+  title: 'Wiring an ERP for French e-invoicing',
+  description:
+    'The September 2026 deadline is not a PDF problem. What the mandate actually requires, the adapter boundary that survives a vendor change, and the gates that keep a misconfigured deploy from transmitting.',
+  alternates: {
+    canonical: '/blog/wiring-an-erp-for-french-e-invoicing',
+  },
+}
+
+# Wiring an ERP for French e-invoicing
+
+On 1 September 2026 every business subject to French VAT has to be able to receive a structured electronic invoice. Large and mid-size companies have to emit them from the same date. Everyone else follows on 1 September 2027, on the same rails.
+
+Receiving is the part that catches teams out, because it applies to everybody at once and there is no size exemption to hide behind. If your suppliers start sending structured invoices through a platform in September, something on your side has to accept them.
+
+I spent part of last year building this into an ERP. Nearly all the written material is in French and aimed at finance teams, so this is the engineering view: what the mandate actually asks of your system, where I put the seams, and which parts I deliberately did not claim were finished.
+
+Not legal advice. The perimeter that applies to a given company is a question for their accountant, and the rules moved twice while I was building.
+
+## It is not a PDF problem
+
+The most expensive misconception is that this is invoice generation with extra steps. You already produce a PDF, so surely you attach some XML and email it.
+
+Three things break that model.
+
+The invoice no longer travels directly to your customer. It goes through a partner platform, which routes it to the recipient's platform. Your system talks to a platform, not to a buyer, and needs to know which platform the recipient is registered on.
+
+The document has to be structured to a European semantic standard, EN16931, not merely machine-readable. A PDF with an attached spreadsheet is not an invoice under this regime.
+
+And the invoice acquires a lifecycle that outlives the send. Deposited, received, accepted, rejected, payment reported. Those statuses come back to you asynchronously and you are expected to record them. An invoice is no longer a document you emitted, it is a state machine you are responsible for.
+
+That third point is what actually reshapes your data model. Everything else is serialisation.
+
+## Choosing the format
+
+EN16931 has two compliant syntaxes: UBL and CII. Both are valid, and you will meet strong opinions about which is correct.
+
+I went with CII first, at the Factur-X extended profile. The reasoning is narrow rather than aesthetic. Factur-X, the hybrid PDF/A-3 format that French practice leans on, embeds CII specifically. Generating CII means the same artifact serves both the structured submission and the hybrid document, and UBL can be added later as an alternate export from the same normalised model. Starting from UBL would mean carrying a conversion step to reach the format the ecosystem actually hands to humans.
+
+If your business is more cross-border than French-domestic, that calculus changes and UBL first is defensible.
+
+## The seam that matters
+
+The single most useful decision I made was refusing to let the vendor into the orchestration code.
+
+There is one adapter interface. Everything above it, readiness assessment, artifact generation, submission, lifecycle recording, talks to that interface and knows nothing about who is on the other side. Below it sit concrete adapters: a local sandbox and a real provider bridge.
+
+This is an obvious pattern and I would not write it down except that the reason for it was not abstraction for its own sake. When I started, the vendor was undecided. It stayed undecided for months while finance and legal worked through it, and it was still pending production credentials at the point I stopped. If provider calls had been inlined into the invoice flow, that uncertainty would have blocked all of it. Instead the entire pipeline was built, tested and demonstrable against a simulator, with the vendor question left open behind one file.
+
+The corollary is a test rule I would keep on any regulated integration. The sandbox adapter is a deterministic local simulator, and continuous integration runs the whole pipeline without a single API key. Contract tests for the real provider run against recorded HTTP behaviour. If your compliance test suite needs a credential to run, it will stop running, and it will stop running exactly when someone rotates a key during a deadline week.
+
+## What the pipeline does
+
+The flow is linear and every step is recorded.
+
+An invoice is assessed for readiness first, which is a validation pass that reports blockers rather than throwing. Missing routing identity, incomplete party data, anything EN16931 requires that the invoice does not carry. This runs against an immutable snapshot of the invoice rather than the live record, which matters because the invoice can be edited up to issuance and the artifact must correspond to what was issued, not to what the row says today.
+
+From that snapshot the system generates the structured document, validates it, hashes it with SHA-256, and mirrors it to object storage. Then the adapter submits, and the lifecycle event is written.
+
+The hash is the part I would not skip. When a provider converts your submission into a final hybrid document, you want to be able to prove later that what they archived corresponds to what you sent. Without your own hash at the moment of generation, that reconciliation is a conversation rather than a check.
+
+## Fail closed, in production only
+
+Production transmission sits behind explicit gates, all of which refuse rather than warn.
+
+There is a kill switch, an environment flag that must be set before anything is transmitted at all. Provider registration has to be verified for the company or establishment doing the sending. Routing identity has to be present. The probative archive provider and the legally approved retention reference both have to be configured.
+
+Any of those absent, and production submission is refused. Not queued, not logged and skipped.
+
+The reason to build it this way is that the failure mode on the other side is much worse than an outage. An invoice transmitted through a misconfigured route is a fiscal document that exists in the ecosystem, addressed to the wrong platform, that you cannot recall. A deploy that cannot transmit is an incident someone fixes in an hour. A deploy that transmits wrongly is a correction process with a customer and possibly with the administration.
+
+Development and sandbox stay permissive, because the same strictness in local development just teaches people to disable the check.
+
+## One security detail worth stealing
+
+The provider calls a webhook when an invoice changes state. That endpoint carries a platform account identifier in its path, and it is signed with an HMAC.
+
+The naive version signs the request body. That is not enough here, and the reason is specific to multi-tenant routing. If the signature covers only the body, a valid signed payload for one account can be replayed against another account's path, because the path is not part of what was signed. In a system where each account maps to a different company's fiscal data, that is a cross-tenant write.
+
+So the signature covers `timestamp.platformAccountId.body`, with the account identifier from the path inside the signed material. A payload signed for one account fails verification when replayed at another account's endpoint, and the timestamp bounds replay generally. The endpoint also refuses every request outright when the signing secret is unset, rather than falling back to accepting unsigned calls in a development-shaped configuration that reached production.
+
+This generalises past e-invoicing. Any time a webhook path carries a tenant identifier, that identifier belongs inside the signature.
+
+## Two distinctions people collapse
+
+These cost me time, so they are worth stating plainly.
+
+A platform's invoice validation and archiving workflow is not cash register certification. Vendors demo an e-invoicing flow and it gets reported internally as "we are certified." They are different regimes with different scopes, different audits, and different obligations. Being connected to a compliant platform says nothing about whether your software satisfies the cash register rules, and the reverse is equally true.
+
+Technical archiving is not probative archiving. Mirroring your structured XML to object storage gives you durability and a copy you can serve. It does not give you an archive with evidential value under French rules, which requires a qualified provider, an approved retention duration, and a verifiable evidence export. I labelled the storage mirror explicitly as technical, in the code and in the decision record, because the gap between those two words is the sort of thing that gets forgotten in eight months and then asserted confidently to an auditor.
+
+## What I did not finish
+
+The honest list, because a compliance writeup that presents itself as complete is not useful to anyone doing the work.
+
+Validation is structural rather than full XSD and schematron. Proper validation also means recording which validator version passed each artifact, since a document that validated in 2026 needs to be shown as having validated under the rules of 2026.
+
+Hybrid document reconciliation is designed but not closed. The provider converts asynchronously, so the final artifact has to be fetched back, hashed, and compared against the snapshot hash. Until that loop runs, the hash is a claim rather than a check.
+
+Inbound reception, e-reporting and payment reporting are modelled with tables and a sync function, and deliberately not claimed as done. The outbound path is the one with a proven provider contract behind it.
+
+The probative archive is unresolved and was always going to be, because it is a procurement and legal decision rather than an engineering one.
+
+I wrote that list into the repository as a checklist with the same weight as the completed items. On a regulated feature, the gap between what works and what has been proven to work is the only thing an auditor is interested in, and it is the first thing that goes vague when a deadline approaches.
+
+## If you are starting now
+
+You have about a week before the receive obligation, so the realistic move is not to build this.
+
+Find out which platform your suppliers will route through and make sure something on your side can accept a structured document, even if the first version parks it in a table for a human. Reception is a smaller problem than emission and it is the one that binds everyone in September.
+
+Then build the emit path behind an adapter, against a simulator, without waiting for the vendor decision to land. That decision took months where I was, and the pipeline was finished long before it arrived.

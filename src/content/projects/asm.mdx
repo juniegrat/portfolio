@@ -1,0 +1,66 @@
+export const metadata = {
+  title: 'ASM: Attack Surface Monitor',
+  description:
+    'A self-hosted attack surface monitor built on ProjectDiscovery CLIs. Why it shells out instead of reimplementing, why SQLite is the whole backend, and why it reports diffs rather than findings.',
+  alternates: {
+    canonical: '/projects/asm',
+  },
+}
+
+# ASM: Attack Surface Monitor
+
+Continuous discovery of internet-facing assets, plus vulnerability scanning, behind a dashboard you run yourself. About 4,900 lines of Python and a TanStack Start front end, built over two months in 2026.
+
+## The problem
+
+Commercial attack surface management is a good product with one structural catch: to tell you what you are exposing, the vendor has to hold a complete inventory of what you are exposing. You send them your domains, they send back your weak points, and that inventory now lives on someone else's infrastructure.
+
+For most companies that trade is fine. For some it is not, and the ones it fails for are exactly the ones that most want the product: regulated businesses, companies under a client security clause that forbids third-party reconnaissance, and anyone whose asset list is itself sensitive.
+
+The open-source scanners those platforms are built on are free and excellent. What is missing is the layer above them: state across runs, change detection, alerting, and something to look at. That layer is the whole project.
+
+## Shelling out instead of reimplementing
+
+The engine does not implement subdomain enumeration, HTTP probing, or vulnerability detection. It runs `subfinder`, then `httpx`, then `nuclei`, and parses their output.
+
+This is the sort of decision that looks lazy in review and is usually correct. Nuclei's value is not its matching engine, it is the community template library and the rate at which that library absorbs new CVEs. Reimplementing the engine means inheriting none of that and maintaining a detection catalogue forever, which is a full-time job that several companies already do better.
+
+The costs are real and worth naming rather than glossing. Installation is heavier, because users need a Go toolchain and four binaries before anything runs. Process boundaries mean parsing text output rather than calling functions, so upstream format changes break you at runtime rather than at compile time. And you inherit upstream's release cadence, including its regressions.
+
+I would make the same call again, but I would not pretend the packaging story is good.
+
+## SQLite as the entire backend
+
+There is no API server. The dashboard is a TanStack Start application whose server functions open the same SQLite file the Python engine writes to.
+
+The conventional shape here is engine writes to database, API reads database, front end calls API. That middle tier exists to serve multiple clients, enforce access across a network boundary, and let the pieces scale separately. A single-host self-hosted tool has one client, no network boundary between the reader and the file, and nothing to scale independently. The tier would have been ceremony.
+
+Removing it removed a deployment unit, a port, a serialisation format, and an entire class of "the API is out of sync with the schema" bugs.
+
+The limit is honest and I designed into it: this runs on one host. There is no horizontal scale story, and if the engine and the dashboard ever needed to live on different machines, the API tier comes back and that is a real rewrite. For the deployment this targets, one box in your own network, that ceiling is far away.
+
+## Reporting diffs, not findings
+
+This is the part that makes it useful rather than merely functional.
+
+A scanner run against a real estate produces hundreds of results, and almost all of them are the same results it produced yesterday. A tool that mails you all of them every night trains you to filter the mail, and after two weeks nobody reads it. The finding that mattered arrives in a message that has already been categorised as noise.
+
+So every asset and every finding carries `first_seen` and `last_seen`. A run updates `last_seen` on everything it observes, and anything whose `first_seen` equals the current run is new. Alerts carry only that set.
+
+The consequence is that a quiet night sends nothing at all, and a message from this tool means something changed. That is a small amount of code and it is the difference between a scanner and a monitor.
+
+It also gives you a history for free. Because rows are never overwritten, you can answer when an asset appeared and when it stopped responding, which is usually the first question in an incident and is exactly what a stateless scan cannot tell you.
+
+## Scope, deliberately inconvenient
+
+The configuration ships pointed at `example.com`.
+
+Scanning infrastructure you do not own is unlawful in most jurisdictions, and a tool that chains subdomain enumeration into active vulnerability scanning makes that trivially easy to do by accident, with one careless edit to a config file. A default that resolves to nothing forces a deliberate act before the first real run, and the authorization requirement is stated in the readme rather than buried in a licence.
+
+This costs a step in setup. That is the correct trade.
+
+## What I would change
+
+The setup path is the weakest part. Four Go binaries before first run is a real barrier, and the honest fix is shipping a container image with the toolchain baked in.
+
+Parsing CLI output is a standing liability. It works, and it will keep working until an upstream release changes a field name, at which point it fails in production rather than in CI. Contract tests against pinned binary versions would catch that, and they do not exist yet.
