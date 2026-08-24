@@ -8,6 +8,15 @@ import { defineConfig } from 'vite'
 
 const config = defineConfig({
   resolve: { tsconfigPaths: true },
+  server: {
+    // Vite's default localhost binding resolves to [::1] only, which
+    // `tailscale serve` (an IPv4 proxy) cannot reach. Still loopback-only.
+    host: '127.0.0.1',
+    // `tailscale serve` proxies to 127.0.0.1 but forwards the tailnet hostname
+    // as Host, which Vite rejects by default. Tailnet-only — the dev server
+    // still binds to localhost, so this opens nothing to the LAN or internet.
+    allowedHosts: ['.ts.net'],
+  },
   plugins: [
     devtools(),
     nitro({
