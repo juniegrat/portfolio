@@ -1,0 +1,110 @@
+export const metadata = {
+  title: 'Post-mortem of a one-person build',
+  description:
+    'Eighteen months, eleven applications, one committer. What the git history recorded about how a project stays on schedule while the person running it does not.',
+  alternates: {
+    canonical: '/blog/post-mortem-of-a-one-person-build',
+  },
+}
+
+# Post-mortem of a one-person build
+
+I spent eighteen months as the only engineer on an ERP. Eleven applications, eight shared packages, twenty-five workspaces. Around 1.85 million lines of TypeScript, 1,491 test files, 424 markdown documents totalling roughly 463,000 words. It shipped. Transactions, invoicing, stock, payments, KYC, a customer portal, a native mobile app, a storefront, French fiscal compliance. All of it works.
+
+I want to write down what the repository recorded, because I did not notice most of it while it was happening, and because the numbers are harder to argue with than a feeling.
+
+This is a post-mortem, not a complaint. The distinction I care about is that a post-mortem includes the operator's own errors, and mine are in here.
+
+## What the commit log knew before I did
+
+The `dev` branch holds 9,885 commits. One human author. Across every branch, 18,031 commits, of which six belong to dependabot and the rest to me. Four git identities, all the same person.
+
+The interesting part is not the volume. It is the distribution.
+
+Of 550 calendar days, 382 have at least one commit. That is 69.5 percent of every day in the span, including public holidays and the one week I was away. Weekends account for 24.2 percent of commits, which is very close to the share you would get if weekends were simply ordinary working days. 63.2 percent of commits fall outside weekday office hours, and 21.7 percent carry a timestamp between midnight and five in the morning. There is a 42-day consecutive streak in spring 2026.
+
+Commit timestamps are not proof of hours worked. You can batch commits, you can push at 2am work you did at 6pm. I keep the caveat because it is honest. But the shape holds across 550 days and it does not look like batching. It looks like a clock that never fully stopped.
+
+The other number is the acceleration. The last four months contain 62.7 percent of all commits. The peak month has 2,689. If this had been a team, that curve would have triggered a conversation. Because it was one person, the curve looked like productivity.
+
+That is the first finding. A one-person project has no natural alarm. Velocity and distress produce the same graph.
+
+## The governance vacuum, in artifacts
+
+The company ran Jira. The export I kept shows 466 tickets in the project.
+
+Ninety-six percent of them were reported by the product manager. Story points were filled on 6.2 percent, all in one consecutive burst, then never again. Twenty-eight tickets sat in a blocked state, median eleven days, one of them 160 days waiting on a business answer I chased myself. Five epics went untouched for six months. Nearly half the tickets had not been updated in the month before the export.
+
+And across 9,885 commits, the string "Jira" appears zero times.
+
+That gap is the whole story in one measurement. There was a tool where the process was performed, and a repository where the work happened, and no wire between them. I built my own delivery tracking because the imposed one carried no information. Then I maintained both, because the imposed one had to keep looking alive.
+
+The RACI document I wrote in July lists Engineering as me. It lists Release manager, Legal, Finance and Ops as TBD. The version one release sign-off requires five named owners: Product, Finance, Legal and compliance, Engineering lead, Release and Ops. All five signatures are mine, on the same day. I signed off on my own work in five roles because there was nobody to appoint, and the release date did not move on account of that.
+
+I want to be precise about what went wrong there, because "bad management" is too vague to learn from. Nobody forbade me from raising it. What happened is subtler and more common. Every time a role was missing, the fastest path to a shipped feature was for me to absorb it. Each absorption was individually rational and took an afternoon. Cumulatively they produced an organization where one contractor held product, compliance, release and infrastructure, and where the company's only complete copy of its own system lived on his personal accounts, paid for with his personal card.
+
+Nobody decided that. It assembled itself out of a year of locally reasonable choices. That is the failure mode worth naming, because it does not require anyone to be a villain, and it will happen again anywhere a competent person is left unsupervised next to an urgent deadline.
+
+## On the people, and on the limits of my own account
+
+The part I find hardest to write is the part about not trusting my read of people any more.
+
+The pattern I experienced was not hostility. It was agreement that did not survive contact with the next meeting. Scope confirmed in writing, then redefined after delivery. Direct questions about acceptance criteria answered with a change of subject. Decisions attributed to whoever was not in the room. Over months this produces something worse than conflict, which is the constant low-grade suspicion that you are misremembering your own working life.
+
+So I did what an engineer does when instrumentation is missing. I built a tool. It ingested my own message archive, 29,918 one-to-one messages across twenty-one months, and looked for two things: statements that contradicted earlier statements by the same person, and topics I raised that were never answered.
+
+It found 203 contradictions and 422 unaddressed topics. That felt like vindication for about a day.
+
+Then I hand-labelled 109 of the findings to see how good the tool actually was. Contradiction detection came out at 94 percent precision, which is usable. Avoidance detection came out at 77 percent precision and 71 percent recall, meaning roughly a quarter of what it flagged did not survive a careful reread. A third classifier, the one distinguishing "never answered" from "answered after I chased", agreed with my own judgement 37 percent of the time. I deleted it from the report. Seventeen percent of the avoidance findings turned out to be miscategorised at the ingestion stage, and the person whose section I felt most strongly about had the least reliable results of anyone.
+
+Eleven thousand five hundred and eighty-nine extracted facts have never been verified by anything, human or automatic. They are not evidence of anything and I do not cite them.
+
+I am including this because it is the single most useful thing I learned in eighteen months. My perception of being systematically avoided was substantially correct and materially overstated, and I could not tell which was which until I measured it. If you are in a situation like this, the instinct to gather proof is sound. The instinct to trust your own gathering is not. Build the measurement of your measurement, and be prepared for it to take some of your case away from you. Mine did.
+
+That is also why this post names nobody. A tool with 77 percent precision is not a basis for accusing an identifiable person of anything in public.
+
+## Skill gaps are a load-bearing problem
+
+There were people around me who could not read the codebase. This is not an insult, it is a structural fact with consequences, and the consequences are the point.
+
+When nobody can review your work, three things happen in order.
+
+First, review stops being something you receive and becomes something you simulate. My commits carry a conventional scope 97.9 percent of the time. I wrote 424 documents. I built a remediation programme with 272 tracked identifiers across ten families. None of that was for anyone else. It was scaffolding to hold up the judgement that a second engineer would normally provide, and it costs real hours that show up nowhere on a roadmap.
+
+Second, you start encoding guardrails in places that cannot be argued with. When you cannot rely on a human catching an error, you push the constraint down into the type system, into the schema, into a database constraint, into an end-to-end test. This is genuinely good engineering and I would defend most of those decisions on their merits. It is also, if I am honest, defensive. Some of that rigour was engineering. Some was a person building a system that could not be broken by people he had stopped trusting.
+
+Third, and this is the one that actually ends projects, you become the only viable operator. During the one week I was away, the team lost access to the platform and I was the only person who could restore it. That is not a boast. It is a defect, and it is a defect I built. Every time I fixed something myself instead of leaving it broken long enough for the gap to become visible, I was choosing the delivery date over the organization's ability to survive without me.
+
+## What I got wrong
+
+The company's failures are documented above and I stand behind them. Here are mine.
+
+I optimised for shipping when I should have optimised for legibility. A slower project with two engineers who could both read it would have been worth more to everyone, including me, than a fast project with one.
+
+I let each absorbed role feel like a favour instead of treating it as a change in the contract. There was a written mechanism for scope changes. I never once used it. By the time the accumulated scope was obvious, it had eighteen months of my own precedent behind it.
+
+I ran the infrastructure on personal accounts because it was faster on day one and I never migrated it. That created a dependency that served nobody well, and it is the kind of thing that looks like leverage from the outside and feels like a hostage situation from the inside.
+
+And I let the resentment out. Late in the project my own messages stopped being professional. I do not think that came from nowhere, and I do not think it excuses anything either. It is in the record, it belongs to me, and a version of this post that left it out would be advocacy rather than a post-mortem.
+
+## The signals I would watch for now
+
+Not advice, just the specific things I now check.
+
+Whether any code I write is read by another human within a week. Not approved. Read.
+
+Whether the tracker the company believes in and the repository where work happens reference each other at all. Zero cross-references is a five-alarm reading, and it took me a year to see it.
+
+Whether my name appears in more than one role on any sign-off document. One signature in five boxes is not seniority.
+
+Whether the share of commits outside working hours is drifting up quarter over quarter. It is a cheap query and it does not lie about you the way you lie about yourself.
+
+Whether anything critical runs on an account with my name on it.
+
+## Where it ended
+
+The relationship ended in August 2026, unformalized on the company's side as I write this.
+
+The system is live. The compliance dossiers are complete and I would submit them tomorrow. The test suites pass. Somebody will inherit 1.85 million lines of code and 463,000 words of documentation written by one person, and the documentation was the right call, because it is the only part of this that transfers.
+
+I do not have a lesson that resolves it. The engineering was the best work I have done. The eighteen months cost more than the work was worth to me, and I would not have believed that on any single day of it, which is precisely the problem with a graph that cannot tell velocity from distress.

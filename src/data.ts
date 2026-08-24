@@ -141,16 +141,11 @@ export const CAPABILITIES: Capability[] = [
 // These map to the MDX files in src/content/blog/<slug>.mdx
 export const BLOG_POSTS: BlogPost[] = [
   {
-    title: 'Exploring the Intersection of Design, AI, and Design Engineering',
-    description: 'How AI is changing the way we design.',
-    slug: 'exploring-the-intersection-of-design-ai-and-design-engineering',
+    title: 'Post-mortem of a one-person build',
+    description:
+      'Eighteen months, eleven applications, one committer, and what the git history recorded.',
+    slug: 'post-mortem-of-a-one-person-build',
     uid: 'blog-1',
-  },
-  {
-    title: 'How to Export Metadata from MDX',
-    description: 'A guide on exporting metadata from MDX files to drive page SEO.',
-    slug: 'example-mdx-metadata',
-    uid: 'blog-2',
   },
 ]
 
