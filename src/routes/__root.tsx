@@ -14,7 +14,9 @@ export const Route = createRootRoute({
   head: () => ({
     meta: [
       { charSet: 'utf-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+      // `viewport-fit=cover` is what makes env(safe-area-inset-*) report real
+      // numbers; the `.safe-x` / `.safe-b` gutters depend on it.
+      { name: 'viewport', content: 'width=device-width, initial-scale=1, viewport-fit=cover' },
       { name: 'theme-color', content: '#ffffff' },
       { title: SITE_TITLE },
       { name: 'description', content: SITE_DESCRIPTION },
@@ -51,7 +53,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           <div className="theme-grid" aria-hidden="true" />
           <div className="rail" aria-hidden="true" />
           <div className="relative flex min-h-[100dvh] w-full flex-col">
-            <div className="relative mx-auto w-full max-w-[640px] flex-1 px-4 pt-20">
+            {/* 80px of dead air above the name is a desktop luxury; on a phone
+                it costs a fifth of the viewport before the first word. */}
+            <div className="safe-x relative mx-auto w-full max-w-[640px] flex-1 pt-12 pb-24 sm:pt-20 sm:pb-0">
               <Header />
               {children}
               <Footer />

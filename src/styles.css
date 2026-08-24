@@ -222,23 +222,19 @@ code {
 }
 
 /*
-  Drive the vendored scroll-world engine from this site's tokens. Its own
-  defaults are a cream ground with a lavender accent; unlayered rules here beat
-  its `@layer sw` defaults, so /scroll-world follows whichever theme is active.
+  Page gutters. `viewport-fit=cover` lets the page reach the physical edge, so
+  the gutter has to clear the notch itself rather than trusting a fixed value:
+  in landscape on a notched phone `env()` is larger than the design gutter, and
+  everywhere else it is 0 and the design gutter wins.
 */
-.sw-root {
-  /*
-    Deliberately NOT var(--surface). Every clip is grounded in the diorama's own
-    graphite, so the page must match it or the posters read as dark rectangles
-    floating on a pale page. This surface is a cinema: dark in all four themes,
-    with the gold taken from the footage itself.
-  */
-  --sw-bg: #0c0c0e;
-  --sw-ink: #f4f2ec;
-  --sw-ink-soft: #a8a49a;
-  --sw-accent: #cea600;
-  --sw-font-display: var(--font-geist);
-  --sw-font-body: var(--font-geist);
+.safe-x {
+  padding-left: max(1.25rem, env(safe-area-inset-left));
+  padding-right: max(1.25rem, env(safe-area-inset-right));
+}
+
+/* Keeps the footer clear of the iOS home indicator. */
+.safe-b {
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom));
 }
 
 /*

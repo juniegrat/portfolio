@@ -22,6 +22,14 @@ export const Route = createFileRoute('/world')({
   component: World,
 })
 
+/** 0..1 scroll progress to a 1-based, zero-padded panel number. */
+function panelLabel(progress: number) {
+  return String(Math.min(PROJECTS.length, Math.floor(progress * PROJECTS.length) + 1)).padStart(
+    2,
+    '0',
+  )
+}
+
 function World() {
   const wrap = useRef<HTMLDivElement>(null)
   const track = useRef<HTMLDivElement>(null)
@@ -59,11 +67,7 @@ function World() {
               // here would re-render the tree ~60x/second.
               const node = counter.current
               if (!node) return
-              const index = Math.min(
-                PROJECTS.length,
-                Math.floor(self.progress * PROJECTS.length) + 1,
-              )
-              node.textContent = String(index).padStart(2, '0')
+              node.textContent = panelLabel(self.progress)
             },
           },
         })
@@ -98,7 +102,19 @@ function World() {
           <span> / {String(PROJECTS.length).padStart(2, '0')}</span>
         </div>
 
-        <div ref={track} className="pan-track flex h-full items-center gap-6 px-[6vw]">
+        <div
+          ref={track}
+          className="pan-track flex h-full items-center gap-6 px-[6vw]"
+          // Below 768px the pin is never built and the track is a native
+          // scroller, so nothing drives the counter. This does. On desktop the
+          // track is transformed rather than scrolled, so it never fires.
+          onScroll={(event) => {
+            const el = event.currentTarget
+            const max = el.scrollWidth - el.clientWidth
+            const node = counter.current
+            if (node) node.textContent = panelLabel(max > 0 ? el.scrollLeft / max : 0)
+          }}
+        >
           {PROJECTS.map((project, index) => (
             <article
               key={project.id}

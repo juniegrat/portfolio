@@ -4,15 +4,8 @@
   "files": {
     "ignoreUnknown": true,
     // routeTree.gen.ts is machine-written; styles.css uses Tailwind v4 at-rules
-    // Biome's CSS parser can't handle yet; scrub-engine.js is vendored upstream
-    // (kept close to source so it stays diffable — local changes are marked ADAPTED).
-    "includes": [
-      "**",
-      "!src/routeTree.gen.ts",
-      "!**/*.gen.ts",
-      "!src/styles.css",
-      "!src/lib/scrub-engine.js"
-    ]
+    // Biome's CSS parser can't handle yet.
+    "includes": ["**", "!src/routeTree.gen.ts", "!**/*.gen.ts", "!src/styles.css"]
   },
   "formatter": {
     "enabled": true,

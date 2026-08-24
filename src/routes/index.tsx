@@ -85,7 +85,9 @@ function ProjectMedia({ project, index }: { project: Project; index: number }) {
 
   const renderMedia = (className: string) =>
     video ? (
-      <video src={video} autoPlay loop muted className={className} />
+      // `playsInline` is load-bearing on iOS: without it Safari takes the video
+      // fullscreen instead of autoplaying inline, so the card renders empty.
+      <video src={video} autoPlay loop muted playsInline preload="metadata" className={className} />
     ) : (
       <img src={image} alt={name} className={className} />
     )
@@ -96,11 +98,13 @@ function ProjectMedia({ project, index }: { project: Project; index: number }) {
         {renderMedia('aspect-video w-full cursor-zoom-in rounded-plate object-cover')}
       </MorphingDialogTrigger>
       <MorphingDialogContainer>
-        <MorphingDialogContent className="relative aspect-video rounded-frame bg-raised p-1 ring-1 ring-line ring-inset">
-          {renderMedia('aspect-video h-[50vh] w-full rounded-plate object-cover md:h-[70vh]')}
+        {/* Without a width cap the aspect-video box is ~720px wide at h-[50vh]
+            and overhangs a phone screen. */}
+        <MorphingDialogContent className="relative aspect-video w-[92vw] max-w-3xl rounded-frame bg-raised p-1 ring-1 ring-line ring-inset">
+          {renderMedia('aspect-video h-auto w-full rounded-plate object-cover')}
         </MorphingDialogContent>
         <MorphingDialogClose
-          className="fixed top-6 right-6 h-fit w-fit rounded-full bg-raised p-1"
+          className="fixed top-[calc(env(safe-area-inset-top)+1rem)] right-4 flex h-11 w-11 items-center justify-center rounded-full bg-raised sm:top-6 sm:right-6"
           variants={{
             initial: { opacity: 0 },
             animate: { opacity: 1, transition: { delay: 0.3, duration: 0.1 } },
@@ -121,7 +125,7 @@ function MagneticSocialLink({ children, link }: { children: React.ReactNode; lin
         href={link}
         target="_blank"
         rel="noopener noreferrer"
-        className="group relative inline-flex shrink-0 items-center gap-[1px] rounded-full bg-sunken px-2.5 py-1 text-sm text-ink transition-[background-color,color,transform] duration-200 ease-snap hover:bg-accent hover:text-accent-ink active:scale-[0.97]"
+        className="group relative inline-flex min-h-11 shrink-0 items-center gap-[1px] rounded-full bg-sunken px-3.5 py-2 text-sm text-ink transition-[background-color,color,transform] duration-200 ease-snap hover:bg-accent hover:text-accent-ink active:scale-[0.97] sm:min-h-0 sm:px-2.5 sm:py-1"
       >
         {children}
         <svg
@@ -149,7 +153,7 @@ function MagneticSocialLink({ children, link }: { children: React.ReactNode; lin
 
 function Home() {
   return (
-    <main className="relative space-y-24">
+    <main className="relative space-y-16 sm:space-y-24">
       <section {...enter(0)}>
         <p className="text-balance text-lg leading-relaxed text-muted">{SITE_DESCRIPTION}</p>
       </section>
