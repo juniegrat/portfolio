@@ -27,6 +27,12 @@ export type BlogPost = {
   description: string
   slug: string
   uid: string
+  /** ISO date. Drives the ordering of the blog index and the dateline. */
+  date: string
+  /** Optional hero. Falls back to the typographic plate when absent. */
+  hero?: string
+  /** Reading time in minutes, rounded. */
+  minutes: number
 }
 
 export type SocialLink = {
@@ -138,7 +144,11 @@ export const CAPABILITIES: Capability[] = [
   },
 ]
 
-// These map to the MDX files in src/content/blog/<slug>.mdx
+// These map to the MDX files in src/content/blog/<slug>.mdx. Heroes live in
+// public/blog/ and follow the project posters: isometric diorama on a floating
+// rock, one graphite ground, one gold accent. Array order is the order the blog
+// index renders; `date` only drives the dateline. Drop `hero` and the card falls
+// back to a typographic plate.
 export const BLOG_POSTS: BlogPost[] = [
   {
     title: 'Post-mortem of a one-person build',
@@ -146,6 +156,9 @@ export const BLOG_POSTS: BlogPost[] = [
       'Eighteen months, eleven applications, one committer, and what the git history recorded.',
     slug: 'post-mortem-of-a-one-person-build',
     uid: 'blog-1',
+    date: '2026-08-24',
+    hero: '/blog/one-person-build.webp',
+    minutes: 9,
   },
   {
     title: 'Inheriting a nearly finished project',
@@ -153,6 +166,9 @@ export const BLOG_POSTS: BlogPost[] = [
       'What "already largely done" turned out to mean, measured in the files I was handed.',
     slug: 'inheriting-a-nearly-finished-project',
     uid: 'blog-2',
+    date: '2026-08-24',
+    hero: '/blog/inheritance.webp',
+    minutes: 8,
   },
   {
     title: 'An append-only fiscal journal for NF525',
@@ -160,6 +176,9 @@ export const BLOG_POSTS: BlogPost[] = [
       'Proving to a French auditor that your records were never altered, and what that does to your release process.',
     slug: 'append-only-fiscal-journal-nf525',
     uid: 'blog-3',
+    date: '2026-08-24',
+    hero: '/blog/fiscal-journal.webp',
+    minutes: 7,
   },
 ]
 

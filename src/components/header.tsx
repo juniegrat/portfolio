@@ -2,8 +2,11 @@ import { Link } from '@tanstack/react-router'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { NAME, ROLE } from '@/data'
 
-/** The GSAP horizontal pan. */
-const NAV = [{ to: '/world', label: 'Work' }] as const
+/** Work is the GSAP horizontal pan; Blog is the writing index. */
+const NAV = [
+  { to: '/world', label: 'Work' },
+  { to: '/blog', label: 'Blog' },
+] as const
 
 export function Header() {
   // flex-wrap moves the control group to its own row on very narrow screens

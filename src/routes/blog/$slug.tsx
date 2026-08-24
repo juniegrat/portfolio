@@ -1,9 +1,12 @@
-import { createFileRoute, notFound } from '@tanstack/react-router'
+import { createFileRoute, Link, notFound } from '@tanstack/react-router'
+import { ArrowLeftIcon } from 'lucide-react'
 import type { MDXComponents } from 'mdx/types'
 import { useEffect, useState } from 'react'
 import { mdxComponents } from '@/components/mdx-components'
+import { formatPostDate, PostHero } from '@/components/post-hero'
 import { ScrollProgress } from '@/components/ui/scroll-progress'
 import { TextMorph } from '@/components/ui/text-morph'
+import { BLOG_POSTS } from '@/data'
 import { WEBSITE_URL } from '@/lib/constants'
 
 type PostModule = {
@@ -31,9 +34,11 @@ export const Route = createFileRoute('/blog/$slug')({
   loader: ({ params }) => {
     const post = posts[params.slug]
     if (!post) throw notFound()
+    const entry = BLOG_POSTS.find((item) => item.slug === params.slug)
     return {
       title: post.metadata?.title ?? params.slug,
       description: post.metadata?.description ?? '',
+      hero: entry?.hero,
     }
   },
   head: ({ loaderData, params }) => {
@@ -47,6 +52,11 @@ export const Route = createFileRoute('/blog/$slug')({
         { property: 'og:title', content: loaderData.title },
         { property: 'og:description', content: loaderData.description },
         { property: 'og:url', content: url },
+        // Falls through to the site card declared on the root route when a
+        // post ships without a hero.
+        ...(loaderData.hero
+          ? [{ property: 'og:image', content: `${WEBSITE_URL}${loaderData.hero}` }]
+          : []),
         { name: 'twitter:title', content: loaderData.title },
         { name: 'twitter:description', content: loaderData.description },
       ],
@@ -96,6 +106,7 @@ function BlogPost() {
   if (!post) return null
 
   const Content = post.default
+  const entry = BLOG_POSTS.find((item) => item.slug === slug)
 
   return (
     <>
@@ -107,10 +118,29 @@ function BlogPost() {
         }}
       />
 
-      <div className="absolute top-24 right-4">
+      <div className="mt-24 flex items-center justify-between gap-4">
+        <Link
+          to="/blog"
+          className="group inline-flex min-h-11 items-center gap-1.5 text-sm text-muted transition-colors duration-150 ease-snap hover:text-ink sm:min-h-0"
+        >
+          <ArrowLeftIcon className="h-3.5 w-3.5 transition-transform duration-200 ease-snap group-hover:-translate-x-0.5" />
+          <span>Writing</span>
+        </Link>
         <CopyButton />
       </div>
-      <main className="prose mt-24 pb-20 prose-h1:text-xl prose-h1:font-medium prose-h2:mt-12 prose-h2:scroll-m-20 prose-h2:text-lg prose-h2:font-medium prose-h3:text-base prose-h3:font-medium prose-h4:text-base prose-h4:font-medium prose-h5:text-base prose-h5:font-medium prose-h6:text-base prose-h6:font-medium prose-strong:font-medium">
+
+      {entry ? (
+        <div className="mt-4">
+          <PostHero title={entry.title} src={entry.hero} eager />
+          <div className="tabular mt-3 flex items-center gap-2 px-1 font-mono text-xs text-faint">
+            <time dateTime={entry.date}>{formatPostDate(entry.date)}</time>
+            <span aria-hidden="true">/</span>
+            <span>{entry.minutes} min</span>
+          </div>
+        </div>
+      ) : null}
+
+      <main className="prose mt-6 pb-20 prose-h1:text-xl prose-h1:font-medium prose-h2:mt-12 prose-h2:scroll-m-20 prose-h2:text-lg prose-h2:font-medium prose-h3:text-base prose-h3:font-medium prose-h4:text-base prose-h4:font-medium prose-h5:text-base prose-h5:font-medium prose-h6:text-base prose-h6:font-medium prose-strong:font-medium">
         <Content components={mdxComponents} />
       </main>
     </>

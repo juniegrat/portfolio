@@ -247,7 +247,16 @@ function Home() {
       </section>
 
       <section id="blog" {...enter(3)}>
-        <h2 className="mb-3 text-lg font-medium text-ink">Blog</h2>
+        <div className="mb-3 flex items-baseline justify-between gap-3">
+          <h2 className="text-lg font-medium text-ink">Writing</h2>
+          <Link
+            to="/blog"
+            className="group relative inline-block font-mono text-xs text-muted transition-colors duration-150 ease-snap hover:text-ink"
+          >
+            All posts
+            <span className="absolute bottom-0.5 left-0 block h-[1px] w-full max-w-0 bg-accent transition-[max-width] duration-200 ease-snap group-hover:max-w-full" />
+          </Link>
+        </div>
         <div className="flex flex-col space-y-0">
           <AnimatedBackground
             enableHover

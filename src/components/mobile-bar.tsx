@@ -8,14 +8,14 @@ import useClickOutside from '@/hooks/useClickOutside'
 /**
  * Bottom navigation, phones only.
  *
- * Work is its own route; Blog and Connect are sections of the home page, so
- * they carry a hash and route home first when you are somewhere else. Theme
+ * Work and Blog are their own routes; Connect is a section of the home page, so
+ * it carries a hash and routes home first when you are somewhere else. Theme
  * lives behind a disclosure rather than inline — five swatches plus three
  * labels do not fit one 375px row, and navigation earns the space.
  */
 const NAV = [
   { label: 'Work', to: '/world' },
-  { label: 'Blog', to: '/', hash: 'blog' },
+  { label: 'Blog', to: '/blog' },
   { label: 'Contact', to: '/', hash: 'connect' },
 ] as const
 
@@ -73,8 +73,8 @@ export function MobileBar() {
               to={item.to}
               hash={hash}
               className={ITEM}
-              // Only the route item gets an active state. Blog and Connect are
-              // both `/`, so router matching would light them at the same time;
+              // Only route items get an active state. Connect is a hash on `/`,
+              // so router matching would light it alongside any other `/` item;
               // telling them apart needs scroll position, which the router does
               // not track.
               activeProps={hash ? undefined : { className: 'text-ink' }}
