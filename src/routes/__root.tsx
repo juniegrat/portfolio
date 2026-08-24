@@ -10,6 +10,10 @@ import appCss from '../styles.css?url'
 
 const SITE_TITLE = `${NAME}, ${ROLE}`
 
+/** Screenshot of the home page in the instrument theme. See README.md. */
+const OG_IMAGE = `${WEBSITE_URL}/og.png`
+const OG_IMAGE_ALT = `The ${NAME} portfolio home page: the intro line and the first project cards.`
+
 export const Route = createRootRoute({
   head: () => ({
     meta: [
@@ -25,9 +29,18 @@ export const Route = createRootRoute({
       { property: 'og:title', content: SITE_TITLE },
       { property: 'og:description', content: SITE_DESCRIPTION },
       { property: 'og:url', content: WEBSITE_URL },
+      // Scrapers do not run JS and will not resolve a relative path, so the
+      // card image has to be an absolute URL. Regenerate it with the recipe in
+      // README.md whenever the home page changes shape.
+      { property: 'og:image', content: OG_IMAGE },
+      { property: 'og:image:width', content: '1200' },
+      { property: 'og:image:height', content: '630' },
+      { property: 'og:image:alt', content: OG_IMAGE_ALT },
       { name: 'twitter:card', content: 'summary_large_image' },
       { name: 'twitter:title', content: SITE_TITLE },
       { name: 'twitter:description', content: SITE_DESCRIPTION },
+      { name: 'twitter:image', content: OG_IMAGE },
+      { name: 'twitter:image:alt', content: OG_IMAGE_ALT },
     ],
     links: [
       { rel: 'stylesheet', href: appCss },

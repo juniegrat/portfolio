@@ -207,6 +207,25 @@ function PeopleComponent() {
 
 Loaders simplify your data fetching logic dramatically. Check out more information in the [Loader documentation](https://tanstack.com/router/latest/docs/framework/react/guide/data-loading#loader-parameters).
 
+## Social card
+
+`public/og.png` is a real 1200x630 screenshot of the home page in the instrument
+theme, not a generated card. Regenerate it whenever the home page changes shape:
+
+1. `pnpm dev`, open `http://localhost:5180/` at a 1200x630 viewport.
+2. `localStorage.setItem('theme', 'instrument')`, reload.
+3. Hide the chrome that should not appear in a social card:
+
+   ```js
+   document.querySelector('[role="group"][aria-label="Color theme"]').parentElement.style.display = 'none'
+   document.documentElement.style.overflow = 'hidden' // drops the scrollbar
+   ```
+
+   In dev, also remove the TanStack devtools node.
+4. Screenshot the viewport (not the full page) to `public/og.png`.
+
+The dimensions are declared in `src/routes/__root.tsx`; keep them in sync.
+
 # Demo files
 
 Files prefixed with `demo` can be safely deleted. They are there to provide a starting point for you to play around with the features you've installed.
