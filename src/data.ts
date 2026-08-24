@@ -42,8 +42,10 @@ export const SITE_DESCRIPTION =
 
 export const EMAIL = 'juniegrat@gmail.com'
 
-// Selected projects. Drop in an `image` (path under /public) or `video` URL to
-// replace the typographic plate.
+// Selected projects. Posters live in public/projects/ — isometric dioramas
+// rendered per project, kept on one graphite ground and one gold accent so the
+// grid reads as a set. Drop a `video` URL on a project to override its poster;
+// omit both and the card falls back to the typographic plate.
 export const PROJECTS: Project[] = [
   {
     name: 'Design Library',
@@ -52,6 +54,7 @@ export const PROJECTS: Project[] = [
     link: 'https://design.juniegrat.com',
     tech: ['TanStack Start', 'Tailwind v4', 'shadcn registry', 'Vite SSR'],
     year: '2026',
+    image: '/projects/library.webp',
     id: 'design-library',
   },
   {
@@ -62,6 +65,7 @@ export const PROJECTS: Project[] = [
     // case-study URL to enable it).
     tech: ['Next.js', 'Turborepo', 'tRPC', 'Drizzle ORM', 'PostgreSQL', 'Playwright'],
     year: '2026',
+    image: '/projects/hadesor.webp',
     id: 'hadesor',
   },
   {
@@ -71,6 +75,7 @@ export const PROJECTS: Project[] = [
     link: 'https://github.com/juniegrat/asm',
     tech: ['Python', 'FastAPI', 'TanStack Start', 'SQLite', 'nuclei'],
     year: '2026',
+    image: '/projects/asm.webp',
     id: 'asm',
   },
   {
@@ -80,6 +85,7 @@ export const PROJECTS: Project[] = [
     link: 'https://github.com/juniegrat/coin-detect',
     tech: ['React Native', 'Expo', 'TypeScript', 'OpenAI Vision'],
     year: '2026',
+    image: '/projects/coin.webp',
     id: 'coin-detect',
   },
   {
@@ -89,6 +95,7 @@ export const PROJECTS: Project[] = [
     link: 'https://github.com/juniegrat/threejs-nebula',
     tech: ['Three.js', 'GLSL', 'Vite'],
     year: '2026',
+    image: '/projects/aurum.webp',
     id: 'aurum',
   },
   {
@@ -98,6 +105,7 @@ export const PROJECTS: Project[] = [
     link: 'https://github.com/juniegrat/ae-mcp',
     tech: ['TypeScript', 'MCP', 'ExtendScript', 'AppleScript'],
     year: '2026',
+    image: '/projects/mcp.webp',
     id: 'adobe-mcp',
   },
 ]

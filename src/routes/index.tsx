@@ -89,7 +89,9 @@ function ProjectMedia({ project, index }: { project: Project; index: number }) {
       // fullscreen instead of autoplaying inline, so the card renders empty.
       <video src={video} autoPlay loop muted playsInline preload="metadata" className={className} />
     ) : (
-      <img src={image} alt={name} className={className} />
+      // Six posters below the fold on a phone; `lazy` keeps them off the
+      // initial load. The wrapper is `aspect-video`, so there is no shift.
+      <img src={image} alt={name} loading="lazy" decoding="async" className={className} />
     )
 
   return (
