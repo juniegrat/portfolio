@@ -119,6 +119,18 @@ export const PROJECTS: Project[] = [
     slug: 'asm',
   },
   {
+    name: 'People Lens',
+    description: {
+      en: 'A local-first reading of your own communication exports: who you actually give time to, which threads drift, and which patterns a model thinks it found. Every finding carries a measured error rate and a human verdict that overrides the model in both directions.',
+      fr: "Une lecture locale de vos propres exports de communication : à qui vous accordez réellement du temps, quels fils s'éteignent, et quels motifs un modèle croit avoir trouvés. Chaque constat porte un taux d'erreur mesuré et un verdict humain qui prime sur le modèle dans les deux sens.",
+    },
+    tech: ['TanStack Start', 'SQLite', 'Drizzle ORM', 'Local LLM'],
+    year: '2026',
+    image: '/projects/people-lens.webp',
+    id: 'people-lens',
+    slug: 'people-lens',
+  },
+  {
     name: 'Parley',
     description: {
       en: 'Local-first meeting memory for macOS. Records system audio and microphone, separates who spoke with pyannote diarization, and transcribes on-device so nothing leaves the machine. Ships with an iOS companion.',

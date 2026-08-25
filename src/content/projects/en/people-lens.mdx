@@ -1,0 +1,64 @@
+export const metadata = {
+  title: 'People Lens',
+  description:
+    'A local-first tool for reading your own communication history, built so that every finding it produces carries the measured probability that it is wrong.',
+  alternates: {
+    canonical: '/projects/people-lens',
+  },
+}
+
+# People Lens
+
+Your calendar, mail headers and chat exports describe how you actually spend attention, and none of the apps holding them will tell you. People Lens ingests those exports into a local database and reads them back: who you give time to, which relationships are drifting, and which patterns hold up when you check them.
+
+Everything stays on the machine. No account, no sync, no upload. That is a requirement rather than a feature, because the input is the most sensitive corpus most people own.
+
+## The problem with tools like this
+
+There is a category of software that reads your messages and tells you something about the people in them. Almost all of it shares one flaw: it reports findings without reporting how often it is wrong.
+
+That flaw is not cosmetic. A tool that surfaces a pattern in your own history is, by construction, being run by someone with a stake in the answer. Give that person a list of confident-looking rows and they will find the ones that confirm what they already thought. The list is not evidence. It is their prior, rendered as a table, with timestamps that make it look like measurement.
+
+So the design question was not how to detect more. It was how to make the output honest about its own reliability, given that the person reading it wants it to be true.
+
+## Calibration is a first-class subsystem
+
+The answer is that `calibration_labels` is a table, not a spreadsheet somebody kept on the side.
+
+There is a labelling route in the app whose only job is to show you one finding at a time, with the surrounding thread, and take your verdict before revealing what the model decided. Blind scoring, because scoring after you have seen the machine's answer measures your agreeableness rather than the machine.
+
+A calibration pass then compares the labelled sample against the model's output and produces precision and recall per detector. Those numbers ship with the report. A detector that scores badly does not get a caveat in a footnote, it gets pulled.
+
+On my own corpus, this was worth the entire project. One detector came out strong enough to cite. One came out usable with a stated error bar. A third agreed with my own judgement barely more than a third of the time, which is worse than chance on a binary question, and I deleted it rather than keep it with a disclaimer. A number with a disclaimer still gets quoted without one.
+
+## Human verdicts override, in both directions
+
+The labelling verdict beats the model permanently, and it beats it both ways: a finding a human rejects stays rejected, and a finding a human accepts stays accepted even when a later model pass disagrees.
+
+The second half matters more than it sounds. A review loop where the human can only strike things out is not review, it is a slower way of agreeing with yourself: everything the model surfaced is either confirmed or removed, and nothing it missed can ever enter. Letting the verdict add as well as subtract is what makes the labelled set a ground truth rather than a filtered version of the model's opinion.
+
+## Patterns come from literature, not from vibes
+
+There is a `research_papers` table, and it is there because the alternative is inventing psychology.
+
+It is easy to write a detector for a pattern you feel exists. It is much harder to defend that pattern to anyone else, and impossible to know whether you have described a real phenomenon or your own irritation. Anchoring the detectors to published constructs means each one has a definition that was written by someone with no stake in your corpus, and a body of work that says what it does and does not predict.
+
+This also constrains the tool usefully. If a pattern has no literature behind it, it does not get a detector. That has removed more ideas than it has kept.
+
+## Running the models locally
+
+Inference runs against local models, and `benchmark-local-llm.ts` exists because "local" and "good enough" are not the same claim and the gap needed measuring.
+
+The constraint is absolute: the corpus does not leave the machine, so a hosted frontier model is not available at any quality. That means the honest engineering question is not which model is best, it is which locally runnable model is adequate for each specific detector, measured on the same labelled sample used for calibration. Some tasks passed. Others did not, and those became the ones a human does.
+
+## The ingestion bugs are the dangerous ones
+
+Seventeen percent of one detector's output turned out to be miscategorised before any detection logic ran, at the ingestion stage. Bad plumbing, not bad inference.
+
+That is the more embarrassing failure and the more instructive one, because a calibration number computed downstream of a parsing bug is measuring the wrong thing while looking perfectly rigorous. There is now a deduplication pass for the truncated copies that quoting and forwarding produce, and the calibration sample is drawn after ingestion rather than before, so what gets scored is what the detectors actually saw.
+
+## What it is not
+
+It is not a way to prove something about another person. The precision figures alone rule that out, and the tool is deliberately shaped so that anything you would want to quote has to pass through a human verdict first.
+
+It is a way to find out how much of your own reading of your own history survives being checked. In my case the honest answer was: much of it, but materially less than I believed going in, and I could not tell which parts from the inside.

@@ -1,0 +1,64 @@
+export const metadata = {
+  title: 'People Lens',
+  description:
+    "Un outil local pour relire son propre historique de communication, conçu pour que chaque constat produit porte la probabilité mesurée qu'il soit faux.",
+  alternates: {
+    canonical: '/fr/projects/people-lens',
+  },
+}
+
+# People Lens
+
+Votre agenda, vos en-têtes de messagerie et vos exports de conversations décrivent la façon dont vous dépensez réellement votre attention, et aucune des applications qui les détiennent ne vous le dira. People Lens ingère ces exports dans une base locale et les relit : à qui vous accordez du temps, quelles relations s'éloignent, et quels motifs tiennent quand on les vérifie.
+
+Tout reste sur la machine. Pas de compte, pas de synchronisation, pas d'envoi. C'est une exigence plutôt qu'une fonctionnalité, parce que l'entrée est le corpus le plus sensible que la plupart des gens possèdent.
+
+## Le problème avec ce genre d'outil
+
+Il existe une catégorie de logiciels qui lisent vos messages et vous disent quelque chose sur les personnes qui s'y trouvent. Presque tous partagent un même défaut : ils rapportent des constats sans rapporter à quelle fréquence ils se trompent.
+
+Ce défaut n'est pas cosmétique. Un outil qui fait remonter un motif dans votre propre historique est, par construction, utilisé par quelqu'un qui a un intérêt dans la réponse. Donnez à cette personne une liste de lignes à l'air assuré et elle y trouvera celles qui confirment ce qu'elle pensait déjà. La liste n'est pas une preuve. C'est son a priori, rendu sous forme de tableau, avec des horodatages qui lui donnent l'apparence d'une mesure.
+
+La question de conception n'était donc pas comment détecter davantage. C'était comment rendre la sortie honnête sur sa propre fiabilité, sachant que la personne qui la lit souhaite qu'elle soit vraie.
+
+## La calibration est un sous-système de premier plan
+
+La réponse tient au fait que `calibration_labels` est une table, et non un tableur que quelqu'un tient à côté.
+
+L'application comporte une route d'annotation dont l'unique fonction est de vous montrer un constat à la fois, avec le fil qui l'entoure, et de prendre votre verdict avant de révéler ce que le modèle a décidé. Notation en aveugle, parce que noter après avoir vu la réponse de la machine mesure votre docilité plutôt que la machine.
+
+Une passe de calibration compare ensuite l'échantillon annoté à la sortie du modèle et produit une précision et un rappel par détecteur. Ces nombres sont livrés avec le rapport. Un détecteur qui obtient de mauvais résultats ne reçoit pas une réserve en note de bas de page : il est retiré.
+
+Sur mon propre corpus, cela a justifié le projet entier. Un détecteur est ressorti assez solide pour être cité. Un autre est ressorti exploitable avec une barre d'erreur explicite. Un troisième s'accordait avec mon propre jugement à peine plus d'une fois sur trois, ce qui est pire que le hasard sur une question binaire, et je l'ai supprimé plutôt que de le conserver avec un avertissement. Un nombre assorti d'un avertissement finit quand même cité sans lui.
+
+## Le verdict humain prime, dans les deux sens
+
+Le verdict d'annotation l'emporte définitivement sur le modèle, et il l'emporte dans les deux sens : un constat rejeté par un humain reste rejeté, et un constat accepté par un humain reste accepté même si une passe ultérieure du modèle n'est pas d'accord.
+
+La seconde moitié compte plus qu'il n'y paraît. Une boucle de revue où l'humain ne peut que rayer n'est pas une revue, c'est une façon plus lente d'être d'accord avec soi-même : tout ce que le modèle a fait remonter est soit confirmé, soit supprimé, et rien de ce qu'il a manqué ne peut jamais entrer. Permettre au verdict d'ajouter autant que de retrancher est ce qui fait de l'ensemble annoté une vérité terrain plutôt qu'une version filtrée de l'avis du modèle.
+
+## Les motifs viennent de la littérature, pas de l'intuition
+
+Il existe une table `research_papers`, et elle est là parce que l'alternative consiste à inventer de la psychologie.
+
+Il est facile d'écrire un détecteur pour un motif dont on sent l'existence. Il est bien plus difficile de défendre ce motif devant quelqu'un d'autre, et impossible de savoir si l'on a décrit un phénomène réel ou son propre agacement. Ancrer les détecteurs à des construits publiés donne à chacun une définition écrite par quelqu'un qui n'a aucun intérêt dans votre corpus, et un corps de travaux qui dit ce qu'elle prédit et ce qu'elle ne prédit pas.
+
+Cela contraint aussi l'outil de façon utile. Si un motif n'a pas de littérature derrière lui, il n'obtient pas de détecteur. Cette règle a écarté plus d'idées qu'elle n'en a retenues.
+
+## Faire tourner les modèles en local
+
+L'inférence s'exécute sur des modèles locaux, et `benchmark-local-llm.ts` existe parce que « local » et « suffisamment bon » ne sont pas la même affirmation et que l'écart demandait à être mesuré.
+
+La contrainte est absolue : le corpus ne quitte pas la machine, donc un modèle hébergé de premier plan n'est disponible à aucune qualité. La question d'ingénierie honnête n'est donc pas quel modèle est le meilleur, mais quel modèle exécutable localement est adéquat pour chaque détecteur précis, mesuré sur le même échantillon annoté que la calibration. Certaines tâches sont passées. D'autres non, et celles-là sont devenues celles que fait un humain.
+
+## Les bogues d'ingestion sont les dangereux
+
+Dix-sept pour cent de la sortie d'un détecteur se sont révélés mal catégorisés avant que la moindre logique de détection ne s'exécute, au stade de l'ingestion. De la mauvaise plomberie, pas de la mauvaise inférence.
+
+C'est l'échec le plus gênant et le plus instructif, parce qu'un nombre de calibration calculé en aval d'un bogue d'analyse mesure la mauvaise chose tout en paraissant parfaitement rigoureux. Il existe désormais une passe de déduplication pour les copies tronquées que produisent la citation et le transfert, et l'échantillon de calibration est tiré après l'ingestion plutôt qu'avant, de sorte que ce qui est noté est bien ce que les détecteurs ont vu.
+
+## Ce que ce n'est pas
+
+Ce n'est pas un moyen de prouver quoi que ce soit au sujet d'une autre personne. Les chiffres de précision suffisent à l'exclure, et l'outil est délibérément conçu pour que tout ce que l'on voudrait citer doive d'abord passer par un verdict humain.
+
+C'est un moyen de découvrir quelle part de votre propre lecture de votre propre historique survit à une vérification. Dans mon cas, la réponse honnête a été : une grande part, mais sensiblement moins que je ne le croyais au départ, et je ne pouvais pas distinguer laquelle de l'intérieur.
