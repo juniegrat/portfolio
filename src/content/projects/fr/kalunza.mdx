@@ -1,0 +1,77 @@
+export const metadata = {
+  title: 'Kalunza',
+  description:
+    "Marque, boutique et outillage catalogue pour un porte-passeport fabriqué à Soweto. Pourquoi la proposition a été livrée sous forme de site plutôt que de deck, et pourquoi le catalogue est piloté depuis Python plutôt que depuis l'admin Shopify.",
+  alternates: {
+    canonical: '/fr/projects/kalunza',
+  },
+}
+
+# Kalunza
+
+Une boutique en production pour un seul objet : un porte-passeport fabriqué à Soweto, en coton shweshwe sur une base de daim. Direction artistique, thème Shopify, et l'outillage qui met le catalogue en ligne.
+
+Plus petit que la plupart de ce qui figure sur ce site, et présent ici parce que les décisions intéressantes n'ont pas été celles que j'attendais.
+
+## Vendre un seul objet
+
+La plupart des conseils sur les boutiques supposent un catalogue. Merchandising, logique de collections, ventes croisées, recherche. Rien de tout cela ne s'applique quand il n'y a qu'un produit, et cette absence change la fonction du site.
+
+Avec un catalogue, le travail consiste à aider quelqu'un à choisir. Avec un seul objet, il consiste à expliquer pourquoi cet objet existe. Presque tout le poids se déplace donc vers la matière et la provenance : ce qu'est le coton shweshwe, pourquoi une base en daim, ce que « fabriqué à Soweto » implique dans la façon dont la pièce est assemblée. La page produit cesse d'être une fiche technique pour devenir l'argument.
+
+Concrètement, le texte et la photographie ont piloté la mise en page plutôt que l'inverse, et la majorité des sections standard du thème ont sauté. Une boutique mono-produit qui conserve son carrousel de recommandations vous dit qu'elle a été montée à partir d'un template et que personne n'a regardé.
+
+## La proposition a été livrée sous forme de site
+
+La direction artistique devait être validée par une personne qui n'est pas designer et qui ne lit pas de spécifications.
+
+Le réflexe habituel est un deck. J'en ai vu assez partir de travers pour connaître le mode de défaillance : tout le monde approuve les diapositives, puis conteste la réalisation, parce qu'une diapositive de palette et une vraie page dans cette palette sont deux expériences différentes et qu'une seule des deux est le produit.
+
+La proposition est donc partie sous la forme d'un site déployable, sur sa propre URL, avec la direction implémentée plutôt que décrite. Comportement au défilement, vraie typographie aux vraies tailles, photographie réelle. Valider signifiait alors regarder quelque chose qui se comporte comme la chose à valider.
+
+Cela a coûté quelques jours qu'un deck n'aurait pas coûtés. Cela a acheté une direction qui a survécu au contact de l'implémentation, puisqu'elle avait déjà été implémentée.
+
+## La direction est stockée comme donnée
+
+`DESIGN.md` conserve la direction courante sous forme de document structuré plutôt que de prose : une palette nommée, une échelle typographique, et les règles qui les tiennent ensemble.
+
+```yaml
+name: Shweshwe After Dark
+colors:
+  night: "#030806"
+  forest: "#071610"
+  emerald: "#286f52"
+  shweshwe-gold: "#d6a52b"
+  bone: "#f2efe5"
+typography:
+  display:
+    fontSize: "clamp(3.375rem, 6.25vw, 6.5rem)"
+    fontWeight: 500
+    lineHeight: 0.93
+```
+
+Écrite ainsi, une direction se relit et se compare. Quand la palette change, le changement est une ligne dans un fichier, datée et motivée, et non un nouveau PDF dont plus personne ne sait reconstituer le rapport au précédent. Cela signifie aussi que les jetons qui arrivent dans le thème et ceux du site de proposition viennent du même endroit, ce qui est la seule raison pour laquelle ces deux surfaces se sont un jour accordées sur une couleur.
+
+L'échelle typographique est un unique `clamp`, délibérément. Une taille d'affichage qui tient en une expression plutôt qu'en quatre surcharges de points de rupture est une taille que l'on peut raisonner, et cela empêche le titre de faire quelque chose d'imprévu sur une largeur que personne n'a testée.
+
+## Piloter le catalogue depuis Python
+
+Le travail sur le catalogue s'exécute sous forme de scripts contre l'API Shopify, pas via l'interface d'administration. Construction des charges utiles d'opérations en masse, composition de la page d'accueil, création de pages, import dans une boutique de développement, et extraction du catalogue en production vers un CSV.
+
+C'est plus de mise en place que de cliquer dans l'admin, et la raison tient à la boutique de développement. Modifier directement une boutique en production revient à faire de l'étape risquée la seule étape. Avec un script d'import, la même entrée produit le même catalogue sur une boutique jetable, on regarde, et seulement ensuite cela s'approche de la production. Le retour vers CSV existe pour comparer l'état réel à ce que les scripts croient qu'il devrait être, ce qui est la façon de retrouver la chose que quelqu'un a changée à la main il y a trois semaines.
+
+Rien de sophistiqué là-dedans. Quelques centaines de lignes de Python autour d'un client d'API. C'est ici parce que « on le fera dans l'admin » est la façon dont une boutique finit dans un état que personne ne sait reproduire.
+
+## Deux thèmes à la fois
+
+La boutique tourne sur Prestige. Une migration vers Horizon avance à côté, schémas de sections d'abord, inachevée volontairement.
+
+Migrer une boutique en production n'est pas une tâche que l'on termine en une après-midi, et ce n'est pas une tâche que l'on veut appliquer à moitié à ce qui prend actuellement les commandes. Garder la migration sous forme de jeu de schémas parallèle permet de construire et de relire le nouveau thème sur du contenu réel pendant que l'ancien continue de vendre, et fait du basculement une décision prise une fois plutôt qu'un état vers lequel on dérive.
+
+Le coût est que deux structures de thème coexistent et peuvent diverger. C'est une vraie dette de maintenance, et elle est moins chère que l'alternative, qui est une boutique en production à moitié migrée.
+
+## Ce que je ferais autrement
+
+La photographie est arrivée après que la mise en page avait déjà pris forme : certaines sections ont donc été conçues autour d'images qui n'existaient pas encore et ont dû bouger une fois qu'elles ont existé. Sur un produit où la matière est l'argument, la prise de vue devrait venir en premier et la mise en page suivre.
+
+J'aurais aussi écrit les scripts de catalogue contre la boutique de développement dès le premier commit, plutôt que d'ajouter ce chemin une fois que la boutique en production portait déjà un état fabriqué à la main. Réconcilier les deux après coup a pris plus de temps que de le faire dans le bon ordre.

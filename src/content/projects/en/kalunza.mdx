@@ -1,0 +1,77 @@
+export const metadata = {
+  title: 'Kalunza',
+  description:
+    'Brand, storefront and catalog tooling for a Soweto-made passport holder. Why the pitch shipped as a website instead of a deck, and why the catalog is driven from Python rather than the Shopify admin.',
+  alternates: {
+    canonical: '/projects/kalunza',
+  },
+}
+
+# Kalunza
+
+A live storefront for a single crafted object: a passport holder made in Soweto from Shweshwe cotton over a suede base. Brand direction, the Shopify theme, and the tooling that puts the catalog on the store.
+
+Smaller than most of what is on this site, and included because the interesting decisions were not the ones I expected.
+
+## Selling one object
+
+Most storefront advice assumes a catalog. Merchandising, collection logic, cross-sell, search. None of it applies when there is one product, and the absence changes what the site is for.
+
+With a catalog, the job is helping someone choose. With one object, the job is explaining why it exists. That pushes almost all the weight onto material and provenance: what Shweshwe cotton is, why a suede base, what "made in Soweto" means for how the thing is put together. The product page stops being a spec sheet and becomes the argument.
+
+Practically, that meant the copy and photography drove the layout rather than the reverse, and most of the theme's standard sections came out. A one-product store that keeps its recommendation carousel is telling you it was built from a template and nobody looked.
+
+## The pitch shipped as a website
+
+The design direction had to be agreed with a stakeholder who is not a designer and does not read specifications.
+
+The usual move is a deck. I have watched enough of those go sideways to know the failure: everyone agrees to the slides, then disagrees with the build, because a slide of a colour palette and a real page in that palette are different experiences and only one of them is the product.
+
+So the proposition went out as its own deployable site, on its own URL, with the direction implemented rather than described. Scroll behaviour, real type at real sizes, the actual photography. Sign-off then meant looking at something that behaves like the thing being approved.
+
+It cost a few days that a deck would not have. It bought a direction that survived contact with implementation, because it had already been implemented.
+
+## The direction is stored as data
+
+`DESIGN.md` holds the current direction as a structured document rather than prose: a named palette, a type scale, and the rules that hold them together.
+
+```yaml
+name: Shweshwe After Dark
+colors:
+  night: "#030806"
+  forest: "#071610"
+  emerald: "#286f52"
+  shweshwe-gold: "#d6a52b"
+  bone: "#f2efe5"
+typography:
+  display:
+    fontSize: "clamp(3.375rem, 6.25vw, 6.5rem)"
+    fontWeight: 500
+    lineHeight: 0.93
+```
+
+Written this way, a direction can be reviewed and diffed. When the palette changes, the change is a line in a file with a date and a reason, not a new PDF whose relationship to the last one nobody can reconstruct. It also means the tokens that reach the theme and the tokens in the pitch site come from one place, which is the only reason those two ever agreed on a colour.
+
+The type scale is a single `clamp`, deliberately. A display size that is one expression rather than four breakpoint overrides is a size you can reason about, and it stops the headline from doing something unplanned on a width nobody tested.
+
+## Driving the catalog from Python
+
+The catalog work runs as scripts against the Shopify API, not through the admin interface. Building bulk operation payloads, composing the homepage, creating pages, importing into a development store, and pulling the live catalog back out to CSV.
+
+This is more setup than clicking through the admin, and the reason is the development store. Making a change directly against a live storefront means the risky step and the only step are the same step. With an import script, the same input produces the same catalog on a scratch store, you look at it, and only then does it go near production. The round trip back to CSV exists so the live state can be diffed against what the scripts believe it should be, which is how you find the thing somebody changed by hand three weeks ago.
+
+None of this is sophisticated. It is a few hundred lines of Python around an API client. It is here because "we will just do it in the admin" is how a store ends up with a state nobody can reproduce.
+
+## Two themes at once
+
+The store runs on Prestige. A migration to Horizon sits alongside it, section schemas first, unfinished on purpose.
+
+Migrating a live storefront is not a task you complete in an afternoon and it is not one you want to half-apply to the thing currently taking orders. Keeping the migration as a parallel set of schemas means the new theme can be built and reviewed against real content while the old one keeps selling, and the switch is a decision made once rather than a state you drift into.
+
+The cost is that two theme structures exist and can disagree. That is a real maintenance tax, and it is cheaper than the alternative, which is a half-migrated live store.
+
+## What I would do differently
+
+The photography arrived after the layout was already taking shape, so some sections were designed around images that did not exist yet and had to move once they did. On a product where material is the argument, the shoot should come first and the layout should follow it.
+
+I would also have written the catalog scripts against the development store from the first commit rather than adding that path once the live store already had hand-made state in it. Reconciling the two afterwards took longer than doing it in the right order would have.
