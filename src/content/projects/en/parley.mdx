@@ -1,0 +1,58 @@
+export const metadata = {
+  title: 'Parley',
+  description:
+    'Meeting memory for macOS that never uploads anything. Why "local-first" is an architectural constraint rather than a privacy badge, and what diarization costs when the transcript has to know who spoke.',
+  alternates: {
+    canonical: '/projects/parley',
+  },
+}
+
+# Parley
+
+Records a meeting from system audio and microphone, works out who said what, transcribes it, and keeps every byte on the machine. Built for Apple Silicon, with an iOS companion.
+
+## The constraint decides the architecture
+
+Every meeting tool worth using sends your audio to a server. That is not carelessness, it is the only way to reach the best models, and for most conversations it is a fine trade.
+
+It stops being fine when the meeting is a client's confidential roadmap, a salary discussion, a legal call, or anything covered by an agreement you signed. In those rooms the question is not whether the vendor is trustworthy but whether you are permitted to transmit at all, and the answer is often no.
+
+So the constraint here is absolute: nothing leaves the machine. Not the audio, not the transcript, not an embedding, not a telemetry ping with a duration in it. That single rule determines almost every decision downstream, and it removes the option that every competitor takes.
+
+The most important consequence is that you no longer get to pick the best model. You get to pick the best model that runs on this laptop, which is a different and much smaller list, and the honest engineering question becomes whether the gap is survivable for the specific task rather than which model wins in the abstract.
+
+## Diarization is the hard half
+
+Transcription is close to solved for local use. Diarization, meaning working out how many people spoke and which segment belongs to whom, is not.
+
+Parley uses pyannote for it, and the reason that step deserves its own attention is that a transcript without speakers is a much weaker artifact. "We agreed to ship in March" is a note. "The client said they need it by March, and we said that was possible" is a record. The second is what you want six weeks later when the recollections diverge, and the difference between them is entirely speaker attribution.
+
+Diarization is also where the errors are least forgiving. A transcription mistake produces a wrong word that a reader corrects from context without noticing. An attribution mistake produces a sentence in the wrong mouth, which reads as perfectly fluent and is completely false. Fluent and false is the worst failure mode any tool can have, because nothing about the output signals that it needs checking.
+
+That is why speaker labels stay visibly provisional rather than presented as fact.
+
+## Two sources, one timeline
+
+Recording system audio and microphone together is not one stream, it is two, and they do not agree.
+
+The remote participants arrive through the system output path, already mixed and already delayed by the conferencing application's own buffering. You arrive through the microphone, near-instantly and with room reflections the far side never had. Aligning the two matters because a diarizer handed a misaligned mix will happily invent an extra speaker out of the same voice arriving twice.
+
+Handling that is unglamorous work, and it is most of the difference between a demo that transcribes a podcast file and something you can point at a real call.
+
+## Importing counts as a feature
+
+The app also takes any existing audio or video file, and I nearly did not build that.
+
+It turned out to matter more than the live path. People arrive with a backlog: recordings already sitting in a folder from calls that happened before they had the tool. A recorder alone is useless to them until they hold another meeting. An importer makes the product valuable on the day it is installed rather than a week later, and it is a fraction of the work of the capture path because everything downstream is shared.
+
+## The iOS companion, and what it does not do
+
+The phone app reads the results. It does not process anything, because a local-first product cannot suddenly become a syncing product for the convenience of a second screen.
+
+That means the transfer is direct and the phone shows what the Mac has already produced, rather than the two devices sharing a backend that would defeat the entire premise. It is a smaller feature than it looks and it was the right shape, because the alternative was quietly rebuilding the thing the product exists to avoid.
+
+## What I would fix
+
+Model selection is still mostly my judgement rather than a measurement. There is a benchmark for local model throughput but no scored comparison of diarization quality across the options on a labelled sample of real calls, which is exactly the kind of check I insist on elsewhere and have not done here.
+
+The alignment between the two audio paths is tuned rather than derived. It works on the machines I have, which is not the same as being correct, and the first report of an invented speaker will almost certainly trace back to it.

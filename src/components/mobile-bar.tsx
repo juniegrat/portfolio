@@ -11,15 +11,18 @@ import { LocaleLink } from '@/i18n/use-locale'
 /**
  * Bottom navigation, phones only.
  *
- * Work and Blog are their own routes; Connect is a section of the home page, so
- * it carries a hash and routes home first when you are somewhere else. Theme
- * lives behind a disclosure rather than inline — five swatches plus three
+ * All three destinations are real routes. About replaced the Connect hash,
+ * which reached a home page section by scrolling and which the About page now
+ * covers better, so the hash-scroll handling this component used to carry is
+ * gone with it.
+ *
+ * Theme lives behind a disclosure rather than inline: five swatches plus three
  * labels do not fit one 375px row, and navigation earns the space.
  */
 const NAV = [
   { key: 'nav.work', to: '/world', localised: false },
   { key: 'nav.blog', to: '/blog', localised: true },
-  { key: 'nav.contact', to: '/', hash: 'connect', localised: true },
+  { key: 'nav.about', to: '/about', localised: true },
 ] as const
 
 const ITEM =
@@ -77,33 +80,16 @@ export function MobileBar() {
         aria-label="Primary"
       >
         {NAV.map((item) => {
-          const hash = 'hash' in item ? item.hash : undefined
+          // `/world` is a wordless GSAP pan with no localised twin, so it links
+          // plainly; the other two route within the current locale.
           const Component = item.localised ? LocaleLink : Link
           return (
             <Component
               key={item.key}
               to={item.to}
-              hash={hash}
               className={ITEM}
-              // Only route items get an active state. Connect is a hash on `/`,
-              // so router matching would light it alongside any other `/` item;
-              // telling them apart needs scroll position, which the router does
-              // not track.
-              activeProps={hash ? undefined : { className: 'text-ink' }}
-              onClick={(event) => {
-                setOpen(false)
-                if (!hash) return
-                const target = document.getElementById(hash)
-                // Not on this page: let the router navigate there instead.
-                if (!target) return
-                // A same-route hash change is not a navigation, so scroll
-                // restoration puts us back where we were. Do the scroll here.
-                // No `behavior` — that keeps the smooth/instant choice in the
-                // stylesheet, where it is already gated on reduced motion.
-                event.preventDefault()
-                target.scrollIntoView()
-                window.history.replaceState(null, '', `#${hash}`)
-              }}
+              activeProps={{ className: 'text-ink' }}
+              onClick={() => setOpen(false)}
             >
               {intl.formatMessage({ id: item.key })}
             </Component>

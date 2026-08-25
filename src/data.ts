@@ -79,6 +79,7 @@ export const PROJECTS: Project[] = [
     year: '2026',
     image: '/projects/library.webp',
     id: 'design-library',
+    slug: 'design-library',
   },
   {
     name: 'Hadesor ERP',
@@ -140,6 +141,7 @@ export const PROJECTS: Project[] = [
     year: '2026',
     image: '/projects/parley.webp',
     id: 'parley',
+    slug: 'parley',
   },
   {
     name: 'Shirei',

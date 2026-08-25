@@ -1,0 +1,58 @@
+export const metadata = {
+  title: 'Parley',
+  description:
+    "Mémoire de réunion pour macOS qui n'envoie jamais rien. Pourquoi « local » est une contrainte d'architecture plutôt qu'un badge de confidentialité, et ce que coûte la diarisation quand la transcription doit savoir qui a parlé.",
+  alternates: {
+    canonical: '/fr/projects/parley',
+  },
+}
+
+# Parley
+
+Enregistre une réunion depuis le son système et le micro, détermine qui a dit quoi, transcrit, et garde chaque octet sur la machine. Conçu pour Apple Silicon, avec une application iOS compagnon.
+
+## La contrainte décide de l'architecture
+
+Tout outil de réunion qui vaut la peine envoie votre audio vers un serveur. Ce n'est pas de la négligence, c'est le seul moyen d'atteindre les meilleurs modèles, et pour la plupart des conversations c'est un arbitrage acceptable.
+
+Il cesse de l'être quand la réunion porte sur la feuille de route confidentielle d'un client, sur une discussion salariale, sur un appel avec un avocat, ou sur quoi que ce soit couvert par un accord que vous avez signé. Dans ces pièces, la question n'est pas de savoir si le prestataire est digne de confiance mais si vous avez le droit de transmettre, et la réponse est souvent non.
+
+La contrainte est donc absolue : rien ne quitte la machine. Ni l'audio, ni la transcription, ni un vecteur, ni un ping de télémétrie contenant une durée. Cette seule règle détermine presque toutes les décisions en aval, et elle supprime l'option que prennent tous les concurrents.
+
+La conséquence la plus importante est que vous ne choisissez plus le meilleur modèle. Vous choisissez le meilleur modèle qui tourne sur cette machine, ce qui est une liste différente et bien plus courte, et la question d'ingénierie honnête devient de savoir si l'écart est supportable pour la tâche précise, plutôt que quel modèle gagne dans l'abstrait.
+
+## La diarisation est la moitié difficile
+
+La transcription est proche d'être résolue pour un usage local. La diarisation, c'est-à-dire déterminer combien de personnes ont parlé et à qui appartient chaque segment, ne l'est pas.
+
+Parley s'appuie sur pyannote pour cela, et si cette étape mérite son propre traitement, c'est qu'une transcription sans locuteurs est un artefact beaucoup plus faible. « On s'est mis d'accord pour livrer en mars » est une note. « Le client a dit qu'il lui fallait mars, et nous avons dit que c'était possible » est un enregistrement. Le second est ce que vous voulez six semaines plus tard quand les souvenirs divergent, et toute la différence tient à l'attribution.
+
+La diarisation est aussi l'endroit où les erreurs pardonnent le moins. Une erreur de transcription produit un mot faux qu'un lecteur corrige par le contexte sans le remarquer. Une erreur d'attribution produit une phrase dans la mauvaise bouche, parfaitement fluide et complètement fausse. Fluide et faux est le pire mode de défaillance possible, parce que rien dans la sortie ne signale qu'il faut vérifier.
+
+C'est pourquoi les étiquettes de locuteur restent visiblement provisoires plutôt que présentées comme un fait.
+
+## Deux sources, une seule ligne de temps
+
+Enregistrer le son système et le micro ensemble n'est pas un flux, c'en est deux, et ils ne s'accordent pas.
+
+Les participants distants arrivent par la sortie système, déjà mixés et déjà retardés par la mise en tampon de l'application de visioconférence. Vous arrivez par le micro, presque instantanément, avec des réflexions de pièce que l'autre côté n'a jamais eues. Aligner les deux compte, parce qu'un diariseur à qui l'on donne un mixage désaligné inventera volontiers un locuteur supplémentaire à partir de la même voix arrivée deux fois.
+
+Traiter cela est un travail ingrat, et c'est l'essentiel de la différence entre une démonstration qui transcrit un fichier de podcast et quelque chose que l'on peut pointer sur un vrai appel.
+
+## L'import compte comme une fonctionnalité
+
+L'application accepte aussi n'importe quel fichier audio ou vidéo existant, et j'ai failli ne pas le construire.
+
+Cela s'est révélé plus important que le chemin en direct. Les gens arrivent avec un arriéré : des enregistrements déjà posés dans un dossier, issus d'appels antérieurs à l'installation de l'outil. Un simple enregistreur ne leur sert à rien jusqu'à leur prochaine réunion. Un importateur rend le produit utile le jour de son installation plutôt qu'une semaine plus tard, et il coûte une fraction du chemin de capture puisque tout l'aval est partagé.
+
+## L'application iOS, et ce qu'elle ne fait pas
+
+L'application téléphone lit les résultats. Elle ne traite rien, parce qu'un produit local ne peut pas devenir soudainement un produit synchronisé pour le confort d'un second écran.
+
+Le transfert est donc direct et le téléphone affiche ce que le Mac a déjà produit, plutôt que deux appareils partageant un backend qui ruinerait toute la prémisse. C'est une fonctionnalité plus petite qu'elle n'en a l'air et c'était la bonne forme, parce que l'alternative consistait à reconstruire discrètement la chose que le produit existe pour éviter.
+
+## Ce que je corrigerais
+
+Le choix des modèles relève encore surtout de mon jugement plutôt que d'une mesure. Il existe un banc d'essai pour le débit des modèles locaux, mais aucune comparaison notée de la qualité de diarisation entre les options sur un échantillon annoté d'appels réels, ce qui est exactement le genre de vérification que j'exige ailleurs et que je n'ai pas faite ici.
+
+L'alignement entre les deux chemins audio est réglé plutôt que dérivé. Cela fonctionne sur les machines que j'ai, ce qui n'est pas la même chose qu'être correct, et le premier signalement d'un locuteur inventé y remontera presque certainement.

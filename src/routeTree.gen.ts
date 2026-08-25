@@ -10,10 +10,12 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as WorldRouteImport } from './routes/world'
 import { Route as BlogIndexRouteImport } from './routes/blog/index'
 import { Route as BlogSlugRouteImport } from './routes/blog/$slug'
 import { Route as FrIndexRouteImport } from './routes/fr/index'
+import { Route as FrAboutRouteImport } from './routes/fr/about'
 import { Route as ProjectsSlugRouteImport } from './routes/projects/$slug'
 import { Route as FrBlogIndexRouteImport } from './routes/fr/blog/index'
 import { Route as FrBlogSlugRouteImport } from './routes/fr/blog/$slug'
@@ -22,6 +24,11 @@ import { Route as FrProjectsSlugRouteImport } from './routes/fr/projects/$slug'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const WorldRoute = WorldRouteImport.update({
@@ -42,6 +49,11 @@ const BlogSlugRoute = BlogSlugRouteImport.update({
 const FrIndexRoute = FrIndexRouteImport.update({
   id: '/fr/',
   path: '/fr/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FrAboutRoute = FrAboutRouteImport.update({
+  id: '/fr/about',
+  path: '/fr/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProjectsSlugRoute = ProjectsSlugRouteImport.update({
@@ -67,8 +79,10 @@ const FrProjectsSlugRoute = FrProjectsSlugRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/world': typeof WorldRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/fr/about': typeof FrAboutRoute
   '/projects/$slug': typeof ProjectsSlugRoute
   '/blog/': typeof BlogIndexRoute
   '/fr/': typeof FrIndexRoute
@@ -78,8 +92,10 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/world': typeof WorldRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/fr/about': typeof FrAboutRoute
   '/projects/$slug': typeof ProjectsSlugRoute
   '/blog': typeof BlogIndexRoute
   '/fr': typeof FrIndexRoute
@@ -90,8 +106,10 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/world': typeof WorldRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/fr/about': typeof FrAboutRoute
   '/projects/$slug': typeof ProjectsSlugRoute
   '/blog/': typeof BlogIndexRoute
   '/fr/': typeof FrIndexRoute
@@ -103,8 +121,10 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/about'
     | '/world'
     | '/blog/$slug'
+    | '/fr/about'
     | '/projects/$slug'
     | '/blog/'
     | '/fr/'
@@ -114,8 +134,10 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/about'
     | '/world'
     | '/blog/$slug'
+    | '/fr/about'
     | '/projects/$slug'
     | '/blog'
     | '/fr'
@@ -125,8 +147,10 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/about'
     | '/world'
     | '/blog/$slug'
+    | '/fr/about'
     | '/projects/$slug'
     | '/blog/'
     | '/fr/'
@@ -137,8 +161,10 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
   WorldRoute: typeof WorldRoute
   BlogSlugRoute: typeof BlogSlugRoute
+  FrAboutRoute: typeof FrAboutRoute
   ProjectsSlugRoute: typeof ProjectsSlugRoute
   BlogIndexRoute: typeof BlogIndexRoute
   FrIndexRoute: typeof FrIndexRoute
@@ -154,6 +180,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/world': {
@@ -182,6 +215,13 @@ declare module '@tanstack/react-router' {
       path: '/fr'
       fullPath: '/fr/'
       preLoaderRoute: typeof FrIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fr/about': {
+      id: '/fr/about'
+      path: '/fr/about'
+      fullPath: '/fr/about'
+      preLoaderRoute: typeof FrAboutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/projects/$slug': {
@@ -217,8 +257,10 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
   WorldRoute: WorldRoute,
   BlogSlugRoute: BlogSlugRoute,
+  FrAboutRoute: FrAboutRoute,
   ProjectsSlugRoute: ProjectsSlugRoute,
   BlogIndexRoute: BlogIndexRoute,
   FrIndexRoute: FrIndexRoute,

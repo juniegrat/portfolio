@@ -1,0 +1,39 @@
+export const metadata = {
+  title: 'À propos',
+  description:
+    "Ingénieur design : je construis des systèmes de production de bout en bout, du schéma de base de données à la courbe d'animation, et je les instrumente au lieu d'affirmer qu'ils fonctionnent.",
+}
+
+# À propos
+
+Je suis ingénieur design. Concrètement, cela veut dire que je conduis une chose du schéma jusqu'à l'interface livrée sans la passer à quelqu'un d'autre au milieu, et que la typographie, le mouvement et le plan d'exécution des requêtes sont tous mon problème.
+
+L'essentiel de ce que je construis tient en trois domaines.
+
+**Des systèmes qui doivent être justes.** Un ERP sur un schéma PostgreSQL de 300 tables, avec une chaîne de types ininterrompue de la base à l'interface. De la conformité fiscale française : un journal en ajout seul certifié selon NF525, et un pipeline de facturation électronique construit pour l'échéance de 2026. Des parcours d'identité et de lutte contre le blanchiment. Du travail où un enregistrement faux est pire qu'un enregistrement lent, et où quelqu'un finit par auditer la chose.
+
+**Des outils qui gardent vos données.** Un moniteur de surface d'attaque auto-hébergé, comme alternative à l'envoi de votre inventaire d'actifs chez un éditeur. Une transcription de réunion locale qui sépare les locuteurs sur la machine. Un outil d'analyse de votre propre historique de communication qui rapporte son propre taux d'erreur. La contrainte est chaque fois la même : l'entrée est trop sensible pour être envoyée ailleurs, donc tout doit tourner en local, modèles compris.
+
+**Des interfaces qui se comportent.** Du WebGL piloté au défilement, de la physique de corps rigides dans le navigateur, du suivi de mains, de l'audio procédural. Des design systems où les jetons sont une source de vérité unique plutôt qu'un document que personne ne lit. Des serveurs MCP qui pilotent directement After Effects et Illustrator.
+
+## Comment je travaille
+
+L'habitude qui traverse tout cela consiste à mesurer plutôt qu'à affirmer.
+
+Quand j'ai construit un outil pour analyser mon propre historique de messages, la partie utile n'a pas été les constats. Cela a été d'annoter un échantillon à la main pour découvrir à quelle fréquence l'outil se trompait, de publier les chiffres, et de supprimer le détecteur qui n'était d'accord avec moi qu'une fois sur trois. Quand je génère de l'audio, un script note la sortie contre une référence et m'annonce que la prise générée a perdu. Quand j'avance dix-huit mois d'effort, l'affirmation est une distribution de commits plutôt qu'une impression.
+
+Le même réflexe se voit dans le code sous la forme du refus par défaut. Un journal fiscal qui ne peut pas atteindre son secret de signature refuse d'écrire plutôt que d'écrire sans signature. Un pipeline de facturation électronique privé de son identité de routage refuse de transmettre plutôt que de transmettre au mauvais endroit. Les deux mettent une fonctionnalité hors service en cas de mauvaise configuration, délibérément, parce que la défaillance inverse est de celles que l'on découvre pendant un audit.
+
+Je documente beaucoup, et pas par politesse. Sur l'ERP, la documentation est la seule partie de dix-huit mois de travail qui se transmette à la personne suivante.
+
+## Ce que je ne suis pas
+
+Je ne suis pas un spécialiste que l'on recrute pour une seule couche. S'il vous faut quelqu'un pour porter un design system isolément, ou un backend isolément, d'autres le font mieux que moi et s'y sentent plus heureux.
+
+Je suis aussi lent à sortir de l'infrastructure. La plupart de ce que je livre est plus petit que la forme conventionnelle : un tableau de bord qui lit SQLite directement au lieu d'une couche d'API, quelques centaines de lignes de Python au lieu d'un framework de pipeline, une contrainte écrite à la main au lieu d'un moteur physique. Parfois c'est une erreur, et j'ai écrit sur les fois où c'en était une.
+
+## Le travail qui m'intéresse
+
+Des produits dont le domaine est réellement compliqué et où la justesse compte : industries réglementées, systèmes financiers ou fiscaux, tout ce qui se termine par un audit. Des équipes qui veulent qu'une seule personne porte une fonctionnalité du schéma à l'interface plutôt que trois qui se la passent. Et du sauvetage de projet, parce qu'un projet décrit comme presque terminé depuis six mois est un problème précis que je reconnais désormais au premier coup d'œil.
+
+Si cela ressemble à ce que vous avez, [écrivez-moi](mailto:juniegrat@gmail.com). Dites-moi quelle est l'échéance et ce qui a déjà mal tourné, parce que ces deux faits déterminent tout le reste.

@@ -1,0 +1,39 @@
+export const metadata = {
+  title: 'About',
+  description:
+    'A design engineer who builds production systems end to end, from the database schema to the motion curve, and instruments them rather than asserting they work.',
+}
+
+# About
+
+I am a design engineer. In practice that means I take something from a schema to a shipped interface without handing it to anyone in the middle, and that the type, the motion and the query plan are all my problem.
+
+Most of what I build falls into three areas.
+
+**Systems that have to be correct.** An ERP over a 300-table PostgreSQL schema, with one unbroken type chain from the database to the UI. French fiscal compliance: an append-only journal certified against NF525, and an e-invoicing pipeline built for the 2026 mandate. Identity and anti-money-laundering flows. Work where a wrong record is worse than a slow one, and where somebody eventually audits the thing.
+
+**Tools that keep your data.** A self-hosted attack surface monitor as an alternative to sending your asset inventory to a vendor. Local-first meeting transcription that separates speakers on-device. An analysis tool for your own communication history that reports its own error rate. The constraint in each case is the same: the input is too sensitive to upload, so everything has to run on the machine, including the models.
+
+**Interfaces that behave.** Scroll-driven WebGL, rigid-body physics in the browser, hand tracking, procedural audio. Design systems where the tokens are one source of truth rather than a document nobody reads. MCP servers that drive After Effects and Illustrator directly.
+
+## How I work
+
+The habit that runs through all of it is measuring instead of asserting.
+
+When I built a tool to analyse my own message history, the useful part was not the findings. It was hand-labelling a sample to find out how often the tool was wrong, publishing the numbers, and deleting the detector that agreed with me only a third of the time. When I generate audio, there is a script that scores the output against a reference and tells me the generated take lost. When I claim eighteen months of effort, the claim is a commit distribution rather than a feeling.
+
+The same instinct shows up in the code as failing closed. A fiscal journal that cannot reach its signing secret refuses to write rather than writing unsigned. An e-invoicing pipeline missing its routing identity refuses to transmit rather than transmitting somewhere wrong. Both of those take down a feature when misconfigured, on purpose, because the alternative failure is one you discover in an audit.
+
+I document heavily, and not as a courtesy. On the ERP, the documentation is the only part of eighteen months of work that transfers to whoever comes next.
+
+## What I am not
+
+I am not a specialist you hire for one layer. If you need someone to own a design system in isolation, or a backend in isolation, there are people who do that better than I do and are happier doing it.
+
+I am also slow to reach for infrastructure. Most of what I ship is smaller than the conventional shape: a dashboard reading SQLite directly instead of an API tier, a few hundred lines of Python instead of a pipeline framework, a hand-written constraint instead of a physics engine. Sometimes that is wrong and I have written about the times it was.
+
+## Work I am interested in
+
+Products where the domain is genuinely complicated and the correctness matters: regulated industries, financial or fiscal systems, anything with an audit at the end of it. Teams that want one person to carry a feature from schema to interface rather than three people passing it along. And rescue work, since a project that has been described as nearly finished for six months is a specific problem I now recognise on sight.
+
+If that sounds like what you have, [write to me](mailto:juniegrat@gmail.com). Tell me what the deadline is and what has already gone wrong, because those two facts determine everything else.

@@ -1,0 +1,54 @@
+export const metadata = {
+  title: 'Design Library',
+  description:
+    'A registry of generated interface designs that installs into your project with one command. Why the brief is stored beside the output, and why a design that cannot be installed is a screenshot.',
+  alternates: {
+    canonical: '/projects/design-library',
+  },
+}
+
+# Design Library
+
+A collection of AI-generated interface designs, kept as files, served as a shadcn registry, and installable into any project with a single command. Live at [design.juniegrat.com](https://design.juniegrat.com).
+
+## The problem with generated designs
+
+Generating an interface is easy now, and almost worthless, because generation is not the bottleneck. What you get out is a picture. Getting from a picture to something in your codebase is the entire job, and it is the part that is unchanged.
+
+So this project starts from a different question. Not "how do I generate more interfaces" but "what has to be true for a generated interface to be usable a week later, by a project that did not exist when it was made."
+
+Two answers, and everything else follows from them.
+
+## It has to install, not download
+
+A design you can look at is a screenshot. A design you can install is a component.
+
+Serving the collection as a shadcn registry means any entry drops into another project with the same command that project already uses for its other components, resolving dependencies and writing files into the existing structure. There is no copy-paste step, no zip, no manual reconciliation of import paths, and no new tool for the receiving project to adopt.
+
+That last point is the whole reason for choosing an existing registry format rather than inventing a distribution mechanism. A bespoke format would have been more expressive and would have required every consumer to install something, which in practice means nobody consumes it. Fitting an established convention costs some flexibility and buys the only thing that matters here, which is that using it requires no decision.
+
+The collection also exports to standalone HTML, for when the destination is not a React project at all and someone just needs the artifact.
+
+## The brief travels with the output
+
+Every design stores the prompt that produced it.
+
+This sounds like bookkeeping and it is the most useful property in the system. A generated interface without its brief cannot be interrogated: you cannot tell whether an odd choice was requested, inferred, or a model artifact, and you cannot produce a variation without reconstructing the intent from the pixels.
+
+With the brief attached, the design becomes a starting point rather than a terminus. You can regenerate with one constraint changed. You can tell whether the thing you dislike was your instruction or the model's invention. And months later you can answer the question that always comes up, which is why this one looks like this.
+
+It also makes the collection legible as a body of work. Reading the briefs next to the outputs shows which instructions actually move a result and which are decoration, and that is invisible when you keep only the outputs.
+
+## Files, not a database
+
+The whole collection is files on disk, read at build time.
+
+There is no database, no admin interface and no content model, because the collection is authored by one person and consumed as static output. A database would buy querying that nothing needs and would add a service to a project whose entire value proposition is that it deploys as static assets and installs as source.
+
+Files also mean the collection is diffable and reviewable the same way as the code, and that a design and its brief cannot drift apart, because they are the same commit.
+
+## What it is honest about
+
+There are no usage numbers. Nobody has told me they installed one, and I have not instrumented it to find out, so any claim about adoption would be invented.
+
+What it demonstrates is narrower and checkable: that generated interface work can be packaged as a real distribution artifact rather than a gallery, and that keeping the brief beside the output changes what the collection is for. Both of those you can verify by opening it and installing one, which is a stronger claim than a number I would have to ask you to believe.

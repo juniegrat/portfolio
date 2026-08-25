@@ -16,6 +16,7 @@ import { DESIGN_URL, LAB_URL } from '@/lib/constants'
  * bottom bar has room for primary navigation and not for five destinations.
  */
 const ROUTES = [
+  { to: '/about', key: 'nav.about', localised: true },
   { to: '/world', key: 'nav.work', localised: false },
   { to: '/blog', key: 'nav.blog', localised: true },
 ] as const

@@ -1,0 +1,54 @@
+export const metadata = {
+  title: 'Design Library',
+  description:
+    "Un registre de maquettes d'interface générées qui s'installe dans votre projet en une commande. Pourquoi le brief est stocké à côté de la sortie, et pourquoi une maquette qui ne s'installe pas est une capture d'écran.",
+  alternates: {
+    canonical: '/fr/projects/design-library',
+  },
+}
+
+# Design Library
+
+Une collection de maquettes d'interface générées par IA, conservées sous forme de fichiers, servies comme registre shadcn, et installables dans n'importe quel projet en une seule commande. En ligne sur [design.juniegrat.com](https://design.juniegrat.com).
+
+## Le problème des maquettes générées
+
+Générer une interface est devenu facile, et presque sans valeur, parce que la génération n'est pas le goulot d'étranglement. Ce qui en sort est une image. Passer de l'image à quelque chose dans votre base de code est tout le travail, et c'est la partie qui n'a pas changé.
+
+Ce projet part donc d'une autre question. Non pas « comment générer davantage d'interfaces » mais « que faut-il pour qu'une interface générée soit utilisable une semaine plus tard, par un projet qui n'existait pas au moment de sa création ».
+
+Deux réponses, et tout le reste en découle.
+
+## Elle doit s'installer, pas se télécharger
+
+Une maquette que l'on peut regarder est une capture d'écran. Une maquette que l'on peut installer est un composant.
+
+Servir la collection comme registre shadcn signifie que n'importe quelle entrée arrive dans un autre projet avec la commande que ce projet utilise déjà pour ses autres composants, en résolvant les dépendances et en écrivant les fichiers dans la structure existante. Pas d'étape de copier-coller, pas d'archive, pas de réconciliation manuelle des chemins d'import, et aucun nouvel outil à adopter pour le projet destinataire.
+
+Ce dernier point est toute la raison d'avoir choisi un format de registre existant plutôt que d'inventer un mécanisme de distribution. Un format maison aurait été plus expressif et aurait obligé chaque consommateur à installer quelque chose, ce qui en pratique signifie que personne ne consomme. Se plier à une convention établie coûte de la souplesse et achète la seule chose qui compte ici : s'en servir ne demande aucune décision.
+
+La collection s'exporte aussi en HTML autonome, pour les cas où la destination n'est pas un projet React et où quelqu'un a simplement besoin de l'artefact.
+
+## Le brief voyage avec la sortie
+
+Chaque maquette conserve le prompt qui l'a produite.
+
+Cela ressemble à de la tenue de registre et c'est la propriété la plus utile du système. Une interface générée sans son brief ne peut pas être interrogée : vous ne pouvez pas dire si un choix étrange a été demandé, déduit, ou produit par le modèle, et vous ne pouvez pas produire une variante sans reconstituer l'intention à partir des pixels.
+
+Avec le brief attaché, la maquette devient un point de départ plutôt qu'un aboutissement. Vous pouvez régénérer avec une contrainte changée. Vous pouvez dire si ce qui vous déplaît venait de votre consigne ou de l'invention du modèle. Et des mois plus tard vous pouvez répondre à la question qui revient toujours : pourquoi celle-ci ressemble à ça.
+
+Cela rend aussi la collection lisible comme un corpus. Lire les briefs à côté des sorties montre quelles consignes déplacent réellement un résultat et lesquelles sont décoratives, et c'est invisible quand on ne garde que les sorties.
+
+## Des fichiers, pas une base de données
+
+Toute la collection tient en fichiers sur disque, lus à la compilation.
+
+Pas de base de données, pas d'interface d'administration, pas de modèle de contenu, parce que la collection est écrite par une seule personne et consommée sous forme de sortie statique. Une base achèterait des requêtes dont rien n'a besoin et ajouterait un service à un projet dont toute la proposition tient à ce qu'il se déploie en fichiers statiques et s'installe en code source.
+
+Les fichiers signifient aussi que la collection se compare et se relit comme le code, et qu'une maquette et son brief ne peuvent pas diverger, puisqu'ils sont le même commit.
+
+## Ce sur quoi elle est honnête
+
+Il n'y a aucun chiffre d'usage. Personne ne m'a dit en avoir installé une, et je ne l'ai pas instrumentée pour le savoir : toute affirmation sur l'adoption serait inventée.
+
+Ce qu'elle démontre est plus étroit et vérifiable : qu'un travail d'interface généré peut être empaqueté comme un véritable artefact de distribution plutôt que comme une galerie, et que garder le brief à côté de la sortie change la fonction de la collection. Ces deux points se vérifient en l'ouvrant et en installant une entrée, ce qui est une affirmation plus solide qu'un nombre que je devrais vous demander de croire.
