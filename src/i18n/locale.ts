@@ -17,6 +17,19 @@ export const HTML_LANG: Record<Locale, string> = {
   fr: 'fr',
 }
 
+/**
+ * BCP 47 tags handed to `IntlProvider` for formatting.
+ *
+ * Distinct from the catalogue keys: bare `en` resolves to en-US in ICU, which
+ * formats dates as "August 25, 2026". The prose here is British and `og:locale`
+ * already claims en_GB, so the formatter should agree and produce
+ * "25 August 2026". Messages stay keyed by the short locale.
+ */
+export const INTL_LOCALE: Record<Locale, string> = {
+  en: 'en-GB',
+  fr: 'fr-FR',
+}
+
 /** Open Graph locale codes. */
 export const OG_LOCALE: Record<Locale, string> = {
   en: 'en_GB',

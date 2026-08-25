@@ -258,6 +258,20 @@ export const CAPABILITIES: Capability[] = [
 export const BLOG_POSTS: BlogPost[] = [
   {
     title: {
+      en: 'Simulate rather than animate',
+      fr: "Simuler plutôt qu'animer",
+    },
+    description: {
+      en: 'An animation is a recording of a decision. A simulation is the decision, still running. Three browser experiments that took the second route, and what each one cost.',
+      fr: "Une animation est l'enregistrement d'une décision. Une simulation est la décision, toujours en train de tourner. Trois expériences navigateur qui ont pris la seconde voie, et ce que chacune a coûté.",
+    },
+    slug: 'simulate-rather-than-animate',
+    uid: 'blog-6',
+    date: '2026-08-25',
+    minutes: 6,
+  },
+  {
+    title: {
       en: 'Wiring an ERP for French e-invoicing',
       fr: 'Brancher un ERP sur la facturation électronique française',
     },

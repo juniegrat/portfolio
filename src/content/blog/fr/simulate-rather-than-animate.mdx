@@ -1,0 +1,74 @@
+export const metadata = {
+  title: "Simuler plutôt qu'animer",
+  description:
+    "Une animation est l'enregistrement d'une décision. Une simulation est la décision, toujours en train de tourner. Trois expériences navigateur qui ont pris la seconde voie, ce que chacune a coûté, et là où les keyframes gagnent encore.",
+  alternates: {
+    canonical: '/fr/blog/simulate-rather-than-animate',
+  },
+}
+
+# Simuler plutôt qu'animer
+
+Un couteau papillon qui s'ouvre est difficile à animer et facile à simuler.
+
+Animé, vous écrivez à la main la relation entre deux pivots au long d'une rotation qui se replie sur elle-même, et la moindre interruption vous laisse à un endroit que la timeline ne décrit pas. Simulé, vous déclarez que les manches tournent autour d'axes fixes avec des limites angulaires, vous appliquez un couple, et le pliage devient une conséquence plutôt qu'une description. Vous n'avez pas animé le couteau. Vous avez énoncé ce qu'est un couteau et vous l'avez laissé en être un.
+
+Cette distinction est tout le propos. Une animation est l'enregistrement d'une décision prise une fois par quelqu'un. Une simulation est la décision, toujours en train de tourner, capable de répondre à des questions que l'auteur n'avait pas anticipées.
+
+J'ai construit cinq expériences navigateur sur ce second principe, avec trois implémentations assez différentes. Voici ce que chacune a coûté.
+
+## Pourquoi cela dépasse le jeu vidéo
+
+Il serait facile de ranger cela dans les « jouets 3D » et d'arrêter la lecture, et ce serait une erreur, parce que le même arbitrage gouverne le travail d'interface ordinaire.
+
+Chaque fois que vous écrivez une transition CSS avec une durée et une courbe d'accélération, vous animez. Vous avez enregistré une décision : cet élément met 240 ms à parcourir cette distance selon cette courbe. L'enregistrement fonctionne jusqu'à ce que quelque chose l'interrompe. Un utilisateur qui attrape un panneau en pleine transition, une valeur qui change pendant que le changement précédent joue encore, un geste qui s'inverse. La timeline n'a de réponse pour aucun de ces cas : vous obtenez un à-coup, une bagarre entre deux interpolations, ou un retour brutal au début.
+
+Écrivez le même mouvement comme un ressort et l'interruption cesse d'être un cas particulier. L'élément a une position et une vitesse, et une nouvelle cible change simplement ce vers quoi il se dirige tout en conservant l'élan qu'il avait déjà. L'inversion en plein vol n'est pas un bogue à traiter, c'est ce que font les équations.
+
+La barre de progression de défilement de cette page est un ressort pour exactement cette raison, configurée avec son rebond à zéro. Remontez à mi-parcours et elle ne bégaie pas, parce qu'il n'y a jamais eu de timeline à abandonner.
+
+## Trois façons de faire, trois factures
+
+### Un moteur de corps rigides complet
+
+Le pousse-pièces fait tourner Jolt Physics compilé en WebAssembly, avec Three.js qui dessine la machine. Les disques entrent en collision, s'empilent, glissent de l'étagère et se poussent les uns les autres d'une manière que personne n'a écrite.
+
+Acheter un vrai moteur achète une justesse que vous mettriez des mois à atteindre seul. Manifolds de contact, frottement, restitution, empilement stable, phase large. Ma contribution se limite aux valeurs de frottement et de restitution par corps et à la géométrie de la machine. Le comportement qui lui donne son air de borne d'arcade appartient à Jolt.
+
+La facture est triple. Vous livrez un binaire WebAssembly, c'est-à-dire de vrais octets sur une page qui pesait quelques centaines de kilo-octets de JavaScript. Vous héritez d'une API façonnée par les hypothèses de quelqu'un d'autre, et vous écrivez à chaque image la colle entre sa représentation des transformations et celle du moteur de rendu. Et vous renoncez au déterminisme facile : un solveur de corps rigides est itératif, et de petites différences s'accumulent en résultats différents.
+
+C'est pourquoi la simulation avance à un pas fixe de 1/60 plutôt qu'au delta d'image. Alimenter un solveur avec un pas variable fait de la physique une fonction du taux de rafraîchissement de l'utilisateur et de son budget d'image courant : la même poussée produit alors des résultats différents sur un écran à 144 Hz et sur un portable bridé. Fixer le pas et accumuler le temps résiduel est la correction standard, et elle cesse d'être optionnelle dès que quelqu'un pourrait comparer deux exécutions.
+
+### Intégration de Verlet et ressorts
+
+La poupée vaudou n'est pas une scène de corps rigides. C'est un ensemble d'os reliés par des ressorts, intégrés par Verlet, avec des multiplicateurs de raideur et d'amortissement par os. On peut l'attraper, l'épingler et tirer sur les membres jusqu'à les séparer, la préhension étant pilotée par un suivi des mains à la webcam.
+
+Verlet est le bon outil ici parce que le comportement intéressant est mou plutôt que rigide, et parce qu'il est extrêmement stable sous mauvais traitement. Il stocke des positions plutôt que des vitesses et déduit le mouvement de la différence entre images, si bien qu'une violation de contrainte est corrigée plutôt qu'amplifiée. Tirez violemment sur un membre dans un système masse-ressort naïf et il explose. En Verlet, il s'étire et se stabilise.
+
+La facture est que les nombres ne sont pas physiques. Les multiplicateurs de raideur et d'amortissement ne sont pas des propriétés de matériau, ce sont des constantes de réglage dont la valeur correcte est celle qui rend bien, et elles interagissent avec le pas de temps et le nombre d'itérations d'une façon qui rend chacune non évidente isolément. Il n'y a aucune référence à laquelle se comparer. Vous voilà revenu au goût, sauf que le goût s'exprime désormais en six scalaires couplés plutôt qu'en une courbe que vous pouvez voir.
+
+### Des contraintes écrites à la main
+
+Le balisong n'utilise ni l'un ni l'autre. Ses pivots sont écrits à la main : un axe, une limite d'arc, un terme de raideur et un terme d'amortissement par pivot, avec un état de roulement explicite portant son propre axe, son angle et son temps écoulé.
+
+Je l'ai écrit ainsi parce que l'objet a exactement deux degrés de liberté qui comptent, et qu'un solveur générique aurait représenté une machinerie considérable pour exprimer deux rotations contraintes. Cela fait quelques centaines de lignes, sans dépendances, et je comprends chaque terme.
+
+La facture arrive dès que les exigences bougent. Des contraintes écrites à la main ne se généralisent pas. Ajoutez un troisième pivot avec un couplage différent et vous n'étendez pas un système, vous en écrivez un second. C'est l'arbitrage classique et j'ai délibérément pris le côté bon marché, parce qu'un couteau papillon ne va pas gagner de nouvelles exigences.
+
+## Là où les keyframes gagnent encore
+
+L'argument honnête contre tout ce qui précède est la direction artistique.
+
+Une simulation vous donne un résultat plausible. Un animateur vous donne le résultat exact. Quand une silhouette précise doit se lire à un instant précis, quand un mouvement doit tomber sur un temps, quand le but de l'animation est de diriger l'attention plutôt que de dépeindre un mécanisme, les keyframes sont simplement justes et la simulation est une façon lente d'y arriver presque.
+
+Il existe aussi une asymétrie de débogage dont on parle trop peu. Une animation fausse est fausse de la même manière à chaque fois : on se déplace jusqu'à l'image et on corrige. Une simulation fausse est fausse différemment à chaque exécution, et la cause est généralement une interaction entre le solveur, le pas de temps et une constante réglée des semaines plus tôt. Le mode de défaillance est pire même quand le résultat médian est meilleur.
+
+Le choix n'est pas esthétique. Il revient à savoir si le mouvement doit répondre à des questions auxquelles vous n'avez pas encore pensé. Un panneau que l'utilisateur peut attraper, un couteau qu'il peut interrompre, une pile de pièces qui doit réagir à des poussées arbitraires : cela demande des règles. Une apparition de logo, non, et la construire en ressorts est une afféterie.
+
+## Ce que je réapprends à chaque fois
+
+Les deux fois où j'ai regretté une décision sur ce terrain, elle avait la même forme : j'avais pris le moteur parce que le problème ressemblait à de la physique, alors que le problème était en réalité deux rotations contraintes.
+
+L'erreur inverse existe et je la commets moins souvent, sans doute parce qu'elle se signale plus tôt. Écrire à la main jusqu'à avoir accidentellement produit un mauvais solveur est désagréable mais visible. Importer un moteur complet pour ce qu'un ressort aurait couvert est confortable, défendable en revue, et l'on peut porter ce poids supplémentaire pendant un an sans jamais remarquer ce qu'il a coûté.
+
+La question utile, avant l'un ou l'autre, est de savoir combien de degrés de liberté comptent réellement. Deux, c'est une contrainte que vous écrivez vous-même. Tout ce qui est mou et déformable, c'est Verlet. Des corps quelconques qui entrent en collision entre eux, c'est un moteur, et il vaut ses octets. Se tromper de réponse n'est fatal dans aucune direction, mais c'est la décision qui détermine quelle part du mois suivant vous passerez à écrire de la colle.

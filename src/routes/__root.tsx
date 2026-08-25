@@ -7,7 +7,7 @@ import { Header } from '@/components/header'
 import { MobileBar } from '@/components/mobile-bar'
 import { ThemeProvider, themeInitScript } from '@/components/theme-provider'
 import { NAME, SITE_DESCRIPTION } from '@/data'
-import { DEFAULT_LOCALE, HTML_LANG, localeFromPathname } from '@/i18n/locale'
+import { DEFAULT_LOCALE, HTML_LANG, INTL_LOCALE, localeFromPathname } from '@/i18n/locale'
 import { MESSAGES } from '@/i18n/messages'
 import { WEBSITE_URL } from '@/lib/constants'
 import appCss from '../styles.css?url'
@@ -75,8 +75,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body className="bg-surface tracking-tight text-ink antialiased">
         <IntlProvider
-          locale={locale}
-          defaultLocale={DEFAULT_LOCALE}
+          locale={INTL_LOCALE[locale]}
+          defaultLocale={INTL_LOCALE[DEFAULT_LOCALE]}
           messages={MESSAGES[locale]}
           // Every key is present in every catalogue by construction (the `en`
           // catalogue types the others), so a miss is a bug worth seeing rather

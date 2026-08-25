@@ -1,0 +1,74 @@
+export const metadata = {
+  title: 'Simulate rather than animate',
+  description:
+    'An animation is a recording of a decision. A simulation is the decision, still running. Three browser experiments that took the second route, what each one cost, and where keyframes still win.',
+  alternates: {
+    canonical: '/blog/simulate-rather-than-animate',
+  },
+}
+
+# Simulate rather than animate
+
+A butterfly knife opening is a hard thing to animate and an easy thing to simulate.
+
+Animated, you are hand-authoring the relationship between two pivots across a rotation that folds back on itself, and any interruption puts you somewhere the timeline does not describe. Simulated, you declare that the handles rotate about fixed axes with angular limits, apply a torque, and the fold is a consequence rather than a description. You did not animate the knife. You stated what a knife is and let it be one.
+
+That distinction is the whole of this piece. An animation is a recording of a decision somebody made once. A simulation is the decision, still running, able to answer questions the author never anticipated.
+
+I have built five browser experiments on the second principle, using three quite different implementations. This is what each cost.
+
+## Why this matters outside games
+
+It would be easy to file this under "3D toys" and stop reading, and that would be a mistake, because the same trade governs ordinary interface work.
+
+Every time you write a CSS transition with a duration and an easing curve, you are animating. You have recorded a decision: this element takes 240ms to travel this distance along this curve. The recording is fine until something interrupts it. A user who grabs a sheet mid-transition, a value that changes while the previous change is still playing, a gesture that reverses direction. The timeline has no answer for any of that, so you get a snap, a fight between two tweens, or a jump back to the start.
+
+Write the same movement as a spring and the interruption is not a special case. The element has a position and a velocity, and a new target simply changes what it is heading toward while it keeps the momentum it already had. Reversal mid-flight is not a bug you handle, it is what the equations do.
+
+The scroll progress bar on this page is a spring for exactly that reason, configured with its bounce set to zero. Scroll upward halfway through and it does not stutter, because there was never a timeline to abandon.
+
+## Three ways to do it, three bills
+
+### A full rigid-body engine
+
+The coin pusher runs Jolt Physics compiled to WebAssembly, with Three.js drawing the cabinet. Discs collide, stack, slide off the shelf and shove each other in ways nobody authored.
+
+Buying a real engine buys correctness you would take months to reach alone. Contact manifolds, friction, restitution, stable stacking, broadphase. My contribution is per-body friction and restitution values and the cabinet geometry. The behaviour that makes it feel like an arcade machine is Jolt's.
+
+The bill is threefold. You ship a WebAssembly binary, which is real bytes on a page that used to be a few hundred kilobytes of JavaScript. You inherit an API shaped by someone else's assumptions, and you write glue between their transform representation and the renderer's every frame. And you give up easy determinism: a rigid-body solver is iterative, and small differences accumulate into different outcomes.
+
+That last one is why the simulation steps at a fixed 1/60 rather than on the frame delta. Feeding a variable timestep into a solver makes the physics a function of the user's refresh rate and current frame budget, which means the same push produces different results on a 144Hz monitor and a throttled laptop. Fixing the step and accumulating leftover time is the standard fix, and it is not optional the moment anyone might compare two runs.
+
+### Verlet integration and springs
+
+The voodoo doll is not a rigid-body scene. It is a set of bones connected by springs, integrated with Verlet, with per-bone stiffness and damping multipliers. You can grab it, pin it, and pull limbs until they separate, with webcam hand tracking driving the grab.
+
+Verlet is the right tool here because the interesting behaviour is soft rather than rigid, and because it is extremely stable under abuse. It stores positions rather than velocities and derives motion from the difference between frames, which means a constraint violation gets corrected rather than amplified. Yank a limb hard in a naive spring-mass system and it explodes. In Verlet it stretches and settles.
+
+The bill is that the numbers are not physical. Stiffness and damping multipliers are not material properties, they are tuning constants whose correct values are whatever looks right, and they interact with the timestep and the iteration count in ways that make each one non-obvious in isolation. There is no reference to check against. You are back to taste, only now taste is expressed as six coupled scalars rather than a curve you can see.
+
+### Hand-rolled constraints
+
+The balisong uses neither. Its pivots are hand-written: an axis, an arc limit, a stiffness and a damping term per pivot, with an explicit roll state carrying its own axis, angle and elapsed time.
+
+I wrote it this way because the object has exactly two degrees of freedom that matter, and a general solver would have been an enormous amount of machinery to express two constrained rotations. It is a few hundred lines, it has no dependencies, and I understand every term in it.
+
+The bill arrives the moment the requirements move. Hand-rolled constraints do not generalise. Add a third pivot with a different coupling and you are not extending a system, you are writing a second one. This is the classic trade and I took the cheap side of it deliberately, because a butterfly knife is not going to grow requirements.
+
+## Where keyframes still win
+
+The honest case against everything above is art direction.
+
+A simulation gives you a plausible outcome. An animator gives you the exact one. When a specific silhouette has to read at a specific moment, when a movement must land on a beat, when the point of the motion is to direct attention rather than to depict a mechanism, keyframes are simply correct and simulation is a slow way to almost get there.
+
+There is also a debugging asymmetry that does not get mentioned enough. A wrong animation is wrong the same way every time, so you scrub to the frame and fix it. A wrong simulation is wrong differently on each run, and the cause is usually an interaction between the solver, the timestep and a constant you set weeks ago. The failure mode is worse even when the median result is better.
+
+The choice is not aesthetic. It comes down to whether the motion needs to answer questions you have not thought of yet. A sheet that a user can grab, a knife they can interrupt, a stack of coins that must respond to arbitrary shoves: those need rules. A logo reveal does not, and building one out of springs is an affectation.
+
+## The part I keep relearning
+
+Both times I have regretted a decision here, it was the same shape: I reached for the engine because the problem sounded like physics, and the problem was actually two constrained rotations.
+
+The reverse mistake exists and I have made it less often, probably because it announces itself sooner. Hand-rolling until you have accidentally written a bad solver is unpleasant but obvious. Pulling in a full engine for something a spring would have covered is comfortable, defensible in review, and you can carry the extra weight for a year without ever noticing what it cost.
+
+The useful question, before either, is how many degrees of freedom actually matter. Two is a constraint you write yourself. Everything soft and deformable is Verlet. Arbitrary bodies colliding with each other is an engine, and worth its bytes. Getting that answer wrong is not fatal in any direction, but it is the decision that determines how much of the next month you spend on glue.
