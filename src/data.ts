@@ -200,6 +200,18 @@ export const PROJECTS: Project[] = [
     id: 'aurum',
   },
   {
+    name: 'Grain Swirl',
+    description: {
+      en: 'A seamless loop of a 6.7-million-point sand simulation, swirled into a flower by a pyro velocity field and rendered in Karma. Graded from linear EXR so the specular highlights roll off instead of clipping.',
+      fr: "Une boucle sans raccord d'une simulation de sable de 6,7 millions de points, mise en tourbillon en fleur par un champ de vitesse pyro et rendue avec Karma. Étalonnée depuis des EXR linéaires pour que les hautes lumières s'atténuent au lieu de brûler.",
+    },
+    tech: ['Houdini', 'Karma', 'Pyro', 'Vellum'],
+    year: '2026',
+    video: '/projects/grain-swirl.mp4',
+    image: '/projects/grain-swirl-poster.webp',
+    id: 'grain-swirl',
+  },
+  {
     name: 'Adobe MCP Bridges',
     description: {
       en: 'MCP servers that drive After Effects and Illustrator through ExtendScript, generating and rendering compositions end to end from a config file or an AI agent.',
