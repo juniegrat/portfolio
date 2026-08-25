@@ -11,6 +11,8 @@ import type { Locale } from './locale'
 const en = {
   'nav.work': 'Work',
   'nav.blog': 'Blog',
+  'nav.lab': 'Lab',
+  'nav.design': 'Design',
   'nav.contact': 'Contact',
   'nav.language': 'Language',
 
@@ -49,6 +51,8 @@ export type MessageKey = keyof typeof en
 const fr: Record<MessageKey, string> = {
   'nav.work': 'Projets',
   'nav.blog': 'Articles',
+  'nav.lab': 'Lab',
+  'nav.design': 'Design',
   'nav.contact': 'Contact',
   'nav.language': 'Langue',
 

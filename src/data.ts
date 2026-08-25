@@ -1,4 +1,5 @@
 import type { Locale } from '@/i18n/locale'
+import { DESIGN_URL, LAB_URL } from '@/lib/constants'
 
 // ---------------------------------------------------------------------------
 // Site content. Everything in here is real; there is no placeholder copy left.
@@ -266,9 +267,20 @@ export const BLOG_POSTS: BlogPost[] = [
   },
 ]
 
+// Rendered in the home page's Connect section. Lab and Design also sit in the
+// desktop header; repeating them here is what gives a phone a route to them,
+// since the bottom bar is reserved for primary navigation.
 export const SOCIAL_LINKS: SocialLink[] = [
   {
     label: 'Github',
     link: 'https://github.com/juniegrat',
+  },
+  {
+    label: 'Lab',
+    link: LAB_URL,
+  },
+  {
+    label: 'Design',
+    link: DESIGN_URL,
   },
 ]

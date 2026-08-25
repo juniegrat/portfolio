@@ -4,12 +4,28 @@ import { LanguageSwitch } from '@/components/language-switch'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { NAME } from '@/data'
 import { LocaleLink } from '@/i18n/use-locale'
+import { DESIGN_URL, LAB_URL } from '@/lib/constants'
 
-/** Work is the GSAP horizontal pan; Blog is the writing index. */
-const NAV = [
-  { to: '/world', key: 'nav.work' },
-  { to: '/blog', key: 'nav.blog' },
+/**
+ * Work is the GSAP horizontal pan; Blog is the writing index. Both are routes
+ * here, and Blog has a localised twin, while `/world` is a wordless pan that
+ * both locales share.
+ *
+ * Lab and Design are separate deployments, so they leave the site. They repeat
+ * in the home page's Connect section, which is how a phone reaches them: the
+ * bottom bar has room for primary navigation and not for five destinations.
+ */
+const ROUTES = [
+  { to: '/world', key: 'nav.work', localised: false },
+  { to: '/blog', key: 'nav.blog', localised: true },
 ] as const
+
+const EXTERNAL = [
+  { href: LAB_URL, key: 'nav.lab' },
+  { href: DESIGN_URL, key: 'nav.design' },
+] as const
+
+const LINK = 'text-sm text-muted transition-colors duration-150 ease-snap hover:text-ink'
 
 export function Header() {
   const intl = useIntl()
@@ -41,29 +57,38 @@ export function Header() {
       */}
       <div className="hidden items-center gap-3 sm:flex">
         <nav className="flex items-center gap-3">
-          {NAV.map((item) =>
-            // `/world` has no localised twin: it is a wordless GSAP pan, so both
-            // locales share the one route.
-            item.to === '/world' ? (
-              <Link
-                key={item.to}
-                to={item.to}
-                className="text-sm text-muted transition-colors duration-150 ease-snap hover:text-ink"
-                activeProps={{ className: 'text-ink' }}
-              >
-                {intl.formatMessage({ id: item.key })}
-              </Link>
-            ) : (
+          {ROUTES.map((item) =>
+            item.localised ? (
               <LocaleLink
                 key={item.to}
                 to={item.to}
-                className="text-sm text-muted transition-colors duration-150 ease-snap hover:text-ink"
+                className={LINK}
                 activeProps={{ className: 'text-ink' }}
               >
                 {intl.formatMessage({ id: item.key })}
               </LocaleLink>
+            ) : (
+              <Link
+                key={item.to}
+                to={item.to}
+                className={LINK}
+                activeProps={{ className: 'text-ink' }}
+              >
+                {intl.formatMessage({ id: item.key })}
+              </Link>
             ),
           )}
+          {EXTERNAL.map((item) => (
+            <a
+              key={item.href}
+              href={item.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={LINK}
+            >
+              {intl.formatMessage({ id: item.key })}
+            </a>
+          ))}
         </nav>
         <LanguageSwitch />
         <ThemeSwitch />
