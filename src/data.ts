@@ -270,6 +270,7 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: 'simulate-rather-than-animate',
     uid: 'blog-6',
     date: '2026-08-25',
+    hero: '/blog/simulate.webp',
     minutes: 6,
   },
   {
