@@ -84,7 +84,19 @@ function ProjectMedia({ project, index }: { project: Project; index: number }) {
     video ? (
       // `playsInline` is load-bearing on iOS: without it Safari takes the video
       // fullscreen instead of autoplaying inline, so the card renders empty.
-      <video src={video} autoPlay loop muted playsInline preload="metadata" className={className} />
+      // `poster` covers the gap before the first frame paints, and is what the
+      // card falls back to wherever autoplay is refused (iOS Low Power Mode,
+      // `prefers-reduced-motion` at the OS level).
+      <video
+        src={video}
+        poster={image}
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="metadata"
+        className={className}
+      />
     ) : (
       // Six posters below the fold on a phone; `lazy` keeps them off the
       // initial load. The wrapper is `aspect-video`, so there is no shift.
