@@ -1,0 +1,74 @@
+export const metadata = {
+  title: "Rapporter ce qu'on n'a pas vérifié",
+  description:
+    "Entre ceux qui font le travail et ceux qui le financent se tient quelqu'un qui doit produire de la confiance sans pouvoir rien vérifier. C'est là que l'incertitude est blanchie en fait.",
+  alternates: {
+    canonical: '/fr/blog/reporting-what-you-did-not-check',
+  },
+}
+
+# Rapporter ce qu'on n'a pas vérifié
+
+Il existe une distinction qu'il vaut la peine de tenir précisément, parce que le mauvais mot rend tout ce problème invisible.
+
+Un menteur sait ce qui est vrai et vous en détourne. Cela suppose de suivre la vérité de près, ce qui rend le mensonge coûteux et explique qu'on finisse par attraper les menteurs. Le baratin est autre chose : c'est une parole sans aucun rapport à la vérité. Celui qui parle n'évite pas l'exactitude, il y est indifférent, parce que l'exactitude n'est pas ce à quoi sert la phrase. La phrase sert à produire un effet, généralement du réconfort.
+
+Presque rien de ce qui déraille dans le reporting de projet ne relève du mensonge. L'essentiel relève de la seconde chose, et la seconde chose est pire, parce qu'il n'y a aucun moment de décision que l'on puisse désigner après coup et personne qui estime avoir mal agi.
+
+Ce texte accompagne un autre, consacré aux managers incapables d'évaluer le travail dont ils répondent. Même racine, autre direction. Celui-là portait sur ce qui arrive quand il faut juger un travail qu'on ne sait pas lire. Celui-ci porte sur ce qui arrive quand il faut le *rapporter*.
+
+## Le rôle fabrique la pression
+
+Placez-vous entre ceux qui font le travail et ceux qui le paient. Votre fonction est de produire un état des lieux défendable, à intervalle régulier, que quelque chose de lisible se soit produit ou non depuis le précédent.
+
+Vous ne pouvez pas évaluer le travail vous-même. Votre seule entrée est ce qu'on vous a dit, et ce qu'on vous a dit était nuancé, parce que les ingénieurs nuancent quand ils sont exacts. « Ça marche pour l'essentiel, il reste deux cas limites, je veux vérifier un point sur l'arrondi de TVA. »
+
+Compressez maintenant cela pour quelqu'un qui a onze autres sujets à entendre. Chaque nuance conservée appelle une question de suivi à laquelle vous ne saurez pas répondre, et être incapable de répondre à des questions sur votre propre point d'avancement est précisément l'échec sur lequel le rôle est jugé. Chaque nuance retirée rend la phrase plus nette et vous fait paraître plus compétent.
+
+Les nuances tombent donc. Non par duplicité. Elles tombent parce qu'elles coûtent quelque chose à celui qui parle et semblent ne rien coûter à celui qui écoute, et parce qu'à chaque étape ce qui reste paraît encore à peu près vrai.
+
+Deux ou trois sauts de ce genre et « ça marche pour l'essentiel, avec des questions ouvertes sur l'arrondi » est arrivé quelque part sous la forme « c'est fait ». Personne n'a menti. L'information a été détruite par une suite de compressions individuellement raisonnables.
+
+## Le moment où cela sort du bâtiment
+
+À l'intérieur, c'est rattrapable. Cela devient irrattrapable dès que la version compressée atteint quelqu'un hors de la boucle de livraison.
+
+Sur un projet où j'ai travaillé, un partie prenante a reçu une présentation du périmètre lors d'une réunion sans aucun ingénieur présent. Une capacité a été décrite comme terminée. Elle ne l'était pas : il lui manquait des catégories entières du domaine dont la personne qui la décrivait ignorait l'existence, parce que le savoir supposait d'avoir fait le travail. J'ai appris ce qui avait été dit après coup, par un enregistrement que j'ai réclamé.
+
+C'est le mécanisme à son extension maximale. L'affirmation n'a pas seulement remonté, elle a quitté le bâtiment, et la personne qui aurait pu la corriger en une phrase n'était pas dans la pièce.
+
+Ce qui rend cela coûteux n'est pas la gêne. C'est que les affirmations externes deviennent des engagements. Une fois qu'on a dit mars à quelqu'un de l'extérieur, mars cesse d'être une estimation et devient un fait que l'ingénierie doit désormais absorber, et chaque conversation suivante porte sur les raisons pour lesquelles l'ingénierie n'arrive pas à tenir une date qu'elle n'a jamais acceptée. Le statut faux ne reste pas faux. Il revient en arrière et remodèle le travail réel, généralement en faisant disparaître discrètement les parties difficiles pour que la date survive.
+
+## De l'agitation qui ne porte aucune décision
+
+Le tracker de ce projet comptait 466 tickets. Quatre-vingt-seize pour cent avaient été créés par une seule personne. Les points de complexité étaient renseignés sur 6,2 % d'entre eux, en une seule salve, puis abandonnés. Vingt-huit stationnaient bloqués, dont un pendant 160 jours, en attente d'une réponse que personne ne relançait. Cinq épiques sont restées six mois sans mouvement.
+
+Lisez ces nombres pour ce qu'ils sont. Beaucoup d'activité et presque aucune décision. Des tickets ont été créés, déplacés, commentés. Ce qui n'a pas été produit, c'est une seule formulation de ce que « terminé » voulait dire, qui aurait pu être vérifiée plus tard et déclarée fausse.
+
+C'est la signature de cette défaillance dans les artefacts, et elle est plus fiable que n'importe quelle impression sur une personne. Un processus qui produit des documents plutôt que des engagements paraît industrieux vu d'en haut et n'apporte rien à ceux d'en bas. Si rien de ce que votre processus émet ne peut être falsifié plus tard, ce processus ne suit pas la réalité, quel que soit son débit.
+
+## Pourquoi cela ne se corrige pas
+
+Deux choses le maintiennent en place, et aucune n'exige que quiconque soit délibérément mauvais.
+
+La première est que corriger une affirmation déjà faite coûte réellement quelque chose à celui qui l'a faite, devant des gens dont l'opinion lui importe. Une correction n'arrive donc pas comme une information nouvelle, elle arrive comme une contestation, et elle est traitée comme telle. L'ingénieur qui dit « en fait ce n'est pas terminé » n'est pas entendu comme serviable. Il est entendu comme difficile, ce qui est exactement la lecture décrite dans le texte précédent.
+
+La seconde est que « je ne sais pas » n'a nulle part où atterrir sans dommage. Dans la plupart des cultures de reporting, c'est la seule réponse qui rejaillit sur celui qui rapporte plutôt que sur le travail. Rendez cette réponse coûteuse et vous garantissez que personne ne la donnera jamais, ce qui signifie que chaque trou de connaissance se présentera déguisé en fait.
+
+## Ce qui aide réellement
+
+Ne laissez jamais la couche de reporting être le seul canal. Le changement au plus fort rendement est que celui qui s'engage sur quelque chose d'externe l'entende une fois, directement, de quelqu'un qui peut se tromper d'une manière vérifiable. C'est une réunion, pas un processus.
+
+Faites la démonstration contre des critères écrits à l'avance. Si « terminé » a été défini avant, le statut devient une observation plutôt qu'une appréciation, et personne n'a à juger l'optimisme de qui que ce soit. C'est le même correctif que dans le texte précédent, parce que c'est le même trou de fond.
+
+Mettez un ingénieur dans la pièce chaque fois que le périmètre est discuté avec quelqu'un d'extérieur à l'équipe. Pas pour présenter. Pour être présent, afin qu'une affirmation fausse coûte une phrase à corriger au lieu d'un trimestre.
+
+Et rendez le fait de ne pas savoir peu coûteux, explicitement et de façon répétée, ou acceptez d'être gouverné par des suppositions assurées. Celui-ci n'est pas un changement de processus, ce qui explique qu'il se produise rarement.
+
+## Ce que je dois assumer
+
+Je n'étais pas dans cette pièce en février, et c'est en partie parce que j'avais cessé d'essayer d'être dans les pièces.
+
+Y entrer coûtait cher. Il fallait débattre de la nécessité de ma présence, et j'avais un arriéré et une échéance, et il était toujours plus simple de continuer à construire en laissant la couche de reporting rapporter. Chaque fois que j'ai fait ce choix, j'ai rendu cette couche plus porteuse et mes corrections ultérieures plus tardives et plus coûteuses. Le jour où je réclamais l'enregistrement de réunions auxquelles je n'avais pas assisté, le schéma avait un an et j'avais contribué à le bâtir.
+
+La version inconfortable est qu'une couche de reporting ne devient la source unique de vérité que si ceux qui connaissent la vérité cessent de se présenter. La mienne l'est devenue. Je ne me suis plus présenté.

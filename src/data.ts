@@ -272,6 +272,21 @@ export const CAPABILITIES: Capability[] = [
 export const BLOG_POSTS: BlogPost[] = [
   {
     title: {
+      en: 'Reporting what you did not check',
+      fr: "Rapporter ce qu'on n'a pas vérifié",
+    },
+    description: {
+      en: 'Between the people doing the work and the people funding it sits someone who has to produce confidence without being able to verify anything. That is where uncertainty gets laundered into fact.',
+      fr: "Entre ceux qui font le travail et ceux qui le financent se tient quelqu'un qui doit produire de la confiance sans pouvoir rien vérifier. C'est là que l'incertitude est blanchie en fait.",
+    },
+    slug: 'reporting-what-you-did-not-check',
+    uid: 'blog-8',
+    date: '2026-08-27',
+    hero: '/blog/reporting.webp',
+    minutes: 6,
+  },
+  {
+    title: {
       en: 'Managing what you cannot read',
       fr: "Diriger ce qu'on ne sait pas lire",
     },

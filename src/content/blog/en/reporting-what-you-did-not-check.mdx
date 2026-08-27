@@ -1,0 +1,74 @@
+export const metadata = {
+  title: 'Reporting what you did not check',
+  description:
+    'Between the people doing the work and the people funding it sits someone who has to produce confidence without being able to verify anything. That is where uncertainty gets laundered into fact.',
+  alternates: {
+    canonical: '/blog/reporting-what-you-did-not-check',
+  },
+}
+
+# Reporting what you did not check
+
+There is a distinction worth having precisely, because the wrong word makes this whole problem invisible.
+
+A liar knows what is true and steers you away from it. That requires tracking the truth carefully, which is why lying is effortful and why liars get caught. Bullshit is different: it is speech with no relationship to truth at all. The speaker is not avoiding accuracy, they are indifferent to it, because accuracy is not what the sentence is for. The sentence is for producing an effect, usually reassurance.
+
+Almost nothing that goes wrong in project reporting is lying. Nearly all of it is the second thing, and the second thing is worse, because there is no moment of decision you can point at afterwards and no one who believes they did anything wrong.
+
+This is a companion to something I wrote about managers who cannot evaluate the work they are responsible for. Same root, different direction. That piece was about what happens when you have to judge work you cannot read. This one is about what happens when you have to *report* it.
+
+## The role manufactures the pressure
+
+Sit between the people doing the work and the people paying for it. Your job is to produce a defensible account of where things stand, on a cadence, whether or not anything legible has happened since the last one.
+
+You cannot evaluate the work yourself. Your only input is what someone told you, and what they told you was hedged, because engineers hedge when they are being accurate. "Mostly working, a couple of edge cases left, I want to check something about the tax rounding."
+
+Now compress that for someone with eleven other things to hear about. Every qualifier you keep invites a follow-up question you cannot answer, and being unable to answer questions about your own status report is the specific failure the role is judged on. Every qualifier you drop makes the sentence cleaner and you more competent-sounding.
+
+So the hedges come off. Not deceptively. They come off because they cost the speaker something and appear to cost the listener nothing, and because at each step the remaining claim still feels approximately true.
+
+Two or three hops of that and "mostly working with open questions about rounding" has arrived somewhere as "done". Nobody lied. The information was destroyed by a series of individually reasonable compressions.
+
+## The moment it goes external
+
+Inside the building this is recoverable. It becomes unrecoverable the moment the compressed version reaches someone outside the delivery loop.
+
+In one project I worked on, a stakeholder was briefed on scope in a meeting with no engineer present. A capability was described as complete. It was not complete: it was missing whole categories of the domain that the person describing it did not know existed, because knowing they existed required doing the work. I learned what had been said afterwards, from a recording I asked for.
+
+That is the mechanism at full extension. The claim did not merely travel upward, it left the building, and the person who could have corrected it in one sentence was not in the room.
+
+What makes this expensive is not the embarrassment. It is that external claims become commitments. Once someone outside has been told March, March stops being an estimate and becomes a fact that engineering is now required to absorb, and every subsequent conversation is about why engineering is failing to meet a date it never agreed to. The false status does not stay false. It reaches back and reshapes the actual work, usually by having the hard parts quietly dropped so the date survives.
+
+## Motion that carries no decisions
+
+The tracker on that project had 466 tickets. Ninety-six percent were filed by one person. Story points were filled on 6.2 percent, in a single burst, then abandoned. Twenty-eight sat blocked, one for 160 days, waiting on an answer nobody chased. Five epics went six months untouched.
+
+Read those numbers for what they are. That is a great deal of activity and almost no decision. Tickets were created, moved and discussed. What was not produced was a single statement about what "finished" meant that could later be checked and found wrong.
+
+That is the artifact signature of this failure, and it is more reliable than any impression of a person. A process generating documents rather than commitments looks industrious from above and provides nothing to the people below. If nothing your process emits is capable of being falsified later, the process is not tracking reality, whatever the throughput.
+
+## Why it does not get corrected
+
+Two things keep it in place, and neither requires anyone to be bad at their job on purpose.
+
+The first is that correcting a claim already made costs the person who made it something real, in front of people whose opinion of them matters. So a correction does not arrive as new information, it arrives as a challenge, and it gets handled as one. The engineer who says "that is not actually done" is not heard as helpful. They are heard as difficult, which is exactly the reading the previous essay described.
+
+The second is that "I do not know" has no safe place to land. In most reporting cultures it is the one answer that reflects on the reporter rather than on the work. Make that answer expensive and you have guaranteed that nobody ever gives it, which means every gap in knowledge arrives dressed as a fact.
+
+## What actually helps
+
+Never let the reporting layer be the only channel. The single highest-value change is that whoever is committing to something external hears it once, directly, from someone who can be wrong about it in a checkable way. That is one meeting, not a process.
+
+Demo against criteria written beforehand. If "done" was defined in advance, status is an observation rather than a characterisation, and nobody has to judge anyone's optimism. This is the same fix as the last piece because it is the same underlying hole.
+
+Put an engineer in the room whenever scope is discussed with anyone outside the team. Not to present. To be present, so that a wrong claim costs one sentence to correct instead of a quarter.
+
+And make not knowing cheap, explicitly and repeatedly, or accept that you will be governed by confident guesses. This one is not a process change, which is why it is the one that rarely happens.
+
+## What I have to hold
+
+I was not in that February room, and part of the reason is that I had stopped trying to be in rooms.
+
+Getting into them was expensive. It meant arguing about whether my presence was necessary, and I had a backlog and a deadline and it was always easier to keep building and let the reporting layer report. Every time I made that trade I made the reporting layer more load-bearing and my own corrections later and more expensive. By the time I was asking for recordings of meetings I had not attended, the pattern was a year old and I had helped build it.
+
+The uncomfortable version is that a reporting layer only becomes the sole source of truth if the people who know the truth stop showing up. Mine did. I did.
