@@ -1,0 +1,92 @@
+export const metadata = {
+  title: 'Diriger ce qu’on ne sait pas lire',
+  description:
+    "Un manager incapable d'évaluer le travail doit évaluer son apparence. Le micromanagement, les réorganisations et le schéma où l'ingénieur le plus solide reçoit le traitement le plus dur découlent tous de cette seule substitution.",
+  alternates: {
+    canonical: '/fr/blog/managing-what-you-cannot-read',
+  },
+}
+
+# Diriger ce qu'on ne sait pas lire
+
+Voici un problème sans bonne solution. Vous êtes responsable de la livraison d'un travail que vous ne savez pas évaluer. Quelqu'un vous remet une branche, un point d'avancement, ou une phrase expliquant pourquoi ce qui devait prendre une semaine en prendra trois. Vous devez décider si c'est vrai. Vous ne lisez pas le code, donc vous ne pouvez pas vérifier.
+
+Tout le reste de ce texte découle de ce que les gens font ensuite.
+
+Parce que le travail est illisible, mais que son apparence ne l'est pas. Les heures sont visibles. La présence est visible. Le temps de réponse en messagerie est visible. Les tickets qui traversent un tableau sont visibles. L'accord manifesté en réunion est extrêmement visible. L'apparence du travail devient donc discrètement la chose que l'on dirige, sans que personne ne l'ait décidé et le plus souvent sans que personne ne le remarque.
+
+Cette substitution est la cause racine. Presque tous les comportements que l'on qualifie de management toxique en ingénierie en découlent.
+
+## Les indicateurs de substitution s'inversent
+
+L'ennui, avec la mesure de l'apparence, n'est pas qu'elle soit approximative. C'est qu'elle est inversée.
+
+L'ingénieur qui prend le problème le plus difficile du système paraît lent. Il rate ses estimations, parce qu'un travail réellement difficile est réellement imprévisible. Il conteste le périmètre, parce qu'il voit ce qu'il y a dessous. Il pose des questions qui ressemblent à de la réticence. Il devient silencieux deux jours au milieu de quelque chose d'ardu.
+
+L'ingénieur qui prend le travail facile paraît excellent. Les tickets se ferment. Les estimations tiennent, parce que le travail était estimable. Il répond vite en messagerie, parce que rien de ce qu'il fait n'exige une heure ininterrompue. Il ne discute jamais une échéance.
+
+Sous une mesure par indicateurs de substitution, le second est votre meilleur élément et le premier est un problème. Non parce que quelqu'un serait injuste exprès. Parce que ce sont les relevés que donnent les instruments.
+
+C'est aussi pourquoi la pression tombe le plus lourdement sur ceux qui portent le plus. Ce sont eux qui produisent les écarts qu'un système par substitution signale. Ils sont la source visible des mauvaises nouvelles, des dates manquées et des désaccords, et ils sont difficiles à diriger parce que les diriger suppose de comprendre ce qu'ils font. La personne qui ne produit rien de difficile ne produit aucun signal alarmant.
+
+## À quoi cela ressemble dans les artefacts
+
+Je peux mettre des chiffres sur un cas, tiré d'un projet dont j'ai parlé ailleurs.
+
+L'entreprise utilisait Jira. L'export montre 466 tickets, dont 96 % créés par le chef de produit. Les points de complexité sont renseignés sur 6,2 % d'entre eux, en une seule salve consécutive, puis plus jamais : l'estimation a été tentée une fois puis abandonnée. Vingt-huit tickets stationnaient bloqués, onze jours en médiane, dont un pendant 160 jours en attente d'une réponse métier. Cinq épiques n'ont pas bougé pendant six mois.
+
+Sur 9 885 commits de la même période, le mot Jira apparaît zéro fois.
+
+Lisez cela comme un instrument et c'est sans ambiguïté. Le tableau n'était pas relié au travail. C'était une surface où l'apparence d'un processus pouvait être entretenue, et elle l'était surtout par une seule personne qui déposait des tickets. Rien de tout cela ne prouve une mauvaise intention. Cela prouve l'existence d'un système de contrôle sans capteur branché sur ce qu'il prétendait contrôler.
+
+La même forme apparaît dans les documents de gouvernance. Un RACI que j'ai rédigé a listé quatre des rôles requis comme « à définir » pendant des mois. La validation de la version 1 exigeait cinq responsables nommés, et les cinq signatures sont les miennes, le même jour. Personne n'a décidé qu'un prestataire validerait le juridique, la finance, le produit, l'ingénierie et la mise en production. Cela s'est assemblé tout seul, parce que chaque manque individuel était plus rapide à absorber qu'à faire remonter.
+
+## Le micromanagement répond à un angle mort
+
+Vient la partie où je dois être prudent, parce que la version honnête de ce texte sépare ce que j'ai observé de ce que j'ai déduit.
+
+Ce que j'ai observé : plus le projet prenait du retard, plus les demandes de détail devenaient fines. Où en était le travail, pourquoi une chose avait pris ce temps-là, ce qui avait exactement été fait cette semaine. Des instructions directes sur quoi traiter ensuite, venant de gens qui ne pouvaient pas évaluer le résultat de l'instruction précédente.
+
+Ce que je déduis, sans pouvoir le prouver : que c'est l'effet, vu de l'intérieur, d'une responsabilité sans visibilité, et que demander du détail est ce qu'on fait quand on ne peut pas apprécier l'ensemble. Si les seuls relevés dont vous disposez sont des substituts, et que ces substituts sont alarmants, le geste naturel consiste à en exiger davantage, à plus haute résolution. Cela ressemble à de la rigueur. Cela produit la même information qu'avant, en plus petits morceaux.
+
+Je tiens à signaler cette déduction clairement, parce que j'ai écrit un autre texte entier sur la mesure de ma propre lecture de ces personnes, et le chiffre honnête y était de 77 % de précision sur un détecteur, et pire sur un autre. Je n'ai pas le droit de publier des affirmations assurées sur l'état intérieur de qui que ce soit après cela. Le mécanisme que je décris est structurel. Ce que telle personne ressentait n'est pas quelque chose que j'ai mesuré.
+
+Le mécanisme n'exige la malveillance de personne. Un manager dans cette position est réellement responsable de quelque chose qu'il ne peut réellement pas voir. C'est une position détestable, et l'essentiel du comportement en découle sans qu'aucun méchant soit nécessaire.
+
+## Des décisions qui rétablissent la sensation plutôt que la situation
+
+Il existe une catégorie précise de décision qui sort de là, et elle devient reconnaissable une fois qu'on l'a vue.
+
+Le problème est que le travail est illisible. C'est difficile, lent et humiliant à corriger, parce que corriger cela suppose d'acquérir assez de compréhension pour évaluer le travail, ou de recruter quelqu'un qui le peut et de lui faire ensuite confiance.
+
+Ce qui se fait à la place touche généralement la partie visible. Un nouveau processus. Une réorganisation du tableau. Une autre cadence de reporting. Une migration d'outil. Une règle de présence. Chacune est lisible, chacune peut être annoncée et achevée, et aucune ne touche l'écart réel.
+
+Le signe distinctif est que le changement porte toujours sur la couche de reporting et jamais sur ce qui est rapporté. Des estimations fausses sont un problème de connaissance. Exiger que les estimations soient saisies deux fois, dans deux systèmes, est un changement de reporting. Ce sera fait, ce sera visible, et les estimations seront exactement aussi fausses.
+
+## Pourquoi c'est la mauvaise personne qui part
+
+Le départ est ce qui devrait inquiéter un dirigeant plus que tout ce qui précède.
+
+La personne sous la plus forte pression est celle qui porte le travail le plus difficile. C'est elle qui a le plus d'options, parce que les qualités qui la rendent difficile à diriger sous des substituts la rendent facile à recruter. Elle part donc en premier.
+
+Ce qui suit est franchement sinistre : la plupart des indicateurs de substitution s'améliorent. La source des estimations manquées a disparu. La personne qui contestait sans cesse le périmètre a disparu. Les tickets se ferment à un rythme plus régulier, puisque le travail restant est du type estimable. Les réunions sont plus consensuelles. Chaque indicateur visible dit que la situation s'est arrangée.
+
+L'indicateur invisible, à savoir si quelqu'un sait encore faire la partie difficile, est tombé à zéro. Et rien dans le tableau de bord n'est capable de le montrer. Cette défaillance émerge deux trimestres plus tard sous la forme d'une capacité qui, discrètement, n'existe plus, à un moment où le départ et sa conséquence sont trop éloignés pour que quiconque encore présent les relie.
+
+## Ce qui traite réellement le problème
+
+Rien dans cette liste n'est un correctif de personnalité, parce que le problème n'est pas la personnalité.
+
+Donnez au manager un signal réel. Pas un résumé. Une chose par cycle qu'il puisse vérifier sans faire confiance au rapport : une démonstration de logiciel qui fonctionne face à un critère convenu avant le début du travail, ou un test en échec qui passe désormais. Il faut que la réponse ne relève pas de l'opinion. Ce capteur unique supprime l'essentiel du besoin de substituts, parce qu'il répond à la vraie question, qui est de savoir si la chose marche.
+
+Écrivez des critères d'acceptation capables d'échouer. C'est le même point pris par un autre bout. Quand « terminé » est défini à l'avance et vérifiable, personne n'a besoin de juger le caractère de quiconque pour savoir si une fonctionnalité est finie. Là où ce n'est pas défini à l'avance, « terminé » se décide en conversation, après livraison, par le plus assuré.
+
+Faites en sorte que le tracker et le dépôt se référencent mutuellement. Si l'outil où vit le processus n'apparaît jamais dans le journal de ce qui a été construit, vous avez deux systèmes et l'un des deux est du théâtre. C'était une requête d'une ligne dans mon cas, disponible dès le premier mois, et je ne l'ai lancée qu'au dix-septième.
+
+Et faites remonter le rôle vacant au lieu de l'absorber. Chaque manque que j'ai comblé en silence est un manque qui a cessé d'être visible pour ceux qui auraient pu le pourvoir. C'est la partie que j'ai ratée, à répétition, et elle a fait plus de dégâts que tout ce qu'on m'a fait.
+
+## Ce que je garde
+
+J'étais difficile à diriger. Pas pour la raison flatteuse, ou pas seulement. Je me suis rendu point de défaillance unique, puis j'ai mal vécu d'être traité comme tel. J'ai absorbé des rôles au lieu d'imposer la conversation sur leur attribution, décision qui paraît généreuse et fonctionne comme de l'accaparement. Et à la fin, mes propres messages n'étaient pas professionnels non plus.
+
+Un texte sur un mécanisme est plus utile qu'un texte sur des gens mauvais, et c'est aussi la seule version que je puisse défendre. Si vous êtes celui que l'on mesure mal, le geste utile n'est pas de prouver que la mesure est injuste. C'est de remettre tôt un signal vérifiable sans vous, avant que les substituts ne soient tout ce dont on dispose.

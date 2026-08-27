@@ -272,6 +272,21 @@ export const CAPABILITIES: Capability[] = [
 export const BLOG_POSTS: BlogPost[] = [
   {
     title: {
+      en: 'Managing what you cannot read',
+      fr: "Diriger ce qu'on ne sait pas lire",
+    },
+    description: {
+      en: 'A manager who cannot evaluate the work has to evaluate the appearance of it. Micromanagement, reorganisations, and the pattern where the strongest engineer gets the hardest treatment all follow from that one substitution.',
+      fr: "Un manager incapable d'évaluer le travail doit évaluer son apparence. Le micromanagement, les réorganisations et le schéma où l'ingénieur le plus solide reçoit le traitement le plus dur découlent tous de cette seule substitution.",
+    },
+    slug: 'managing-what-you-cannot-read',
+    uid: 'blog-7',
+    date: '2026-08-27',
+    hero: '/blog/managing.webp',
+    minutes: 8,
+  },
+  {
+    title: {
       en: 'Simulate rather than animate',
       fr: "Simuler plutôt qu'animer",
     },

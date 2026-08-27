@@ -1,0 +1,92 @@
+export const metadata = {
+  title: 'Managing what you cannot read',
+  description:
+    'A manager who cannot evaluate the work has to evaluate the appearance of it. Micromanagement, reorganisations, and the pattern where the strongest engineer gets the hardest treatment all follow from that one substitution.',
+  alternates: {
+    canonical: '/blog/managing-what-you-cannot-read',
+  },
+}
+
+# Managing what you cannot read
+
+Here is a problem with no good solution. You are responsible for the delivery of work you cannot evaluate. Somebody hands you a branch, or a status update, or a sentence explaining why the thing that was going to take a week is going to take three. You have to decide whether that is true. You cannot read the code, so you cannot check.
+
+Everything else in this piece comes from what people do next.
+
+Because the work is illegible, its appearance is not. Hours are visible. Presence is visible. Response time in chat is visible. Tickets moving across a board are visible. Agreeableness in a meeting is extremely visible. So the appearance of work quietly becomes the thing being managed, and it happens without anybody deciding it, usually without anybody noticing.
+
+That substitution is the root cause. Almost every behaviour that gets called toxic management in engineering is downstream of it.
+
+## Proxies invert
+
+The trouble with measuring appearance is not that it is approximate. It is that it is inverted.
+
+The engineer taking the hardest problem in the system looks slow. They miss estimates, because genuinely hard work is genuinely unpredictable. They push back on scope, because they can see what is underneath it. They ask questions that sound like reluctance. They go quiet for two days in the middle of something difficult.
+
+The engineer taking the easy work looks excellent. Tickets close. Estimates hold, because the work was estimable. They are responsive in chat, because nothing they are doing requires an uninterrupted hour. They never dispute a deadline.
+
+Under proxy measurement, the second person is your best performer and the first is a problem. Not because anyone is being unfair on purpose. Because those are the readings the instruments give.
+
+This is also why the pressure lands hardest on the people carrying the most. They are the ones generating the discrepancies that a proxy-based system flags. They are the visible source of bad news, missed dates and disagreement, and they are hard to direct because directing them requires understanding what they are doing. The person producing nothing difficult produces no alarming signals at all.
+
+## What it looks like in artifacts
+
+I can put numbers on one instance of this, from a project I have written about elsewhere.
+
+The company ran Jira. The export shows 466 tickets, of which 96 percent were created by the product manager. Story points were filled on 6.2 percent, in one consecutive burst, then never again: estimation was attempted once and abandoned. Twenty-eight tickets sat blocked, median eleven days, one of them for 160 days waiting on a business answer. Five epics went untouched for six months.
+
+Across 9,885 commits in the same period, the word Jira appears zero times.
+
+Read that as an instrument and it is unambiguous. The board was not connected to the work. It was a surface where the appearance of a process could be maintained, and it was maintained mostly by one person filing tickets. None of that is evidence of bad intent. It is evidence of a control system with no sensor attached to the thing it was controlling.
+
+The same shape shows up in the governance documents. A RACI I wrote listed four of the required roles as "to be determined" for months. The version one release sign-off required five named owners, and all five signatures are mine, on the same day. Nobody decided that a contractor should sign off on legal, finance, product, engineering and release. It assembled itself, because each individual gap was faster to absorb than to escalate.
+
+## Micromanagement is a response to a blind spot
+
+Now the part where I have to be careful, because the honest version of this essay separates what I observed from what I inferred.
+
+What I observed: as the project got later, the requests for detail got finer. Where the work stood, why a thing took as long as it did, what exactly had been done that week. Direct instruction on what to work on next, from people who could not evaluate the outcome of the previous instruction.
+
+What I infer, and cannot prove: that this is what responsibility without visibility feels like from the inside, and that asking for detail is what you do when you cannot assess the whole. If the only readings you get are proxies, and the proxies are alarming, the natural move is to demand more proxies at higher resolution. It feels like diligence. It produces the same information as before, in smaller pieces.
+
+I want to flag the inference clearly because I have written a whole other piece about measuring my own read of these people, and the honest number there was 77 percent precision on one detector and worse on another. I do not get to publish confident claims about anyone's inner state after that. The mechanism I am describing is structural. What any particular person was feeling is not something I measured.
+
+The mechanism does not require anyone to be malicious. A manager in this position is genuinely responsible for something they genuinely cannot see. That is an awful position and most of the behaviour follows from it without any villain being required.
+
+## Decisions that restore the feeling rather than the situation
+
+There is a specific category of decision that comes out of this, and it is recognisable once you have seen it.
+
+The problem is that the work is illegible. That is hard, slow and humbling to fix, because fixing it means acquiring enough understanding to evaluate the work, or hiring someone who can and then trusting them.
+
+What gets done instead tends to be a change to the part that is visible. A new process. A reorganisation of the board. A different reporting cadence. A tool migration. A rule about presence. Each is legible, each can be announced and completed, and none of them touch the actual gap.
+
+The tell is that the change is always to the reporting layer and never to the thing being reported on. A team's estimates being wrong is a knowledge problem. Requiring the estimates to be entered twice, in two systems, is a reporting change. It will be done, it will be visible, and the estimates will be exactly as wrong.
+
+## Why this ends with the wrong person leaving
+
+The exit is the part that should worry an owner more than anything above.
+
+The person under the most pressure is the person carrying the hardest work. They have the most options, because the same qualities that make them hard to manage under proxies make them easy to hire. So they go first.
+
+What happens then is genuinely bleak: most of the proxy metrics improve. The source of missed estimates has gone. The person who kept disputing scope has gone. Tickets close at a steadier rate, because the remaining work is the estimable kind. Meetings are more agreeable. Every visible indicator says the situation got better.
+
+The invisible indicator, which is whether anyone can still do the hard part, has gone to zero. And nothing in the instrument panel is capable of showing it. That failure surfaces two quarters later as a capability that quietly no longer exists, by which point the departure and the consequence are too far apart to be connected by anyone still there.
+
+## What actually addresses it
+
+Nothing on this list is a personality fix, because the problem is not personality.
+
+Give the manager one real signal. Not a summary. One thing per cycle they can verify without trusting the report: a demo of working software against a criterion agreed before the work started, or a failing test that now passes. It has to be something where the answer is not a matter of opinion. That single sensor removes most of the need for proxies, because it answers the actual question, which is whether the thing works.
+
+Write acceptance criteria that can fail. This is the same point from another direction. When "done" is defined in advance and checkable, nobody has to assess anybody's character to know whether a feature is finished. Where it is not defined in advance, "done" gets decided in conversation, after delivery, by whoever is most confident.
+
+Make the tracker and the repository reference each other. If the tool where the process lives never appears in the log of what was actually built, you have two systems and one of them is theatre. That was a one-line query in my case, available from month one, and I did not run it until month seventeen.
+
+And escalate the empty role instead of absorbing it. Every gap I filled quietly was a gap that stopped being visible to anyone who could have staffed it. This is the piece I got wrong, repeatedly, and it did more damage than anything anyone did to me.
+
+## The part I keep
+
+I was hard to manage. Not for the flattering reason, or not only. I made myself the single point of failure and then resented being treated as one. I absorbed roles rather than forcing the conversation about who owned them, which is a decision that looks generous and functions as hoarding. And by the end my own messages were not professional either.
+
+An essay about a mechanism is more useful than an essay about bad people, and it is also the only version I can defend. If you are the one being measured badly, the useful move is not to prove the measurement unfair. It is to hand over one signal they can check without you, early, before the proxies are all anyone has.
