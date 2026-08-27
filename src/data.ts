@@ -272,6 +272,21 @@ export const CAPABILITIES: Capability[] = [
 export const BLOG_POSTS: BlogPost[] = [
   {
     title: {
+      en: 'Constraints instead of reviewers',
+      fr: 'Des contraintes plutôt que des relecteurs',
+    },
+    description: {
+      en: 'A reviewer catches a mistake once. A constraint catches it forever, including from people who never met you. Which layer should enforce an invariant, and where the approach stops working.',
+      fr: "Un relecteur attrape une erreur une fois. Une contrainte l'attrape toujours, y compris venant de gens qui ne vous ont jamais rencontré. Quelle couche doit porter un invariant, et où l'approche cesse de fonctionner.",
+    },
+    slug: 'constraints-instead-of-reviewers',
+    uid: 'blog-9',
+    date: '2026-08-27',
+    hero: '/blog/constraints.webp',
+    minutes: 6,
+  },
+  {
+    title: {
       en: 'Reporting what you did not check',
       fr: "Rapporter ce qu'on n'a pas vérifié",
     },

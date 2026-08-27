@@ -1,0 +1,91 @@
+export const metadata = {
+  title: 'Constraints instead of reviewers',
+  description:
+    'A reviewer catches a mistake once. A constraint catches it forever, including from people who never met you. How to decide which layer should enforce an invariant, and where the approach stops working.',
+  alternates: {
+    canonical: '/blog/constraints-instead-of-reviewers',
+  },
+}
+
+# Constraints instead of reviewers
+
+A reviewer catches a mistake once, in one diff, if they are paying attention that afternoon. A constraint catches it every time, in every code path, including from the person who joins in two years and never speaks to you.
+
+That asymmetry is the whole argument for pushing checks down the stack, and it holds regardless of how good your review culture is. Where review is scarce it stops being an optimisation and becomes the only thing keeping a large system honest.
+
+What follows is the ladder I use, cheapest and most durable first, with numbers from a system where I leaned on it hard: an ERP over roughly three hundred tables.
+
+## The database is the last line and should be the first choice
+
+A constraint in the schema is enforced no matter what reaches the database. Your application, a colleague's script, a migration run by hand at two in the morning, an admin tool nobody remembered existed. Every other layer can be bypassed by someone who does not know it exists.
+
+In that system: 2,081 `NOT NULL` declarations, 888 foreign keys, 216 unique indexes, and 77 check constraints. The check constraints are the interesting ones, because they encode business rules rather than shape:
+
+```sql
+CHECK (starts_on <= ends_on)
+CHECK (status IN ('open', 'closed', 'locked'))
+CHECK (account_class IS NULL OR account_class BETWEEN 1 AND 9)
+```
+
+The first one is my favourite thing in the schema. A date range that runs backwards is not a validation problem to be solved in a form handler, it is a state that should not be able to exist in the universe. Written this way, it cannot. Not through the API, not through a bulk import, not through a repair script written under pressure during an incident, which is exactly when someone will try.
+
+Note the third one, because it shows a distinction people get wrong. The rule is not "account class is 1 to 9". It is "account class is unknown, or it is 1 to 9". Nullable is not weakness. Conflating "we do not know" with "it is zero" is how sentinel values get born, and a sentinel value is a lie the database will faithfully preserve for a decade.
+
+## Derive validators, never write them
+
+The second rung is that no validator should restate what a table already says.
+
+That system generates them: 673 insert schemas, 670 select schemas, 610 update schemas, all derived from the table definitions with `drizzle-zod`. Nobody typed those out.
+
+The reason is not typing speed, it is drift. A hand-written validator and a table definition are two descriptions of the same thing, maintained by different people at different times. They will disagree eventually, and the disagreement will be silent: a column gains a constraint, the validator does not, and now your API accepts something the database will reject at write time, in production, from a user.
+
+Deriving makes that class of bug unrepresentable. Change the column and every validator built on it changes in the same commit, because there is only one description.
+
+## Make the illegal states unrepresentable, then let the compiler find every site
+
+The third rung is types, and the specific technique that pays for itself is exhaustiveness.
+
+Model a thing that can be in one of several states as a discriminated union rather than an object with optional fields for each case. Then, where you handle it, force the compiler to prove you covered everything:
+
+```ts
+switch (entry.kind) {
+  case 'debit':  return applyDebit(entry)
+  case 'credit': return applyCredit(entry)
+  default: {
+    const unreachable: never = entry
+    throw new Error(`Unhandled entry kind: ${JSON.stringify(unreachable)}`)
+  }
+}
+```
+
+The payoff arrives later. When someone adds a third kind, this stops compiling, and so does every other place with the same shape. That server code has 878 occurrences of `never`, and most of them are this. It is a list of places a future change is required to visit.
+
+This is the closest a type system gets to doing what a reviewer does, because it answers the question a good reviewer asks: what else does this change affect? A compiler answers it exhaustively and in under a second, which no human does.
+
+## The rule this collapses to
+
+For each invariant, ask which is the lowest layer that can enforce it, and put it there.
+
+Lower means harder to bypass and covering more callers. Application validation protects the path you thought of. A database constraint protects paths that do not exist yet, written by people you will never meet, including the ones bypassing your application entirely.
+
+The corollary is that if you find yourself writing the same guard clause in several functions, you have identified something that belongs further down. Repeated guards are a symptom, not a pattern.
+
+## Where this stops working
+
+Four honest limits, three of which I have hit.
+
+**Constraints encode decisions, and decisions are wrong sometimes.** A check constraint is a claim about the domain forever. When the business rule turns out to have an exception, changing it is a migration against live data, and you will discover the exception under deadline pressure, because that is when the unusual case shows up. Cheap to write, expensive to be wrong about.
+
+**Over-constraining produces workarounds that are worse than the looseness.** Mark a column `NOT NULL` when the real rule is "usually known", and you have not eliminated missing data. You have forced everyone downstream to invent a value that means missing, and now the absence is invisible to queries instead of explicit.
+
+**Types that model everything become unreadable.** There is a point where a signature is so precise that nobody can tell what the function does, and the cost lands on every reader forever to prevent a bug that would have been caught in an afternoon. Precision has a budget.
+
+**And it does not replace review, it replaces one part of review.** A type system catches wrong states. It has nothing to say about wrong ideas. Nothing in the schema will tell you that the feature should not exist, that there is a simpler model, that you have built the third slightly different version of something already in the codebase, or that a reasonable person would find the API baffling.
+
+That last one matters most and is the thing I actually lost. On that project I had no reviewers, and I compensated by making the machine check what a machine can check. It worked, in the sense that the correctness held. What I did not get, for eighteen months, was anyone asking why I had done it that way. Some of the answers would have been embarrassing, which is the point of the question.
+
+## The part worth admitting
+
+I would defend most of those constraints on the merits. I should also say that some of that rigour was not purely engineering judgement. Building a system that cannot be broken by other people is a technically sound decision and also, in the right circumstances, a defensive one, and both motives produce identical code. That is what makes them hard to separate from the inside.
+
+The technique stands on its own regardless. But if you notice that your invariants have started to feel like fortifications, it is worth asking who you are fortifying against, and whether the answer is a class of bug or a group of colleagues.

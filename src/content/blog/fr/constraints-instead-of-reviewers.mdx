@@ -1,0 +1,91 @@
+export const metadata = {
+  title: 'Des contraintes plutôt que des relecteurs',
+  description:
+    "Un relecteur attrape une erreur une fois. Une contrainte l'attrape toujours, y compris venant de gens qui ne vous ont jamais rencontré. Comment choisir la couche qui doit porter un invariant, et où l'approche cesse de fonctionner.",
+  alternates: {
+    canonical: '/fr/blog/constraints-instead-of-reviewers',
+  },
+}
+
+# Des contraintes plutôt que des relecteurs
+
+Un relecteur attrape une erreur une fois, dans un diff, s'il est attentif cet après-midi-là. Une contrainte l'attrape à chaque fois, sur chaque chemin de code, y compris venant de la personne qui arrivera dans deux ans et ne vous parlera jamais.
+
+Cette asymétrie est tout l'argument en faveur de la descente des vérifications dans la pile, et elle tient quelle que soit la qualité de votre culture de revue. Là où la revue est rare, elle cesse d'être une optimisation et devient la seule chose qui garde un grand système honnête.
+
+Voici l'échelle que j'utilise, du moins cher et du plus durable vers le haut, avec des chiffres tirés d'un système où je m'y suis fortement appuyé : un ERP d'environ trois cents tables.
+
+## La base de données est la dernière ligne et devrait être le premier choix
+
+Une contrainte dans le schéma s'applique quoi qu'il arrive à la base. Votre application, le script d'un collègue, une migration lancée à la main à deux heures du matin, un outil d'administration dont plus personne ne se souvenait. Toutes les autres couches peuvent être contournées par quelqu'un qui ignore leur existence.
+
+Dans ce système : 2 081 déclarations `NOT NULL`, 888 clés étrangères, 216 index uniques et 77 contraintes de vérification. Ces dernières sont les intéressantes, parce qu'elles encodent des règles métier plutôt que des formes :
+
+```sql
+CHECK (starts_on <= ends_on)
+CHECK (status IN ('open', 'closed', 'locked'))
+CHECK (account_class IS NULL OR account_class BETWEEN 1 AND 9)
+```
+
+La première est ce que je préfère dans tout le schéma. Une plage de dates qui se déroule à l'envers n'est pas un problème de validation à régler dans un gestionnaire de formulaire, c'est un état qui ne devrait pas pouvoir exister dans l'univers. Écrit ainsi, il ne le peut pas. Ni par l'API, ni par un import en masse, ni par un script de réparation écrit sous pression pendant un incident, moment où quelqu'un essaiera précisément.
+
+Notez la troisième, parce qu'elle éclaire une distinction souvent ratée. La règle n'est pas « la classe de compte vaut 1 à 9 ». Elle est « la classe de compte est inconnue, ou elle vaut 1 à 9 ». Autoriser le nul n'est pas une faiblesse. Confondre « nous ne savons pas » et « cela vaut zéro » est la façon dont naissent les valeurs sentinelles, et une valeur sentinelle est un mensonge que la base conservera fidèlement pendant dix ans.
+
+## Dérivez les validateurs, ne les écrivez jamais
+
+Le deuxième barreau est qu'aucun validateur ne devrait redire ce qu'une table dit déjà.
+
+Ce système les génère : 673 schémas d'insertion, 670 de sélection, 610 de mise à jour, tous dérivés des définitions de tables avec `drizzle-zod`. Personne ne les a tapés.
+
+La raison n'est pas la vitesse de frappe, c'est la dérive. Un validateur écrit à la main et une définition de table sont deux descriptions de la même chose, maintenues par des personnes différentes à des moments différents. Elles finiront par diverger, et la divergence sera silencieuse : une colonne gagne une contrainte, le validateur non, et votre API accepte désormais quelque chose que la base refusera à l'écriture, en production, venant d'un utilisateur.
+
+Dériver rend cette classe de bogue irreprésentable. Changez la colonne et tous les validateurs bâtis dessus changent dans le même commit, parce qu'il n'existe qu'une description.
+
+## Rendez les états illégaux irreprésentables, puis laissez le compilateur trouver chaque site
+
+Le troisième barreau, ce sont les types, et la technique qui se rentabilise est l'exhaustivité.
+
+Modélisez une chose pouvant être dans plusieurs états par une union discriminée plutôt que par un objet aux champs optionnels pour chaque cas. Puis, là où vous la traitez, forcez le compilateur à prouver que vous avez tout couvert :
+
+```ts
+switch (entry.kind) {
+  case 'debit':  return applyDebit(entry)
+  case 'credit': return applyCredit(entry)
+  default: {
+    const unreachable: never = entry
+    throw new Error(`Unhandled entry kind: ${JSON.stringify(unreachable)}`)
+  }
+}
+```
+
+Le bénéfice arrive plus tard. Quand quelqu'un ajoute un troisième cas, ceci cesse de compiler, et tous les autres endroits de même forme aussi. Ce code serveur compte 878 occurrences de `never`, et la plupart sont celle-ci. C'est une liste d'endroits qu'un changement futur sera obligé de visiter.
+
+C'est ce qu'un système de types fait de plus proche du travail d'un relecteur, parce que cela répond à la question qu'un bon relecteur pose : quoi d'autre est affecté par ce changement ? Un compilateur y répond exhaustivement et en moins d'une seconde, ce qu'aucun humain ne fait.
+
+## La règle à laquelle tout cela se ramène
+
+Pour chaque invariant, demandez quelle est la couche la plus basse capable de l'imposer, et mettez-le là.
+
+Plus bas signifie plus difficile à contourner et couvrant davantage d'appelants. La validation applicative protège le chemin auquel vous avez pensé. Une contrainte de base protège des chemins qui n'existent pas encore, écrits par des gens que vous ne rencontrerez jamais, y compris ceux qui contournent entièrement votre application.
+
+Le corollaire est que si vous vous surprenez à écrire la même clause de garde dans plusieurs fonctions, vous avez identifié quelque chose qui appartient plus bas. Des gardes répétées sont un symptôme, pas un motif.
+
+## Où cela cesse de fonctionner
+
+Quatre limites honnêtes, dont j'ai rencontré trois.
+
+**Les contraintes encodent des décisions, et les décisions sont parfois fausses.** Une contrainte de vérification est une affirmation sur le domaine, pour toujours. Quand la règle métier se révèle avoir une exception, la changer est une migration sur des données vivantes, et vous découvrirez l'exception sous la pression d'une échéance, parce que c'est là que le cas inhabituel se présente. Peu cher à écrire, cher à se tromper.
+
+**Trop contraindre produit des contournements pires que le relâchement.** Marquez une colonne `NOT NULL` alors que la vraie règle est « généralement connue » et vous n'avez pas éliminé la donnée manquante. Vous avez forcé tout l'aval à inventer une valeur signifiant « manquant », et l'absence est désormais invisible aux requêtes au lieu d'être explicite.
+
+**Des types qui modélisent tout deviennent illisibles.** Il existe un point où une signature est si précise que plus personne ne voit ce que fait la fonction, et le coût retombe sur chaque lecteur pour toujours afin d'éviter un bogue qu'une après-midi aurait attrapé. La précision a un budget.
+
+**Et cela ne remplace pas la revue, cela remplace une partie de la revue.** Un système de types attrape les états faux. Il n'a rien à dire sur les idées fausses. Rien dans le schéma ne vous dira que la fonctionnalité ne devrait pas exister, qu'il existe un modèle plus simple, que vous avez construit la troisième variante d'une chose déjà présente, ou qu'une personne raisonnable trouverait votre API déroutante.
+
+Ce dernier point est le plus important et c'est ce que j'ai réellement perdu. Sur ce projet je n'avais aucun relecteur, et j'ai compensé en faisant vérifier par la machine ce qu'une machine peut vérifier. Cela a marché, au sens où la justesse a tenu. Ce que je n'ai pas eu, pendant dix-huit mois, c'est quelqu'un demandant pourquoi j'avais fait ainsi. Certaines réponses auraient été gênantes, ce qui est tout l'intérêt de la question.
+
+## Ce qu'il faut admettre
+
+Je défendrais la plupart de ces contraintes sur le fond. Je dois aussi dire qu'une partie de cette rigueur ne relevait pas d'un pur jugement d'ingénierie. Construire un système que d'autres ne peuvent pas casser est une décision techniquement saine et, dans certaines circonstances, une décision défensive, et les deux motifs produisent un code identique. C'est ce qui les rend difficiles à séparer de l'intérieur.
+
+La technique tient debout toute seule. Mais si vous remarquez que vos invariants commencent à ressembler à des fortifications, il vaut la peine de demander contre qui vous fortifiez, et si la réponse est une classe de bogues ou un groupe de collègues.
